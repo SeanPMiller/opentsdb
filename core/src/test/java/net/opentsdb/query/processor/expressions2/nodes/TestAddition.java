@@ -69,5 +69,9 @@ public class TestAddition {
         assertEquals(b, b);
         assertNotEquals(a, b);
         assertNotEquals(b, a);
+
+        final Addition c = new Addition(new Long(7), new Long(11));
+        assertEquals(c, c);
+        assertEquals(b, c);
     }
 }

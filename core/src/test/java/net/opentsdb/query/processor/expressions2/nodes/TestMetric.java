@@ -24,6 +24,9 @@ public class TestMetric {
         final Metric m2 = new Metric("m2");
         assertEquals(m2, m2);
 
+        final Metric m2copy = new Metric("m2");
+        assertEquals(m2, m2copy);
+
         final Metric e1 = new Metric("e1");
         assertNotEquals(m2, e1);
         assertNotEquals(e1, m2);

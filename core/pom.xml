@@ -201,7 +201,7 @@
               <argument>-visitor</argument>
             </arguments>
    
-            <outputDirectory>${project.build.directory}/generated-sources/antlr4/net/opentsdb/expressions/parser</outputDirectory>
+            <outputDirectory>${project.build.directory}/target/generated-sources/antlr4/net/opentsdb/expressions/parser</outputDirectory>
           </configuration>
           <executions>
             <execution>

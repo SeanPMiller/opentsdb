@@ -45,7 +45,7 @@ public abstract class BinaryOperator extends ExpressionOperator {
 
     @Override
     public void replaceChild(final ExpressionNode replaceThis,
-            final ExpressionNode withThis) {
+                             final ExpressionNode withThis) {
         if (lhs == replaceThis) {
             setLeftOperand(withThis);
             return;
@@ -77,8 +77,8 @@ public abstract class BinaryOperator extends ExpressionOperator {
         if (other instanceof BinaryOperator) {
             final BinaryOperator that = (BinaryOperator) other;
             return this.lhs.equals(that.lhs) &&
-                this.rhs.equals(that.rhs) &&
-                super.equals(that);
+                    this.rhs.equals(that.rhs) &&
+                    super.equals(that);
         }
 
         return false;

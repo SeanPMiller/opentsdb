@@ -2,17 +2,11 @@ package net.opentsdb.query.processor.expressions2.eval;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import net.opentsdb.query.processor.expressions2.ExpressionException;
-import net.opentsdb.query.processor.expressions2.nodes.Addition;
-import net.opentsdb.query.processor.expressions2.nodes.Bool;
-import net.opentsdb.query.processor.expressions2.nodes.DefaultExpressionVisitor;
+import net.opentsdb.query.processor.expressions2.nodes.*;
 import net.opentsdb.query.processor.expressions2.nodes.Double;
-import net.opentsdb.query.processor.expressions2.nodes.ExpressionNode;
-import net.opentsdb.query.processor.expressions2.nodes.LogicalNegation;
 import net.opentsdb.query.processor.expressions2.nodes.Long;
-import net.opentsdb.query.processor.expressions2.nodes.Metric;
-import net.opentsdb.query.processor.expressions2.nodes.NumericNegation;
-import net.opentsdb.query.processor.expressions2.nodes.Subtraction;
 
 public class Evaluator extends DefaultExpressionVisitor {
     static final class TerminalState {
@@ -41,13 +35,14 @@ public class Evaluator extends DefaultExpressionVisitor {
     private final EvaluationContext context;
     private final Map<String, TerminalState> terminals;
 
-    /** 
-     * TODO 
+    /**
+     * TODO
+     *
      * @param factory
      * @param context
      */
     public Evaluator(final ExpressionFactory factory,
-            final EvaluationContext context) {
+                     final EvaluationContext context) {
         this.factory = factory;
         this.context = context;
 
@@ -60,6 +55,7 @@ public class Evaluator extends DefaultExpressionVisitor {
 
     /**
      * Evaluate the given parsed expression using the configured context.
+     *
      * @return An AutoCloseable object with backing storage that may still be
      * held by an object pool.
      */
@@ -90,10 +86,115 @@ public class Evaluator extends DefaultExpressionVisitor {
     }
 
     @Override
+    public void leaveMultiplication(Multiplication s) {
+        final ExpressionValue rhs = context.pop();
+        final ExpressionValue lhs = context.pop();
+        context.push(lhs.multiply(rhs));
+    }
+
+    @Override
+    public void leaveDivision(Division s) {
+        final ExpressionValue rhs = context.pop();
+        final ExpressionValue lhs = context.pop();
+        context.push(lhs.divide(rhs));
+    }
+
+    @Override
+    public void leaveModulo(Modulo s) {
+        final ExpressionValue rhs = context.pop();
+        final ExpressionValue lhs = context.pop();
+        context.push(lhs.mod(rhs));
+    }
+
+    @Override
+    public void leavePower(Power s) {
+        final ExpressionValue rhs = context.pop();
+        final ExpressionValue lhs = context.pop();
+        context.push(lhs.power(rhs));
+    }
+
+    @Override
+    public void leaveEqual(Equal s) {
+        final ExpressionValue rhs = context.pop();
+        final ExpressionValue lhs = context.pop();
+        context.push(lhs.isEqual(rhs));
+    }
+
+    @Override
+    public void leaveGte(Gte s) {
+        final ExpressionValue rhs = context.pop();
+        final ExpressionValue lhs = context.pop();
+        context.push(lhs.isGte(rhs));
+    }
+
+    @Override
+    public void leaveGt(Gt s) {
+        final ExpressionValue rhs = context.pop();
+        final ExpressionValue lhs = context.pop();
+        context.push(lhs.isGt(rhs));
+    }
+
+    @Override
+    public void leaveLte(Lte s) {
+        final ExpressionValue rhs = context.pop();
+        final ExpressionValue lhs = context.pop();
+        context.push(lhs.isLte(rhs));
+    }
+
+    @Override
+    public void leaveLt(Lt s) {
+        final ExpressionValue rhs = context.pop();
+        final ExpressionValue lhs = context.pop();
+        context.push(lhs.isLt(rhs));
+    }
+
+    @Override
+    public void leaveNotEq(NotEq s) {
+        final ExpressionValue rhs = context.pop();
+        final ExpressionValue lhs = context.pop();
+        context.push(lhs.isEqual(rhs).complement());
+    }
+
+    @Override
+    public void leaveTernary(TernaryOperator s) {
+        final ExpressionValue falseCase = context.pop();
+        final ExpressionValue trueCase = context.pop();
+        final ExpressionValue condition = context.pop();
+
+        if (condition.equals(BooleanConstantValue.TRUE)) {
+            context.push(trueCase);
+        } else {
+            context.push(falseCase);
+        }
+    }
+
+    @Override
     public void leaveBool(final Bool b) {
         context.push(Bool.TRUE == b ?
-            BooleanConstantValue.TRUE :
-            BooleanConstantValue.FALSE);
+                BooleanConstantValue.TRUE :
+                BooleanConstantValue.FALSE);
+    }
+
+    @Override
+    public void leaveAnd(final And s) {
+        final ExpressionValue rhs = context.pop();
+        final ExpressionValue lhs = context.pop();
+        if (lhs.equals(BooleanConstantValue.TRUE) && rhs.equals(BooleanConstantValue.TRUE)) {
+            context.push(BooleanConstantValue.TRUE);
+        } else {
+            context.push(BooleanConstantValue.FALSE);
+        }
+    }
+
+    @Override
+    public void leaveOr(final Or s) {
+        final ExpressionValue rhs = context.pop();
+        final ExpressionValue lhs = context.pop();
+        if (lhs.equals(BooleanConstantValue.TRUE) || rhs.equals(BooleanConstantValue.TRUE)) {
+            context.push(BooleanConstantValue.TRUE);
+        } else {
+            context.push(BooleanConstantValue.FALSE);
+        }
     }
 
     @Override

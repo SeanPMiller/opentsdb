@@ -91,7 +91,7 @@ public interface Registry {
    * Registers a shared object in the concurrent map if the object was not
    * present. If an object was already present, the existing object is returned.
    * @param id A non-null and non-empty ID for the shared object.
-   * @param obj A non-null object.
+   * @param object A non-null object.
    * @return Null if the object was inserted successfully, a non-null object
    * if something with the given ID was already present.
    * @throws IllegalArgumentException if the ID was null or empty or the
