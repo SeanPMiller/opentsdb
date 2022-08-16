@@ -5,6 +5,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
+
 import net.opentsdb.expressions.parser.MetricExpression2Lexer;
 import net.opentsdb.expressions.parser.MetricExpression2Listener;
 import net.opentsdb.expressions.parser.MetricExpression2Parser;
@@ -26,6 +27,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 public class ExpressionParser extends DefaultErrorStrategy
         implements MetricExpression2Listener {
     private final Deque<ExpressionNode> stack;
+
     private final Map<String, Terminal> terminals;
 
     public ExpressionParser() {
@@ -40,6 +42,7 @@ public class ExpressionParser extends DefaultErrorStrategy
 
     /**
      * Transform a textual expression into a parse tree.
+     *
      * @param expression Textual representation of an expression.
      * @return An equivalent parse tree.
      */
@@ -78,33 +81,55 @@ public class ExpressionParser extends DefaultErrorStrategy
         return result;
     }
 
-    @Override public void enterProg(final MetricExpression2Parser.ProgContext ctx) {}
-    @Override public void exitProg(final MetricExpression2Parser.ProgContext ctx) {}
+    public Map<String, Terminal> getTerminals() {
+        return terminals;
+    }
 
-    @Override public void enterAdd(final MetricExpression2Parser.AddContext ctx) {}
-    @Override public void exitAdd(final MetricExpression2Parser.AddContext ctx) {
+    @Override
+    public void enterProg(final MetricExpression2Parser.ProgContext ctx) {
+    }
+
+    @Override
+    public void exitProg(final MetricExpression2Parser.ProgContext ctx) {
+    }
+
+    @Override
+    public void enterAdd(final MetricExpression2Parser.AddContext ctx) {
+    }
+
+    @Override
+    public void exitAdd(final MetricExpression2Parser.AddContext ctx) {
         final ExpressionNode rhs = pop();
         final ExpressionNode lhs = pop();
 
         switch (ctx.op.getType()) {
-        case MetricExpression2Parser.ADD:
-            push(new Addition(lhs, rhs));
-            break;
+            case MetricExpression2Parser.ADD:
+                push(new Addition(lhs, rhs));
+                break;
 
-        case MetricExpression2Parser.SUB:
-            push(new Subtraction(lhs, rhs));
-            break;
+            case MetricExpression2Parser.SUB:
+                push(new Subtraction(lhs, rhs));
+                break;
         }
     }
 
-    @Override public void enterOr(final MetricExpression2Parser.OrContext ctx) {}
-    @Override public void exitOr(final MetricExpression2Parser.OrContext ctx) {
+    @Override
+    public void enterOr(final MetricExpression2Parser.OrContext ctx) {
+    }
+
+    @Override
+    public void exitOr(final MetricExpression2Parser.OrContext ctx) {
         final ExpressionNode rhs = pop();
         final ExpressionNode lhs = pop();
         push(new Or(lhs, rhs));
     }
-    @Override public void enterMul(final MetricExpression2Parser.MulContext ctx) {}
-    @Override public void exitMul(final MetricExpression2Parser.MulContext ctx) {
+
+    @Override
+    public void enterMul(final MetricExpression2Parser.MulContext ctx) {
+    }
+
+    @Override
+    public void exitMul(final MetricExpression2Parser.MulContext ctx) {
         final ExpressionNode rhs = pop();
         final ExpressionNode lhs = pop();
 
@@ -122,14 +147,24 @@ public class ExpressionParser extends DefaultErrorStrategy
                 break;
         }
     }
-    @Override public void enterAnd(final MetricExpression2Parser.AndContext ctx) {}
-    @Override public void exitAnd(final MetricExpression2Parser.AndContext ctx) {
+
+    @Override
+    public void enterAnd(final MetricExpression2Parser.AndContext ctx) {
+    }
+
+    @Override
+    public void exitAnd(final MetricExpression2Parser.AndContext ctx) {
         final ExpressionNode rhs = pop();
         final ExpressionNode lhs = pop();
         push(new And(lhs, rhs));
     }
-    @Override public void enterCmp(final MetricExpression2Parser.CmpContext ctx) {}
-    @Override public void exitCmp(final MetricExpression2Parser.CmpContext ctx) {
+
+    @Override
+    public void enterCmp(final MetricExpression2Parser.CmpContext ctx) {
+    }
+
+    @Override
+    public void exitCmp(final MetricExpression2Parser.CmpContext ctx) {
         final ExpressionNode rhs = pop();
         final ExpressionNode lhs = pop();
 
@@ -159,15 +194,24 @@ public class ExpressionParser extends DefaultErrorStrategy
                 break;
         }
     }
-    @Override public void enterPow(final MetricExpression2Parser.PowContext ctx) {}
-    @Override public void exitPow(final MetricExpression2Parser.PowContext ctx) {
+
+    @Override
+    public void enterPow(final MetricExpression2Parser.PowContext ctx) {
+    }
+
+    @Override
+    public void exitPow(final MetricExpression2Parser.PowContext ctx) {
         final ExpressionNode rhs = pop();
         final ExpressionNode lhs = pop();
         push(new Power(lhs, rhs));
     }
 
-    @Override public void enterUnary(final MetricExpression2Parser.UnaryContext ctx) {}
-    @Override public void exitUnary(final MetricExpression2Parser.UnaryContext ctx) {
+    @Override
+    public void enterUnary(final MetricExpression2Parser.UnaryContext ctx) {
+    }
+
+    @Override
+    public void exitUnary(final MetricExpression2Parser.UnaryContext ctx) {
         if (ctx.op.getType() == MetricExpression2Parser.NOT) {
             push(new LogicalNegation(pop()));
         } else if (ctx.op.getType() == MetricExpression2Parser.SUB) {
@@ -177,10 +221,20 @@ public class ExpressionParser extends DefaultErrorStrategy
         }
     }
 
-    @Override public void enterAtom(final MetricExpression2Parser.AtomContext ctx) {}
-    @Override public void exitAtom(final MetricExpression2Parser.AtomContext ctx) {}
-    @Override public void enterTernary(final MetricExpression2Parser.TernaryContext ctx) {}
-    @Override public void exitTernary(final MetricExpression2Parser.TernaryContext ctx) {
+    @Override
+    public void enterAtom(final MetricExpression2Parser.AtomContext ctx) {
+    }
+
+    @Override
+    public void exitAtom(final MetricExpression2Parser.AtomContext ctx) {
+    }
+
+    @Override
+    public void enterTernary(final MetricExpression2Parser.TernaryContext ctx) {
+    }
+
+    @Override
+    public void exitTernary(final MetricExpression2Parser.TernaryContext ctx) {
 
         final ExpressionNode falseCase = pop();
         final ExpressionNode trueCase = pop();
@@ -188,11 +242,21 @@ public class ExpressionParser extends DefaultErrorStrategy
 
         push(new TernaryOperator(condition, trueCase, falseCase));
     }
-    @Override public void enterOperand(final MetricExpression2Parser.OperandContext ctx) {}
-    @Override public void exitOperand(final MetricExpression2Parser.OperandContext ctx) {}
 
-    @Override public void enterNumeric_literal(final MetricExpression2Parser.Numeric_literalContext ctx) {}
-    @Override public void exitNumeric_literal(final MetricExpression2Parser.Numeric_literalContext ctx) {
+    @Override
+    public void enterOperand(final MetricExpression2Parser.OperandContext ctx) {
+    }
+
+    @Override
+    public void exitOperand(final MetricExpression2Parser.OperandContext ctx) {
+    }
+
+    @Override
+    public void enterNumeric_literal(final MetricExpression2Parser.Numeric_literalContext ctx) {
+    }
+
+    @Override
+    public void exitNumeric_literal(final MetricExpression2Parser.Numeric_literalContext ctx) {
         final String encoded = ctx.getText();
 
         // We want to treat every number as a long, if possible.
@@ -212,8 +276,12 @@ public class ExpressionParser extends DefaultErrorStrategy
         }
     }
 
-    @Override public void enterBoolean_literal(final MetricExpression2Parser.Boolean_literalContext ctx) {}
-    @Override public void exitBoolean_literal(final MetricExpression2Parser.Boolean_literalContext ctx) {
+    @Override
+    public void enterBoolean_literal(final MetricExpression2Parser.Boolean_literalContext ctx) {
+    }
+
+    @Override
+    public void exitBoolean_literal(final MetricExpression2Parser.Boolean_literalContext ctx) {
         if (null != ctx.TRUE()) {
             push(Bool.TRUE);
             return;
@@ -227,8 +295,12 @@ public class ExpressionParser extends DefaultErrorStrategy
         throw new ExpressionException("parser bug: should not have received '" + ctx.getText() + "' in exitBoolean_literal()");
     }
 
-    @Override public void enterMetric(final MetricExpression2Parser.MetricContext ctx) {}
-    @Override public void exitMetric(final MetricExpression2Parser.MetricContext ctx) {
+    @Override
+    public void enterMetric(final MetricExpression2Parser.MetricContext ctx) {
+    }
+
+    @Override
+    public void exitMetric(final MetricExpression2Parser.MetricContext ctx) {
         final String metricName = ctx.getText();
         Terminal result = terminals.get(metricName);
         if (null == result) {
@@ -240,8 +312,19 @@ public class ExpressionParser extends DefaultErrorStrategy
         push(result);
     }
 
-    @Override public void enterEveryRule(final ParserRuleContext ctx) {}
-    @Override public void exitEveryRule(final ParserRuleContext ctx) {}
-    @Override public void visitTerminal(final TerminalNode node) {}
-    @Override public void visitErrorNode(final ErrorNode node) {}
+    @Override
+    public void enterEveryRule(final ParserRuleContext ctx) {
+    }
+
+    @Override
+    public void exitEveryRule(final ParserRuleContext ctx) {
+    }
+
+    @Override
+    public void visitTerminal(final TerminalNode node) {
+    }
+
+    @Override
+    public void visitErrorNode(final ErrorNode node) {
+    }
 }

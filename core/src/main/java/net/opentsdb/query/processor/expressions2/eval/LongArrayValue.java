@@ -241,7 +241,6 @@ public class LongArrayValue extends NumericValue {
         return values.multiply(this);
     }
 
-    // TODO: handle divide-by-zero exception
     @Override
     public ExpressionValue divide(final ExpressionValue value) {
         if (value instanceof LongValue) {
@@ -259,10 +258,34 @@ public class LongArrayValue extends NumericValue {
 
     @Override
     public ExpressionValue divide(final LongValue value) {
-        for (int i = 0; i < underlying.length; ++i) {
-            underlying[i] /= value.getValue();
+        if (value.getValue() == 0) {
+            // If divisor is 0, convert long array to double array of NaN values
+            if (getFactory().getOptions().getInfectiousNaN()) {
+                double[] results = new double[underlying.length];
+                for (int i = 0; i < underlying.length; ++i) {
+                    results[i] = NaN;
+                }
+                return new DoubleArrayValue(getFactory(), results);
+            } else {
+                for (int i = 0; i < underlying.length; ++i) {
+                    underlying[i] = 0;
+                }
+                return this;
+            }
+        } else {
+            if (getFactory().getOptions().getForceFloatingPointDivision()) {
+                double[] results = new double[underlying.length];
+                for (int i = 0; i < underlying.length; ++i) {
+                    results[i] = (double) underlying[i] / value.getValue();
+                }
+                return new DoubleArrayValue(getFactory(), results);
+            } else {
+                for (int i = 0; i < underlying.length; ++i) {
+                    underlying[i] /= value.getValue();
+                }
+                return this;
+            }
         }
-        return this;
     }
 
     @Override
@@ -270,11 +293,7 @@ public class LongArrayValue extends NumericValue {
         // Can we possibly avoid converting this array?
         if (value.isExactLong()) {
             // Yes, the subtrahend is exactly representable as a long.
-            final long subtrahend = (long) value.getValue();
-            for (int i = 0; i < underlying.length; ++i) {
-                underlying[i] /= subtrahend;
-            }
-            return this;
+            return this.divide(new LongValue(getFactory(), (long) value.getValue()));
         } else {
             // No, we need to create a double array.
             final double subtrahend = value.getValue();
@@ -282,9 +301,18 @@ public class LongArrayValue extends NumericValue {
                     underlying.length);
             final DoubleArrayValue newValue = new DoubleArrayValue(getFactory(),
                     newUnderlying);
-            for (int i = 0; i < underlying.length; ++i) {
-                newValue.underlying[i] = (double) underlying[i] / subtrahend;
+
+            if (subtrahend == 0) {
+                double val = getFactory().getOptions().getInfectiousNaN() ? NaN : 0;
+                for (int i = 0; i < underlying.length; ++i) {
+                    newValue.underlying[i] = val;
+                }
+            } else {
+                for (int i = 0; i < underlying.length; ++i) {
+                    newValue.underlying[i] = underlying[i] / subtrahend;
+                }
             }
+
             this.close();
             return newValue;
         }
@@ -292,8 +320,14 @@ public class LongArrayValue extends NumericValue {
 
     @Override
     public ExpressionValue divide(final LongArrayValue values) {
+        if (getFactory().getOptions().getForceFloatingPointDivision()) {
+            return this.divide(new DoubleArrayValue(getFactory(), values.underlying));
+        }
         for (int i = 0; i < underlying.length; ++i) {
-            underlying[i] /= values.getValueAt(i);
+            if (values.getValueAt(i) == 0 && getFactory().getOptions().getInfectiousNaN()) {
+                return this.divide(new DoubleArrayValue(getFactory(), values.underlying));
+            }
+            underlying[i] = values.getValueAt(i) == 0 ? 0 : underlying[i] / values.getValueAt(i);
         }
         values.close();
         return this;
@@ -302,7 +336,9 @@ public class LongArrayValue extends NumericValue {
     @Override
     public ExpressionValue divide(final DoubleArrayValue values) {
         for (int i = 0; i < values.underlying.length; ++i) {
-            values.underlying[i] = (double) this.underlying[i] / values.underlying[i];
+            values.underlying[i] = values.underlying[i] == 0 ?
+                    (getFactory().getOptions().getInfectiousNaN() ? NaN : 0) :
+                    this.underlying[i] / values.underlying[i];
         }
         this.close();
         return values;
@@ -323,13 +359,28 @@ public class LongArrayValue extends NumericValue {
         throw new ExpressionException("unsupported expression operation: LongArrayValue.mod(unknown ExpressionValue)");
     }
 
-    // TODO: handle divide-by-zero exception
     @Override
     public ExpressionValue mod(final LongValue value) {
-        for (int i = 0; i < underlying.length; ++i) {
-            underlying[i] %= value.getValue();
+        if (value.getValue() == 0) {
+            // If divisor is 0, convert long array to double array of NaN values
+            if (getFactory().getOptions().getInfectiousNaN()) {
+                double[] results = new double[underlying.length];
+                for (int i = 0; i < underlying.length; ++i) {
+                    results[i] = NaN;
+                }
+                return new DoubleArrayValue(getFactory(), results);
+            } else {
+                for (int i = 0; i < underlying.length; ++i) {
+                    underlying[i] = 0;
+                }
+                return this;
+            }
+        } else {
+            for (int i = 0; i < underlying.length; ++i) {
+                underlying[i] %= value.getValue();
+            }
+            return this;
         }
-        return this;
     }
 
     @Override
@@ -337,11 +388,7 @@ public class LongArrayValue extends NumericValue {
         // Can we possibly avoid converting this array?
         if (value.isExactLong()) {
             // Yes, the subtrahend is exactly representable as a long.
-            final long subtrahend = (long) value.getValue();
-            for (int i = 0; i < underlying.length; ++i) {
-                underlying[i] %= subtrahend;
-            }
-            return this;
+            return this.mod(new LongValue(getFactory(), (long) value.getValue()));
         } else {
             // No, we need to create a double array.
             final double subtrahend = value.getValue();
@@ -349,9 +396,18 @@ public class LongArrayValue extends NumericValue {
                     underlying.length);
             final DoubleArrayValue newValue = new DoubleArrayValue(getFactory(),
                     newUnderlying);
-            for (int i = 0; i < underlying.length; ++i) {
-                newValue.underlying[i] = (double) underlying[i] % subtrahend;
+
+            if (subtrahend == 0) {
+                double val = getFactory().getOptions().getInfectiousNaN() ? NaN : 0;
+                for (int i = 0; i < underlying.length; ++i) {
+                    newValue.underlying[i] = val;
+                }
+            } else {
+                for (int i = 0; i < underlying.length; ++i) {
+                    newValue.underlying[i] = underlying[i] % subtrahend;
+                }
             }
+
             this.close();
             return newValue;
         }
@@ -360,7 +416,10 @@ public class LongArrayValue extends NumericValue {
     @Override
     public ExpressionValue mod(final LongArrayValue values) {
         for (int i = 0; i < underlying.length; ++i) {
-            underlying[i] %= values.getValueAt(i);
+            if (values.getValueAt(i) == 0 && getFactory().getOptions().getInfectiousNaN()) {
+                return this.mod(new DoubleArrayValue(getFactory(), values.underlying));
+            }
+            underlying[i] = values.getValueAt(i) == 0 ? 0 : underlying[i] % values.getValueAt(i);
         }
         values.close();
         return this;
@@ -369,7 +428,9 @@ public class LongArrayValue extends NumericValue {
     @Override
     public ExpressionValue mod(final DoubleArrayValue values) {
         for (int i = 0; i < values.underlying.length; ++i) {
-            values.underlying[i] = (double) this.underlying[i] % values.underlying[i];
+            values.underlying[i] = values.underlying[i] == 0 ?
+                    (getFactory().getOptions().getInfectiousNaN() ? NaN : 0) :
+                    this.underlying[i] % values.underlying[i];
         }
         this.close();
         return values;
@@ -447,8 +508,8 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isEqual(DoubleValue value){
-        for (long num: this.underlying) {
+    public ExpressionValue isEqual(DoubleValue value) {
+        for (long num : this.underlying) {
             if (num != value.underlying) {
                 return BooleanConstantValue.FALSE;
             }
@@ -458,7 +519,7 @@ public class LongArrayValue extends NumericValue {
 
     @Override
     public ExpressionValue isEqual(LongValue value) {
-        for (long num: this.underlying) {
+        for (long num : this.underlying) {
             if (num != value.underlying) {
                 return BooleanConstantValue.FALSE;
             }
@@ -467,7 +528,7 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isEqual(DoubleArrayValue values){
+    public ExpressionValue isEqual(DoubleArrayValue values) {
         for (int i = 0; i < this.underlying.length; i++) {
             if (this.underlying[i] != values.underlying[i]) {
                 return BooleanConstantValue.FALSE;
@@ -477,7 +538,7 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isEqual(LongArrayValue values){
+    public ExpressionValue isEqual(LongArrayValue values) {
         for (int i = 0; i < this.underlying.length; i++) {
             if (this.underlying[i] != values.underlying[i]) {
                 return BooleanConstantValue.FALSE;
@@ -487,7 +548,7 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isEqual(BooleanConstantValue value){
+    public ExpressionValue isEqual(BooleanConstantValue value) {
         throw new ExpressionException("illegal call of isEqual() on LongArrayValue");
     }
 
@@ -507,8 +568,8 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isGt(DoubleValue value){
-        for (long num: this.underlying) {
+    public ExpressionValue isGt(DoubleValue value) {
+        for (long num : this.underlying) {
             if (num <= value.underlying) {
                 return BooleanConstantValue.FALSE;
             }
@@ -518,7 +579,7 @@ public class LongArrayValue extends NumericValue {
 
     @Override
     public ExpressionValue isGt(LongValue value) {
-        for (long num: this.underlying) {
+        for (long num : this.underlying) {
             if (num <= value.underlying) {
                 return BooleanConstantValue.FALSE;
             }
@@ -527,7 +588,7 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isGt(DoubleArrayValue values){
+    public ExpressionValue isGt(DoubleArrayValue values) {
         for (int i = 0; i < this.underlying.length; i++) {
             if (this.underlying[i] <= values.underlying[i]) {
                 return BooleanConstantValue.FALSE;
@@ -537,7 +598,7 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isGt(LongArrayValue values){
+    public ExpressionValue isGt(LongArrayValue values) {
         for (int i = 0; i < this.underlying.length; i++) {
             if (this.underlying[i] <= values.underlying[i]) {
                 return BooleanConstantValue.FALSE;
@@ -562,8 +623,8 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isGte(DoubleValue value){
-        for (long num: this.underlying) {
+    public ExpressionValue isGte(DoubleValue value) {
+        for (long num : this.underlying) {
             if (num < value.underlying) {
                 return BooleanConstantValue.FALSE;
             }
@@ -573,7 +634,7 @@ public class LongArrayValue extends NumericValue {
 
     @Override
     public ExpressionValue isGte(LongValue value) {
-        for (long num: this.underlying) {
+        for (long num : this.underlying) {
             if (num < value.underlying) {
                 return BooleanConstantValue.FALSE;
             }
@@ -582,7 +643,7 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isGte(DoubleArrayValue values){
+    public ExpressionValue isGte(DoubleArrayValue values) {
         for (int i = 0; i < this.underlying.length; i++) {
             if (this.underlying[i] < values.underlying[i]) {
                 return BooleanConstantValue.FALSE;
@@ -592,7 +653,7 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isGte(LongArrayValue values){
+    public ExpressionValue isGte(LongArrayValue values) {
         for (int i = 0; i < this.underlying.length; i++) {
             if (this.underlying[i] < values.underlying[i]) {
                 return BooleanConstantValue.FALSE;
@@ -617,8 +678,8 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isLt(DoubleValue value){
-        for (long num: this.underlying) {
+    public ExpressionValue isLt(DoubleValue value) {
+        for (long num : this.underlying) {
             if (num >= value.underlying) {
                 return BooleanConstantValue.FALSE;
             }
@@ -628,7 +689,7 @@ public class LongArrayValue extends NumericValue {
 
     @Override
     public ExpressionValue isLt(LongValue value) {
-        for (long num: this.underlying) {
+        for (long num : this.underlying) {
             if (num >= value.underlying) {
                 return BooleanConstantValue.FALSE;
             }
@@ -637,7 +698,7 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isLt(DoubleArrayValue values){
+    public ExpressionValue isLt(DoubleArrayValue values) {
         for (int i = 0; i < this.underlying.length; i++) {
             if (this.underlying[i] >= values.underlying[i]) {
                 return BooleanConstantValue.FALSE;
@@ -647,7 +708,7 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isLt(LongArrayValue values){
+    public ExpressionValue isLt(LongArrayValue values) {
         for (int i = 0; i < this.underlying.length; i++) {
             if (this.underlying[i] >= values.underlying[i]) {
                 return BooleanConstantValue.FALSE;
@@ -672,8 +733,8 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isLte(DoubleValue value){
-        for (long num: this.underlying) {
+    public ExpressionValue isLte(DoubleValue value) {
+        for (long num : this.underlying) {
             if (num > value.underlying) {
                 return BooleanConstantValue.FALSE;
             }
@@ -683,7 +744,7 @@ public class LongArrayValue extends NumericValue {
 
     @Override
     public ExpressionValue isLte(LongValue value) {
-        for (long num: this.underlying) {
+        for (long num : this.underlying) {
             if (num > value.underlying) {
                 return BooleanConstantValue.FALSE;
             }
@@ -692,7 +753,7 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isLte(DoubleArrayValue values){
+    public ExpressionValue isLte(DoubleArrayValue values) {
         for (int i = 0; i < this.underlying.length; i++) {
             if (this.underlying[i] > values.underlying[i]) {
                 return BooleanConstantValue.FALSE;
@@ -702,7 +763,7 @@ public class LongArrayValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isLte(LongArrayValue values){
+    public ExpressionValue isLte(LongArrayValue values) {
         for (int i = 0; i < this.underlying.length; i++) {
             if (this.underlying[i] > values.underlying[i]) {
                 return BooleanConstantValue.FALSE;

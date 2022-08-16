@@ -20,12 +20,10 @@ public class FactoryBasedTest {
     protected final ExpressionFactory factory;
 
     protected static final int DEFAULT_ARRAY_LEN = 5;
-    protected static final EvaluationOptions DEFAULT_EVAL_OPTIONS =
-        new EvaluationOptions.Builder().
-            setInfectiousNaN(false).
-            setForceFloatingPointDivision(true).
-            setAllowMetricReuse(true).
-            build();
+
+
+    static EvaluationOptions DEFAULT_EVAL_OPTIONS = mock(EvaluationOptions.class);
+
 
     public FactoryBasedTest() {
         this(DEFAULT_ARRAY_LEN);
@@ -33,24 +31,27 @@ public class FactoryBasedTest {
 
     public FactoryBasedTest(final int arrayLength) {
         this(arrayLength, DEFAULT_EVAL_OPTIONS);
+        when(DEFAULT_EVAL_OPTIONS.getAllowMetricReuse()).thenReturn(true);
+        when(DEFAULT_EVAL_OPTIONS.getInfectiousNaN()).thenReturn(false);
+        when(DEFAULT_EVAL_OPTIONS.getForceFloatingPointDivision()).thenReturn(false);
     }
 
     public FactoryBasedTest(final int arrayLength, final EvaluationOptions options) {
         this.arrayLength = arrayLength;
 
         longPool = new MockArrayObjectPool(DefaultObjectPoolConfig.newBuilder()
-            .setAllocator(new LongArrayPool())
-            .setInitialCount(4)
-            .setArrayLength(arrayLength)
-            .setId(LongArrayPool.TYPE)
-            .build());
+                .setAllocator(new LongArrayPool())
+                .setInitialCount(4)
+                .setArrayLength(arrayLength)
+                .setId(LongArrayPool.TYPE)
+                .build());
 
         doublePool = new MockArrayObjectPool(DefaultObjectPoolConfig.newBuilder()
-            .setAllocator(new DoubleArrayPool())
-            .setInitialCount(4)
-            .setArrayLength(arrayLength)
-            .setId(DoubleArrayPool.TYPE)
-            .build());
+                .setAllocator(new DoubleArrayPool())
+                .setInitialCount(4)
+                .setArrayLength(arrayLength)
+                .setId(DoubleArrayPool.TYPE)
+                .build());
 
         final Registry registry = mock(Registry.class);
         when(registry.getObjectPool(LongArrayPool.TYPE)).thenReturn(longPool);
@@ -61,7 +62,7 @@ public class FactoryBasedTest {
 
         factory = new ExpressionFactory(options, longPool, doublePool);
     }
-  
+
     @Before
     public void beforeFactoryBasedTest() {
         longPool.resetCounters();

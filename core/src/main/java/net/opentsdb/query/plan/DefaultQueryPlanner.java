@@ -200,7 +200,9 @@ public class DefaultQueryPlanner implements QueryPlanner {
    * Does the hard work.
    */
   public Deferred<Void> plan(final Span span) {
+    // build graph for evaluation
     buildInitialConfigGraph();
+    // Set up nodes in the graph
     setupConfigGraph();
     final List<Deferred<Void>> deferreds = checkForConvertersAndInitFilters();
     

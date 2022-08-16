@@ -222,6 +222,7 @@ public class TestBinaryExpressionNode {
     when(c1.getId()).thenReturn("a");
     when(n1.config()).thenReturn(c1);
     when(r1.source()).thenReturn(n1);
+
     QueryResult r2 = mock(QueryResult.class);
     when(r2.dataSource()).thenReturn(new DefaultQueryResultId("b", "b"));
     QueryNodeConfig c2 = mock(QueryNodeConfig.class);

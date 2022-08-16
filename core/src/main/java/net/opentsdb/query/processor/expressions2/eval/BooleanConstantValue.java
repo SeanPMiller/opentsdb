@@ -1,6 +1,7 @@
 package net.opentsdb.query.processor.expressions2.eval;
 
-import jdk.internal.icu.util.CodePointMap;
+//import jdk.internal.icu.util.CodePointMap;
+
 import net.opentsdb.query.processor.expressions2.ExpressionException;
 import net.opentsdb.query.processor.expressions2.nodes.Bool;
 import net.opentsdb.query.processor.expressions2.nodes.ExpressionNode;
@@ -319,6 +320,7 @@ public class BooleanConstantValue extends ExpressionValue {
     public ExpressionValue isLte(LongArrayValue values) {
         throw new ExpressionException("illegal call of isLte() on BooleanConstantValue");
     }
+
     @Override
     public boolean equals(final Object other) {
         if (this == other) {

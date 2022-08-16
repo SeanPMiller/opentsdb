@@ -154,13 +154,17 @@ public class DoubleValue extends NumericValue {
     // TODO: handle divide-by-zero exception
     @Override
     public ExpressionValue divide(LongValue value) {
-        this.underlying /= (double) value.getValue();
+        this.underlying = value.getValue() == 0 ?
+                (getFactory().getOptions().getInfectiousNaN() ? NaN : 0) :
+                this.underlying / value.getValue();
         return this;
     }
 
     @Override
     public ExpressionValue divide(DoubleValue value) {
-        this.underlying /= value.getValue();
+        this.underlying = value.getValue() == 0 ?
+                (getFactory().getOptions().getInfectiousNaN() ? NaN : 0) :
+                this.underlying / value.getValue();
         return this;
     }
 
@@ -169,7 +173,9 @@ public class DoubleValue extends NumericValue {
         final PooledObject newUnderlying = getFactory().makeDoubleArray(values.underlying.length);
         final DoubleArrayValue newValue = new DoubleArrayValue(getFactory(), newUnderlying);
         for (int i = 0; i < values.underlying.length; ++i) {
-            newValue.underlying[i] = this.underlying / (double) values.underlying[i];
+            newValue.underlying[i] = values.underlying[i] == 0 ?
+                    (getFactory().getOptions().getInfectiousNaN() ? NaN : 0) :
+                    this.underlying / values.underlying[i];
         }
         values.close();
         return newValue;
@@ -178,7 +184,9 @@ public class DoubleValue extends NumericValue {
     @Override
     public ExpressionValue divide(DoubleArrayValue values) {
         for (int i = 0; i < values.underlying.length; ++i) {
-            values.underlying[i] = this.underlying / values.underlying[i];
+            values.underlying[i] = values.underlying[i] == 0 ?
+                    (getFactory().getOptions().getInfectiousNaN() ? NaN : 0) :
+                    this.underlying / values.underlying[i];
         }
         return values;
     }
@@ -201,13 +209,17 @@ public class DoubleValue extends NumericValue {
     // TODO: handle divide-by-zero exception
     @Override
     public ExpressionValue mod(LongValue value) {
-        this.underlying %= (double) value.getValue();
+        this.underlying = value.getValue() == 0 ?
+                (getFactory().getOptions().getInfectiousNaN() ? NaN : 0) :
+                this.underlying % value.getValue();
         return this;
     }
 
     @Override
     public ExpressionValue mod(DoubleValue value) {
-        this.underlying %= value.getValue();
+        this.underlying = value.getValue() == 0 ?
+                (getFactory().getOptions().getInfectiousNaN() ? NaN : 0) :
+                this.underlying % value.getValue();
         return this;
     }
 
@@ -216,7 +228,9 @@ public class DoubleValue extends NumericValue {
         final PooledObject newUnderlying = getFactory().makeDoubleArray(values.underlying.length);
         final DoubleArrayValue newValue = new DoubleArrayValue(getFactory(), newUnderlying);
         for (int i = 0; i < values.underlying.length; ++i) {
-            newValue.underlying[i] = this.underlying % (double) values.underlying[i];
+            newValue.underlying[i] = values.underlying[i] == 0 ?
+                    (getFactory().getOptions().getInfectiousNaN() ? NaN : 0) :
+                    this.underlying % values.underlying[i];
         }
         values.close();
         return newValue;
@@ -225,7 +239,9 @@ public class DoubleValue extends NumericValue {
     @Override
     public ExpressionValue mod(DoubleArrayValue values) {
         for (int i = 0; i < values.underlying.length; ++i) {
-            values.underlying[i] = this.underlying % values.underlying[i];
+            values.underlying[i] = values.underlying[i] == 0 ?
+                    (getFactory().getOptions().getInfectiousNaN() ? NaN : 0) :
+                    this.underlying % values.underlying[i];
         }
         return values;
     }
@@ -282,7 +298,7 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isEqual(DoubleValue value){
+    public ExpressionValue isEqual(DoubleValue value) {
         return this.underlying == value.underlying ? BooleanConstantValue.TRUE : BooleanConstantValue.FALSE;
     }
 
@@ -292,17 +308,17 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isEqual(DoubleArrayValue values){
+    public ExpressionValue isEqual(DoubleArrayValue values) {
         return values.isEqual(this);
     }
 
     @Override
-    public ExpressionValue isEqual(LongArrayValue values){
+    public ExpressionValue isEqual(LongArrayValue values) {
         return values.isEqual(this);
     }
 
     @Override
-    public ExpressionValue isEqual(BooleanConstantValue value){
+    public ExpressionValue isEqual(BooleanConstantValue value) {
         throw new ExpressionException("illegal call of isEqual() on DoubleValue");
     }
 
@@ -322,7 +338,7 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isGt(DoubleValue value){
+    public ExpressionValue isGt(DoubleValue value) {
         return this.underlying > value.underlying ? BooleanConstantValue.TRUE : BooleanConstantValue.FALSE;
     }
 
@@ -332,8 +348,8 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isGt(DoubleArrayValue values){
-        for (double num: values.underlying) {
+    public ExpressionValue isGt(DoubleArrayValue values) {
+        for (double num : values.underlying) {
             if (this.underlying <= num) {
                 return BooleanConstantValue.FALSE;
             }
@@ -342,8 +358,8 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isGt(LongArrayValue values){
-        for (long num: values.underlying) {
+    public ExpressionValue isGt(LongArrayValue values) {
+        for (long num : values.underlying) {
             if (this.underlying <= num) {
                 return BooleanConstantValue.FALSE;
             }
@@ -367,7 +383,7 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isGte(DoubleValue value){
+    public ExpressionValue isGte(DoubleValue value) {
         return this.underlying >= value.underlying ? BooleanConstantValue.TRUE : BooleanConstantValue.FALSE;
     }
 
@@ -377,8 +393,8 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isGte(DoubleArrayValue values){
-        for (double num: values.underlying) {
+    public ExpressionValue isGte(DoubleArrayValue values) {
+        for (double num : values.underlying) {
             if (this.underlying < num) {
                 return BooleanConstantValue.FALSE;
             }
@@ -387,8 +403,8 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isGte(LongArrayValue values){
-        for (long num: values.underlying) {
+    public ExpressionValue isGte(LongArrayValue values) {
+        for (long num : values.underlying) {
             if (this.underlying < num) {
                 return BooleanConstantValue.FALSE;
             }
@@ -412,7 +428,7 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isLt(DoubleValue value){
+    public ExpressionValue isLt(DoubleValue value) {
         return this.underlying < value.underlying ? BooleanConstantValue.TRUE : BooleanConstantValue.FALSE;
     }
 
@@ -422,8 +438,8 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isLt(DoubleArrayValue values){
-        for (double num: values.underlying) {
+    public ExpressionValue isLt(DoubleArrayValue values) {
+        for (double num : values.underlying) {
             if (this.underlying >= num) {
                 return BooleanConstantValue.FALSE;
             }
@@ -432,8 +448,8 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isLt(LongArrayValue values){
-        for (long num: values.underlying) {
+    public ExpressionValue isLt(LongArrayValue values) {
+        for (long num : values.underlying) {
             if (this.underlying >= num) {
                 return BooleanConstantValue.FALSE;
             }
@@ -457,7 +473,7 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isLte(DoubleValue value){
+    public ExpressionValue isLte(DoubleValue value) {
         return this.underlying <= value.underlying ? BooleanConstantValue.TRUE : BooleanConstantValue.FALSE;
     }
 
@@ -467,8 +483,8 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isLte(DoubleArrayValue values){
-        for (double num: values.underlying) {
+    public ExpressionValue isLte(DoubleArrayValue values) {
+        for (double num : values.underlying) {
             if (this.underlying > num) {
                 return BooleanConstantValue.FALSE;
             }
@@ -477,8 +493,8 @@ public class DoubleValue extends NumericValue {
     }
 
     @Override
-    public ExpressionValue isLte(LongArrayValue values){
-        for (long num: values.underlying) {
+    public ExpressionValue isLte(LongArrayValue values) {
+        for (long num : values.underlying) {
             if (this.underlying > num) {
                 return BooleanConstantValue.FALSE;
             }

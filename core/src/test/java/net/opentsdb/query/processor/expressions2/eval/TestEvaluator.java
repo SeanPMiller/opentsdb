@@ -1,6 +1,8 @@
 package net.opentsdb.query.processor.expressions2.eval;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -148,9 +150,9 @@ public class TestEvaluator extends FactoryBasedTest {
             // modulus: long array and double array
             put("nat % ieee754", factory.makeValueFrom(new double[]{0d, 1d, 0.6, 3d, 4d}));
             // modulus: double array and long value
-            put("2 % ieee754", factory.makeValueFrom(new double[]{0.75,2.0,0.6,2.0,2.0}));
+            put("2 % ieee754", factory.makeValueFrom(new double[]{0.75, 2.0, 0.6, 2.0, 2.0}));
             // modulus: double array and double value
-            put("2.5 % ieee754", factory.makeValueFrom(new double[]{0.0,2.5,0.4,2.5,2.5}));
+            put("2.5 % ieee754", factory.makeValueFrom(new double[]{0.0, 2.5, 0.4, 2.5, 2.5}));
 
             // power: long value and long value
             put("2 ^ 2 ^ 2", factory.makeValueFrom(16L));
@@ -164,7 +166,7 @@ public class TestEvaluator extends FactoryBasedTest {
             put("nat ^ 2.5", factory.makeValueFrom(new double[]{0d, 1d, 5.65685424949238, 15.588457268119896, 32d}));
 
             // miscellaneous
-            put("nat ^ (1 + nat) * 2 / ieee754 % 2", factory.makeValueFrom(new double[]{0d,0.6666666666666666,0.8571428571428577,0d,1.1578947368420813}));
+            put("nat ^ (1 + nat) * 2 / ieee754 % 2", factory.makeValueFrom(new double[]{0d, 0.6666666666666666, 0.8571428571428577, 0d, 1.1578947368420813}));
         }};
 
         for (final Map.Entry<String, ExpressionValue> example : examples.entrySet()) {
@@ -274,6 +276,53 @@ public class TestEvaluator extends FactoryBasedTest {
             put("truE ? ieee754 * 2 : (nat + 2)", factory.makeValueFrom(new double[]{2.5, 6d, 1.4, 16.2, 9.5}));
             put("1 < 2 ? 2<3?2+3:4+5 : 2", factory.makeValueFrom(5L));
             put("1 >= 2 ? (2<3?2+3:4+5) : (2>3?100:200.2)", factory.makeValueFrom(200.2));
+        }};
+
+        for (final Map.Entry<String, ExpressionValue> example : examples.entrySet()) {
+            final ExpressionNode parseTree = parser.parse(example.getKey());
+            try (final ExpressionValue result = evaluator.evaluate(parseTree)) {
+                System.out.println("expr: " + example.getKey());
+                assertEquals(example.getValue(), result);
+                System.out.println("done");
+            }
+        }
+    }
+
+    @Test
+    public void testNaN() throws Exception {
+        // nat:         {0, 1, 2, 3, 4}
+        // natSquared:  {0, 1, 4, 9, 16}
+        // ieee754:     {1.25, 3d, 0.7, 8.1, 4.75}
+        when(DEFAULT_EVAL_OPTIONS.getInfectiousNaN()).thenReturn(true);
+        final Map<String, ExpressionValue> examples = new HashMap<String, ExpressionValue>() {{
+            put("nat / nat", factory.makeValueFrom(new double[]{Double.NaN, 1d, 1d, 1d, 1d}));
+            put("nat % nat", factory.makeValueFrom(new double[]{Double.NaN, 0d, 0d, 0d, 0d}));
+            put("nat / nat % nat", factory.makeValueFrom(new double[]{Double.NaN, 0d, 1d, 1d, 1d}));
+            put("nat / 0", factory.makeValueFrom(new double[]{Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN}));
+            put("nat / 0.0", factory.makeValueFrom(new double[]{Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN}));
+        }};
+
+        for (final Map.Entry<String, ExpressionValue> example : examples.entrySet()) {
+            final ExpressionNode parseTree = parser.parse(example.getKey());
+            try (final ExpressionValue result = evaluator.evaluate(parseTree)) {
+                System.out.println("expr: " + example.getKey());
+                assertEquals(example.getValue(), result);
+                System.out.println("done");
+            }
+        }
+    }
+
+    @Test
+    public void testFloatingPointDivision() throws Exception {
+        // nat:         {0, 1, 2, 3, 4}
+        // natSquared:  {0, 1, 4, 9, 16}
+        // ieee754:     {1.25, 3d, 0.7, 8.1, 4.75}
+        when(DEFAULT_EVAL_OPTIONS.getForceFloatingPointDivision()).thenReturn(true);
+        final Map<String, ExpressionValue> examples = new HashMap<String, ExpressionValue>() {{
+            put("(nat + 1) / (nat + 1)", factory.makeValueFrom(new double[]{1d, 1d, 1d, 1d, 1d}));
+            put("nat / 2", factory.makeValueFrom(new double[]{0d, 0.5, 1d, 1.5, 2d}));
+            put("(nat + 1) % (nat + 1)", factory.makeValueFrom(new long[]{0, 0, 0, 0, 0}));
+
         }};
 
         for (final Map.Entry<String, ExpressionValue> example : examples.entrySet()) {

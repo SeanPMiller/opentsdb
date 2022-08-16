@@ -73,6 +73,7 @@ public class Evaluator extends DefaultExpressionVisitor {
 
     @Override
     public void leaveAddition(final Addition a) {
+        // TODO: handle infectiousNan
         final ExpressionValue rhs = context.pop();
         final ExpressionValue lhs = context.pop();
         context.push(lhs.add(rhs));
@@ -80,6 +81,7 @@ public class Evaluator extends DefaultExpressionVisitor {
 
     @Override
     public void leaveSubtraction(Subtraction s) {
+        // TODO: handle infectiousNan
         final ExpressionValue rhs = context.pop();
         final ExpressionValue lhs = context.pop();
         context.push(lhs.subtract(rhs));
@@ -87,6 +89,7 @@ public class Evaluator extends DefaultExpressionVisitor {
 
     @Override
     public void leaveMultiplication(Multiplication s) {
+        // TODO: handle infectiousNan
         final ExpressionValue rhs = context.pop();
         final ExpressionValue lhs = context.pop();
         context.push(lhs.multiply(rhs));
@@ -108,6 +111,7 @@ public class Evaluator extends DefaultExpressionVisitor {
 
     @Override
     public void leavePower(Power s) {
+        // TODO: handle infectiousNan
         final ExpressionValue rhs = context.pop();
         final ExpressionValue lhs = context.pop();
         context.push(lhs.power(rhs));
@@ -115,6 +119,7 @@ public class Evaluator extends DefaultExpressionVisitor {
 
     @Override
     public void leaveEqual(Equal s) {
+        // TODO: handle infectiousNan
         final ExpressionValue rhs = context.pop();
         final ExpressionValue lhs = context.pop();
         context.push(lhs.isEqual(rhs));
@@ -122,6 +127,7 @@ public class Evaluator extends DefaultExpressionVisitor {
 
     @Override
     public void leaveGte(Gte s) {
+        // TODO: handle infectiousNan
         final ExpressionValue rhs = context.pop();
         final ExpressionValue lhs = context.pop();
         context.push(lhs.isGte(rhs));
@@ -129,6 +135,7 @@ public class Evaluator extends DefaultExpressionVisitor {
 
     @Override
     public void leaveGt(Gt s) {
+        // TODO: handle infectiousNan
         final ExpressionValue rhs = context.pop();
         final ExpressionValue lhs = context.pop();
         context.push(lhs.isGt(rhs));
@@ -136,6 +143,7 @@ public class Evaluator extends DefaultExpressionVisitor {
 
     @Override
     public void leaveLte(Lte s) {
+        // TODO: handle infectiousNan
         final ExpressionValue rhs = context.pop();
         final ExpressionValue lhs = context.pop();
         context.push(lhs.isLte(rhs));
@@ -143,6 +151,7 @@ public class Evaluator extends DefaultExpressionVisitor {
 
     @Override
     public void leaveLt(Lt s) {
+        // TODO: handle infectiousNan
         final ExpressionValue rhs = context.pop();
         final ExpressionValue lhs = context.pop();
         context.push(lhs.isLt(rhs));
@@ -150,6 +159,7 @@ public class Evaluator extends DefaultExpressionVisitor {
 
     @Override
     public void leaveNotEq(NotEq s) {
+        // TODO: handle infectiousNan
         final ExpressionValue rhs = context.pop();
         final ExpressionValue lhs = context.pop();
         context.push(lhs.isEqual(rhs).complement());

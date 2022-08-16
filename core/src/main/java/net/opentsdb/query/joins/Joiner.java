@@ -168,8 +168,10 @@ public class Joiner {
       }
       
       final Operand operand;
+
       if (expression_config.getLeftId() != null &&
           expression_config.getLeftId().equals(result.dataSource())) {
+        // Check left side
         operand = Operand.LEFT;
         if (left_key == null) {
           LOG.warn("Received a result set for the left ID: " 
@@ -179,6 +181,7 @@ public class Joiner {
       } else if (expression_config.getRightId() != null &&
           expression_config.getRightId().equals(result.dataSource())) {
         operand = Operand.RIGHT;
+        // Check right side
         if (right_key == null) {
           LOG.warn("Received a result set for the right ID: " 
               + expression_config.getRightId() + " but the right key was null.");
@@ -187,6 +190,7 @@ public class Joiner {
       } else if (expression_config instanceof TernaryParseNode && 
           ((TernaryParseNode) expression_config).getConditionId().equals(
               result.dataSource())) {
+        // Check if we are at a ternary expression
         operand = Operand.CONDITION;
         if (ternary_key == null) {
           LOG.warn("Received a result set for the ternary ID: " 
@@ -211,9 +215,12 @@ public class Joiner {
             key = com.google.common.primitives.Bytes.concat(
                 id.namespace(), id.metric());
           }
-          
+
+          // Hash time series based on tags and store in map with hash code
           switch (operand) {
           case LEFT:
+            // When time series has the same namespace or metric name with left key
+            // Hash this time series and store in set
             if (Bytes.memcmp(key, left_key) == 0) {
               hashByteId(operand, ts, join_set);
             } else {
@@ -840,7 +847,7 @@ public class Joiner {
   /**
    * Computes the has on the ID based on the join config and populates
    * the set if the join is successful.
-   * @param key The non-null and non-empty key.
+   * @param operand The non-null operand.
    * @param ts The non-null time series.
    * @param join_set The non-null set to populate.
    */

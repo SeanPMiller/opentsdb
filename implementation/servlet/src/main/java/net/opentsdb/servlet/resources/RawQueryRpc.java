@@ -264,7 +264,8 @@ public class RawQueryRpc {
     LOG.info("Creating async query");
 
     tsdb.getQueryThreadPool().submit(runTsdQuery, context, TSDTask.QUERY);
-    
+
+    // TODO: return response here
     return null;
   }
   
