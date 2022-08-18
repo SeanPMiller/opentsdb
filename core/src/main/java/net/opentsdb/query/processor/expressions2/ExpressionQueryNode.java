@@ -6,8 +6,7 @@ import net.opentsdb.data.TimeSeries;
 import net.opentsdb.data.TypedTimeSeriesIterator;
 import net.opentsdb.data.types.numeric.NumericArrayType;
 import net.opentsdb.query.*;
-import net.opentsdb.query.processor.expressions.BinaryExpressionNode;
-import net.opentsdb.query.processor.expressions.BinaryExpressionNodeFactory;
+import net.opentsdb.query.joins.Joiner;
 import net.opentsdb.query.processor.expressions2.ExpressionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +40,11 @@ public class ExpressionQueryNode extends AbstractQueryNode<ExpressionConfig> {
     protected final AtomicBoolean all_in;
 
     /**
+     * The joiner.
+     */
+    protected final Joiner joiner;
+
+    /**
      * Default c-tor.
      *
      * @param factory  The factory we came from.
@@ -62,14 +66,19 @@ public class ExpressionQueryNode extends AbstractQueryNode<ExpressionConfig> {
         // Store ids of all needed results as key
         // We need all these results to evaluate this query
         for (QueryResultId resultId : exprConf.getResultsNeeded()) {
-            // TODO: set a query result ID as key
             results.put(resultId, null);
         }
+
+        joiner = new Joiner(expression_config.getJoin());
     }
 
     @Override
     public ExpressionConfig config() {
         return expression_config;
+    }
+
+    public Joiner joiner() {
+        return joiner;
     }
 
     @Override
@@ -105,18 +114,6 @@ public class ExpressionQueryNode extends AbstractQueryNode<ExpressionConfig> {
 
             results.put(next.dataSource(), next);
         }
-
-//        // TODO: decide whether or not the logic is needed here
-//        // referring to onNext method in BinaryExpressionNode
-//        if (resolveMetrics(next)) {
-//            // resolving, don't progress yet.
-//            return;
-//        }
-//
-//        if (resolveJoinStrings(next)) {
-//            // resolving, don't progress yet.
-//            return;
-//        }
 
         // see if all the results are in.
         boolean full_map = true;

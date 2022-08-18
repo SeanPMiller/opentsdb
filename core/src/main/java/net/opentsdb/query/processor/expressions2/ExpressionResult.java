@@ -9,6 +9,7 @@ import net.opentsdb.data.TimeSpecification;
 import net.opentsdb.query.QueryNode;
 import net.opentsdb.query.QueryResult;
 import net.opentsdb.query.QueryResultId;
+import net.opentsdb.query.joins.JoinConfig;
 import net.opentsdb.rollup.RollupConfig;
 
 import java.time.temporal.ChronoUnit;
@@ -59,7 +60,7 @@ public class ExpressionResult implements QueryResult {
 
         for (Map.Entry<QueryResultId, QueryResult> entry : node.results().entrySet()) {
             for (TimeSeries ts : entry.getValue().timeSeries()) {
-                builder.put(entry.getKey().nodeID(), ts);
+                builder.put(entry.getKey().dataSource(), ts);
                 break;
             }
         }

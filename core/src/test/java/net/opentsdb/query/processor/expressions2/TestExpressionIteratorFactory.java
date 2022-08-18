@@ -135,7 +135,7 @@ public class TestExpressionIteratorFactory {
         assertFalse(planner.graph().hasEdgeConnecting(SINK, planner.nodeForId("m1")));
 
         QueryNodeConfig b1 = planner.configNodeForId("expression");
-        assertEquals("Expression2", b1.getType());
+        assertEquals("Expression", b1.getType());
 
         assertTrue((b1 instanceof ExpressionConfig));
         ExpressionConfig p1 = (ExpressionConfig) b1;
@@ -216,7 +216,7 @@ public class TestExpressionIteratorFactory {
         assertFalse(planner.graph().hasEdgeConnecting(SINK, planner.nodeForId("m3")));
 
         QueryNodeConfig b1 = planner.configNodeForId("e1");
-        assertEquals("Expression2", b1.getType());
+        assertEquals("Expression", b1.getType());
 
         assertTrue((b1 instanceof ExpressionConfig));
         ExpressionConfig p1 = (ExpressionConfig) b1;
@@ -281,7 +281,7 @@ public class TestExpressionIteratorFactory {
         assertFalse(planner.graph().hasEdgeConnecting(planner.nodeForId("e1"), planner.nodeForId("m1")));
 
         QueryNodeConfig b1 = planner.configNodeForId("e1");
-        assertEquals("Expression2", b1.getType());
+        assertEquals("Expression", b1.getType());
 
         ExpressionConfig p1 = (ExpressionConfig) b1;
         assertEquals("e1", p1.getId());
@@ -364,7 +364,7 @@ public class TestExpressionIteratorFactory {
         assertTrue(planner.graph().hasEdgeConnecting(SINK, planner.nodeForId("e1")));
 
         QueryNodeConfig b1 = planner.configNodeForId("e1");
-        assertEquals("Expression2", b1.getType());
+        assertEquals("Expression", b1.getType());
         ExpressionConfig p1 = (ExpressionConfig) b1;
 
         assertEquals("e1", p1.getId());

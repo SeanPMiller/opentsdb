@@ -27,8 +27,6 @@ public class TernaryOperator extends ExpressionOperator {
     public void accept(ExpressionVisitor visitor) {
         visitor.enterTernary(this);
         condition.accept(visitor);
-        trueCase.accept(visitor);
-        falseCase.accept(visitor);
         visitor.leaveTernary(this);
     }
 

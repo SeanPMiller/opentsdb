@@ -26,6 +26,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -97,6 +98,9 @@ public class TestExpressionResult extends BaseNumericTest {
         }};
         when(node.results()).thenReturn(results);
 
+        Joiner joiner = mock(Joiner.class);
+        when(node.joiner()).thenReturn(joiner);
+        when(joiner.joinIds(any(TimeSeries.class), any(TimeSeries.class), any(String.class), any(JoinConfig.JoinType.class))).thenReturn(null);
         result.join();
         assertEquals(1, result.time_series.size());
 

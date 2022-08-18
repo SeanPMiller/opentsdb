@@ -71,7 +71,7 @@ public class EvaluationContext {
     public ExpressionValue lookup(final String metricName) {
         final ExpressionValue result = metrics.get(metricName);
         if (null == result) {
-            throw new ExpressionException("tried to look up an undefined metric name in EvaluationContext");
+            throw new ExpressionException("tried to look up an undefined metric name in EvaluationContext: " + metricName);
         }
         return result;
     }

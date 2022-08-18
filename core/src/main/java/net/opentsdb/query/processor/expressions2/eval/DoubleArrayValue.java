@@ -65,6 +65,10 @@ public class DoubleArrayValue extends NumericValue {
         return underlying[idx];
     }
 
+    public double[] getValues() {
+        return underlying;
+    }
+
     @Override
     public void close() {
         underlying = null;

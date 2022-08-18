@@ -1,6 +1,7 @@
 package net.opentsdb.query.processor.expressions2;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 
 import com.google.common.reflect.TypeToken;
@@ -10,6 +11,7 @@ import net.opentsdb.data.TimeSeriesDataType;
 import net.opentsdb.data.TimeSeriesValue;
 import net.opentsdb.data.TimeStamp;
 import net.opentsdb.data.types.numeric.NumericArrayType;
+import net.opentsdb.data.types.numeric.NumericType;
 import net.opentsdb.query.QueryResult;
 import net.opentsdb.query.processor.expressions2.ExpressionConfig;
 import net.opentsdb.query.processor.expressions.ExpressionResult;
@@ -39,20 +41,12 @@ public class ExpressionNumericArrayIterator
 
     @Override
     public TimeSeriesValue<? extends TimeSeriesDataType> next() {
-        // TODO
-
         if (value instanceof DoubleArrayValue) {
             DoubleArrayValue doubleArray = (DoubleArrayValue) value;
-            double_values = new double[doubleArray.getLength()];
-            for (int i = 0; i < double_values.length; i++) {
-                double_values[i] = doubleArray.getValueAt(i);
-            }
+            double_values = doubleArray.getValues();
         } else if (value instanceof LongArrayValue) {
             LongArrayValue longArray = (LongArrayValue) value;
-            long_values = new long[longArray.getLength()];
-            for (int i = 0; i < long_values.length; i++) {
-                long_values[i] = longArray.getValueAt(i);
-            }
+            long_values = longArray.getValues();
         }
         // TODO: result is not array
 
@@ -74,6 +68,11 @@ public class ExpressionNumericArrayIterator
 
     @Override
     public TypeToken<NumericArrayType> type() {
+        return NumericArrayType.TYPE;
+    }
+
+    @Override
+    public TypeToken<? extends TimeSeriesDataType> getType() {
         return NumericArrayType.TYPE;
     }
 

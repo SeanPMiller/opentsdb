@@ -167,14 +167,12 @@ public class Evaluator extends DefaultExpressionVisitor {
 
     @Override
     public void leaveTernary(TernaryOperator s) {
-        final ExpressionValue falseCase = context.pop();
-        final ExpressionValue trueCase = context.pop();
         final ExpressionValue condition = context.pop();
 
         if (condition.equals(BooleanConstantValue.TRUE)) {
-            context.push(trueCase);
+            s.getTrueCase().accept(this);
         } else {
-            context.push(falseCase);
+            s.getFalseCase().accept(this);
         }
     }
 

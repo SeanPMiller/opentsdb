@@ -4,6 +4,7 @@ package net.opentsdb.query.processor.expressions2;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -80,6 +81,7 @@ public class ExpressionConfig extends BaseQueryNodeConfigWithInterpolators<Expre
     /**
      * Parsed tree of expression after simplication
      */
+    @JsonIgnore
     private final ExpressionNode parseTree;
 
     /**
@@ -115,8 +117,11 @@ public class ExpressionConfig extends BaseQueryNodeConfigWithInterpolators<Expre
         expression = builder.expression;
         final ExpressionParser parser = new ExpressionParser();
         ExpressionNode expressionTree = parser.parse(expression);
-        final Simplifier simplifier = new Simplifier();
-        parseTree = simplifier.simplify(expressionTree);
+
+        // TODO: more work with simplifier
+//        final Simplifier simplifier = new Simplifier();
+//        parseTree = simplifier.simplify(expressionTree);
+        parseTree = expressionTree;
 
 
         if (null == builder.sources_alias) {
@@ -157,6 +162,13 @@ public class ExpressionConfig extends BaseQueryNodeConfigWithInterpolators<Expre
      */
     public ExpressionNode getParseTree() {
         return parseTree;
+    }
+
+    /**
+     * @return The list of alias of the needed sources
+     */
+    public List<String> getSourcesAlias() {
+        return sources_alias;
     }
 
     /**

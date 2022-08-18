@@ -32,7 +32,7 @@ import net.opentsdb.query.processor.expressions2.nodes.ExpressionNode;
 public class ExpressionIteratorFactory extends BaseQueryNodeFactory<ExpressionConfig, ExpressionQueryNode> {
 
     // This type should be unique among other plugins
-    public static final String TYPE = "Expression2";
+    public static final String TYPE = "Expression";
 
     public ExpressionIteratorFactory() {
         super();
@@ -124,7 +124,7 @@ public class ExpressionIteratorFactory extends BaseQueryNodeFactory<ExpressionCo
 
     @Override
     public ExpressionConfig parseConfig(ObjectMapper mapper, TSDB tsdb, JsonNode node) {
-        return null;
+        return ExpressionConfig.parse(mapper, tsdb, node);
     }
 
     class NumericArrayIteratorFactory implements QueryIteratorFactory<ExpressionQueryNode, NumericArrayType> {

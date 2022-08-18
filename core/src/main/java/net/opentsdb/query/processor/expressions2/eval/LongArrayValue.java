@@ -51,6 +51,10 @@ public class LongArrayValue extends NumericValue {
         return underlying[idx];
     }
 
+    public long[] getValues() {
+        return underlying;
+    }
+
     @Override
     public void close() {
         underlying = null;

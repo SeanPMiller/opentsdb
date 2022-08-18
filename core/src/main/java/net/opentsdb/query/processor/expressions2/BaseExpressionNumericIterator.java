@@ -119,11 +119,11 @@ public abstract class BaseExpressionNumericIterator<T extends TimeSeriesDataType
 
         // We can now collect metadata from the expression.
         metadata = new Metadata();
-        final MetadataCollector collector = new MetadataCollector(metadata);
-        expression.accept(collector);
+//        final MetadataCollector collector = new MetadataCollector(metadata);
+//        expression.accept(collector);
 
         // Get all metric values and define them in context
-        for (String m : metadata.variablesUsed) {
+        for (String m : config.getSourcesAlias()) {
             if (!sources.containsKey(m)) continue; // TODO: does not have the metric
             TypedTimeSeriesIterator<?> iterator = sources.get(m).iterator(NumericArrayType.TYPE).get();
             TimeSeriesValue<NumericArrayType> value = (TimeSeriesValue<NumericArrayType>) iterator.next();
@@ -147,8 +147,4 @@ public abstract class BaseExpressionNumericIterator<T extends TimeSeriesDataType
         return hasMoreValues;
     }
 
-    @Override
-    public TypeToken<? extends TimeSeriesDataType> getType() {
-        return NumericType.TYPE;
-    }
 }

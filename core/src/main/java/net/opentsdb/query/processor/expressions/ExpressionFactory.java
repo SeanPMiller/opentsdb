@@ -53,7 +53,7 @@ import java.util.Set;
  */
 public class ExpressionFactory extends BaseQueryNodeFactory<ExpressionConfig,
         BinaryExpressionNode> {
-    public static final String TYPE = "Expression";
+    public static final String TYPE = "Expression2";
 
     /**
      * Operand type, left right or condition.

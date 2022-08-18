@@ -3,18 +3,12 @@ package net.opentsdb.query.processor.expressions2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
-import net.opentsdb.data.TimeSeries;
-import net.opentsdb.data.TimeSeriesDataType;
-import net.opentsdb.data.TimeSeriesId;
-import net.opentsdb.data.TypedTimeSeriesIterator;
+import net.opentsdb.data.*;
 import net.opentsdb.data.types.numeric.NumericArrayType;
 import net.opentsdb.query.QueryResult;
 import net.opentsdb.query.processor.expressions.*;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * A container class for computing operation on one or more
@@ -55,8 +49,17 @@ public class ExpressionTimeSeries implements TimeSeries {
         this.result = result;
         this.sourceMap = sourceMap;
         this.types = Lists.newArrayList(NumericArrayType.TYPE);
-        // TODO: id
-        this.id = null;
+
+        String as = node.config().getAs();
+        Iterator<TimeSeries> iterator = sourceMap.values().iterator();
+        TimeSeries cur_ts = null;
+        TimeSeriesId joined_id = null;
+        while (iterator.hasNext()) {
+            TimeSeries next_ts = iterator.next();
+            joined_id = node.joiner().joinIds(cur_ts, next_ts, as, node.config().getJoin().getJoinType());
+            cur_ts = next_ts;
+        }
+        this.id = joined_id;
     }
 
     @Override
@@ -82,13 +85,11 @@ public class ExpressionTimeSeries implements TimeSeries {
 
     @Override
     public Collection<TypedTimeSeriesIterator<? extends TimeSeriesDataType>> iterators() {
-
         final List<TypedTimeSeriesIterator<? extends TimeSeriesDataType>> iterators =
                 Lists.newArrayListWithExpectedSize(types.size());
         for (final TypeToken<? extends TimeSeriesDataType> type : types) {
             iterators.add(((ExpressionIteratorFactory) node.factory()).newTypedIterator(
                     type, node, result, sourceMap));
-
         }
 
         return iterators;
