@@ -337,6 +337,12 @@ public final class PluginLoader {
   public static void loadJARs(String directory) throws SecurityException, 
   IllegalArgumentException, IOException, NoSuchMethodException, 
   IllegalAccessException, InvocationTargetException {
+    if (directory == null) {
+        throw new NullPointerException("The given path was null");
+    } else if (directory.isEmpty()) {
+        throw new IllegalArgumentException("The given path was empty");
+    }
+
     File file = new File(directory);
     if (!file.isDirectory()) {
       throw new IllegalArgumentException(
