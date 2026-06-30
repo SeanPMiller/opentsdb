@@ -14,38 +14,27 @@
 // limitations under the License.
 package net.opentsdb.storage.schemas.tsdb1x;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import net.opentsdb.data.TimeSeriesDataType;
-import net.opentsdb.data.TypedTimeSeriesIterator;
-import net.opentsdb.query.DefaultTimeSeriesDataSourceConfig;
-import org.junit.Before;
-import org.junit.Test;
-import org.powermock.reflect.Whitebox;
 
-import com.google.common.collect.Lists;
-import com.google.common.primitives.Bytes;
-
-import net.openhft.hashing.LongHashFunction;
 import net.opentsdb.common.Const;
 import net.opentsdb.core.MockTSDB;
 import net.opentsdb.data.TimeSeries;
+import net.opentsdb.data.TimeSeriesDataType;
 import net.opentsdb.data.TimeSeriesValue;
+import net.opentsdb.data.TypedTimeSeriesIterator;
 import net.opentsdb.data.types.numeric.NumericType;
 import net.opentsdb.data.types.numeric.aggregators.NumericAggregatorFactory;
 import net.opentsdb.data.types.numeric.aggregators.SumFactory;
+import net.opentsdb.query.DefaultTimeSeriesDataSourceConfig;
 import net.opentsdb.query.QueryNode;
 import net.opentsdb.query.QueryPipelineContext;
 import net.opentsdb.query.SemanticQuery;
@@ -55,6 +44,13 @@ import net.opentsdb.query.pojo.Metric;
 import net.opentsdb.query.pojo.TimeSeriesQuery;
 import net.opentsdb.query.pojo.Timespan;
 import net.opentsdb.storage.schemas.tsdb1x.NumericCodec.OffsetResolution;
+
+import net.openhft.hashing.LongHashFunction;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.google.common.collect.Lists;
+import com.google.common.primitives.Bytes;
 
 public class TestTsdb1xQueryResult extends SchemaBase {
 
@@ -320,7 +316,9 @@ public class TestTsdb1xQueryResult extends SchemaBase {
   @Test
   public void addSequenceMultipleRowsReversed() throws Exception {
     Tsdb1xQueryResult result = new Tsdb1xQueryResult(9, node, schema);
-    Whitebox.setInternalState(result, "reversed", true);
+    Field reversedField = result.getClass().getDeclaredField("reversed");
+    reversedField.setAccessible(true);
+    reversedField.set(result, true);
     long base_time = BASE_TIME;
     int value = 0;
     

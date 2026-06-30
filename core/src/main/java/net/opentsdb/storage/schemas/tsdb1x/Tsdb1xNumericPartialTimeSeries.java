@@ -15,12 +15,9 @@
 package net.opentsdb.storage.schemas.tsdb1x;
 
 import java.util.Iterator;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
-import net.opentsdb.rollup.RollupInterval;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.opentsdb.data.PartialTimeSeriesSet;
 import net.opentsdb.data.TimeStamp;
@@ -29,6 +26,10 @@ import net.opentsdb.exceptions.IllegalDataException;
 import net.opentsdb.pools.ObjectPool;
 import net.opentsdb.pools.PooledObject;
 import net.opentsdb.rollup.DefaultRollupInterval;
+import net.opentsdb.rollup.RollupInterval;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An implementation that converts the column from a 1x schema into the

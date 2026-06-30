@@ -19,19 +19,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import net.opentsdb.common.Const;
+import net.opentsdb.data.*;
+import net.opentsdb.stats.Span;
+
 import com.google.common.collect.Lists;
 import com.google.common.reflect.TypeToken;
 import com.stumbleupon.async.Callback;
 import com.stumbleupon.async.Deferred;
-
-import net.opentsdb.common.Const;
-import net.opentsdb.data.TimeSeries;
-import net.opentsdb.data.TimeSeriesByteId;
-import net.opentsdb.data.TimeSeriesDataType;
-import net.opentsdb.data.TimeSeriesId;
-import net.opentsdb.data.TimeSeriesStringId;
-import net.opentsdb.data.TypedTimeSeriesIterator;
-import net.opentsdb.stats.Span;
 
 /**
  * A generic class to convert a result with {@link Const#TS_BYTE_ID}

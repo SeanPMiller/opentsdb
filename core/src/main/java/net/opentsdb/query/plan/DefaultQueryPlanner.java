@@ -16,26 +16,35 @@ package net.opentsdb.query.plan;
 
 import java.time.Duration;
 import java.time.temporal.TemporalAmount;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import com.google.common.annotations.VisibleForTesting;
+import net.opentsdb.common.Const;
+import net.opentsdb.configuration.Configuration;
+import net.opentsdb.data.TimeSeriesDataSource;
+import net.opentsdb.data.TimeSeriesDataSourceFactory;
+import net.opentsdb.data.TimeSeriesId;
 import net.opentsdb.data.TimeStamp;
-import net.opentsdb.query.BaseTimeSeriesDataSourceConfig;
-import net.opentsdb.query.DefaultQueryResultId;
-
-import net.opentsdb.query.QueryNodeConfigOptions;
+import net.opentsdb.exceptions.QueryExecutionException;
+import net.opentsdb.query.*;
 import net.opentsdb.query.TimeSeriesDataSourceConfig.Builder;
+import net.opentsdb.query.idconverter.ByteToStringIdConverterConfig;
 import net.opentsdb.query.processor.downsample.DownsampleConfig;
 import net.opentsdb.query.processor.downsample.DownsampleFactory;
+import net.opentsdb.query.processor.expressions.ExpressionConfig;
+import net.opentsdb.query.processor.expressions.ExpressionParseNode;
+import net.opentsdb.query.processor.merge.MergerConfig;
+import net.opentsdb.query.processor.summarizer.SummarizerConfig;
 import net.opentsdb.query.processor.timeshift.TimeShiftConfig;
+import net.opentsdb.query.serdes.SerdesOptions;
+import net.opentsdb.stats.Span;
 import net.opentsdb.utils.DateTime;
+import net.opentsdb.utils.Deferreds;
+import net.opentsdb.utils.Pair;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -49,28 +58,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.reflect.TypeToken;
 import com.stumbleupon.async.Callback;
 import com.stumbleupon.async.Deferred;
-
-import net.opentsdb.common.Const;
-import net.opentsdb.configuration.Configuration;
-import net.opentsdb.data.TimeSeriesDataSource;
-import net.opentsdb.data.TimeSeriesDataSourceFactory;
-import net.opentsdb.data.TimeSeriesId;
-import net.opentsdb.exceptions.QueryExecutionException;
-import net.opentsdb.query.QueryNode;
-import net.opentsdb.query.QueryNodeConfig;
-import net.opentsdb.query.QueryNodeFactory;
-import net.opentsdb.query.QueryPipelineContext;
-import net.opentsdb.query.QueryResultId;
-import net.opentsdb.query.TimeSeriesDataSourceConfig;
-import net.opentsdb.query.idconverter.ByteToStringIdConverterConfig;
-import net.opentsdb.query.processor.expressions.ExpressionConfig;
-import net.opentsdb.query.processor.expressions.ExpressionParseNode;
-import net.opentsdb.query.processor.merge.MergerConfig;
-import net.opentsdb.query.processor.summarizer.SummarizerConfig;
-import net.opentsdb.query.serdes.SerdesOptions;
-import net.opentsdb.stats.Span;
-import net.opentsdb.utils.Deferreds;
-import net.opentsdb.utils.Pair;
 
 /**
  * A query planner that handles push-down operations to data sources.

@@ -14,40 +14,21 @@
 // limitations under the License.
 package net.opentsdb.query.pojo;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.Field;
+import java.util.*;
 
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
-
-import com.stumbleupon.async.DeferredGroupException;
 
 import net.opentsdb.query.pojo.TagVFilter;
 import net.opentsdb.query.pojo.TagVLiteralOrFilter;
 import net.opentsdb.query.pojo.TagVRegexFilter;
 import net.opentsdb.query.pojo.TagVWildcardFilter;
 
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore({"javax.management.*", "javax.xml.*",
-  "ch.qos.*", "org.slf4j.*",
-  "com.sum.*", "org.xml.*"})
-@PrepareForTest({  })
+import org.junit.Test;
+
+import com.stumbleupon.async.DeferredGroupException;
+
 public class TestTagVFilter {
 
   @Test (expected = IllegalArgumentException.class)
@@ -59,6 +40,7 @@ public class TestTagVFilter {
   public void getFilterEmptyTagk() throws Exception {
     TagVFilter.getFilter(null, "myflter");
   }
+
 //  
 //  @Test (expected = IllegalArgumentException.class)
 //  public void getFilterEmptyFilter() throws Exception {
@@ -259,20 +241,28 @@ public class TestTagVFilter {
   @Test
   public void comparableTest() throws Exception {
     final TagVFilter filter_a = new TagVWildcardFilter("host", "*omnia");
-    Whitebox.setInternalState(filter_a, "tagk_bytes", new byte[] { 0, 0, 0, 1 });
+    Field tagk_bytesField3 = filter_a.getClass().getSuperclass().getDeclaredField("tagk_bytes");
+    tagk_bytesField3.setAccessible(true);
+    tagk_bytesField3.set(filter_a, new byte[]{0, 0, 0, 1});
     final TagVFilter filter_b = new TagVRegexFilter("dc", ".*katch");
-    Whitebox.setInternalState(filter_b, "tagk_bytes", new byte[] { 0, 0, 0, 2 });
+    Field tagk_bytesField2 = filter_b.getClass().getSuperclass().getDeclaredField("tagk_bytes");
+    tagk_bytesField2.setAccessible(true);
+    tagk_bytesField2.set(filter_b, new byte[]{0, 0, 0, 2});
     
     assertEquals(0, filter_a.compareTo(filter_a));
     assertEquals(-1, filter_a.compareTo(filter_b));
     assertEquals(1, filter_b.compareTo(filter_a));
     
-    Whitebox.setInternalState(filter_a, "tagk_bytes", (byte[])null);
+    Field tagk_bytesField1 = filter_a.getClass().getSuperclass().getDeclaredField("tagk_bytes");
+    tagk_bytesField1.setAccessible(true);
+    tagk_bytesField1.set(filter_a, (byte[]) null);
     assertEquals(0, filter_a.compareTo(filter_a));
     assertEquals(-1, filter_a.compareTo(filter_b));
     assertEquals(1, filter_b.compareTo(filter_a));
     
-    Whitebox.setInternalState(filter_b, "tagk_bytes", (byte[])null);
+    Field tagk_bytesField = filter_b.getClass().getSuperclass().getDeclaredField("tagk_bytes");
+    tagk_bytesField.setAccessible(true);
+    tagk_bytesField.set(filter_b, (byte[]) null);
     assertEquals(0, filter_a.compareTo(filter_a));
     assertEquals(0, filter_a.compareTo(filter_b));
     assertEquals(0, filter_b.compareTo(filter_a));

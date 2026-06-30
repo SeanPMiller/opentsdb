@@ -14,11 +14,11 @@
 // limitations under the License.
 package net.opentsdb.pools;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.opentsdb.configuration.Configuration;
 import net.opentsdb.core.TSDB;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for the pooled array allocators.

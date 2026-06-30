@@ -14,30 +14,28 @@
 //limitations under the License.
 package net.opentsdb.query.processor.expressions;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 
-import net.opentsdb.query.DefaultQueryResultId;
-import org.junit.Before;
-import org.junit.Test;
-import org.powermock.reflect.Whitebox;
-
-import com.google.common.collect.ImmutableMap;
 
 import net.opentsdb.data.SecondTimeStamp;
 import net.opentsdb.data.TimeSeries;
 import net.opentsdb.data.TimeSeriesValue;
 import net.opentsdb.data.types.numeric.NumericArrayTimeSeries;
 import net.opentsdb.data.types.numeric.NumericArrayType;
+import net.opentsdb.query.DefaultQueryResultId;
 import net.opentsdb.query.processor.expressions.ExpressionParseNode.ExpressionOp;
 import net.opentsdb.query.processor.expressions.ExpressionParseNode.OperandType;
 import net.opentsdb.query.processor.expressions.ExpressionParser.NumericLiteral;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import com.google.common.collect.ImmutableMap;
 
 public class TestExpressionNumericArrayIteratorMultiply extends BaseNumericTest {
 
@@ -315,7 +313,9 @@ public class TestExpressionNumericArrayIteratorMultiply extends BaseNumericTest 
               .put(ExpressionTimeSeries.LEFT_KEY, left)
               .put(ExpressionTimeSeries.RIGHT_KEY, right)
               .build());
-    Whitebox.setInternalState(iterator, "infectious_nan", true);
+    Field infectious_nanField = iterator.getClass().getDeclaredField("infectious_nan");
+    infectious_nanField.setAccessible(true);
+    infectious_nanField.set(iterator, true);
     assertTrue(iterator.hasNext());
     TimeSeriesValue<NumericArrayType> value = 
         (TimeSeriesValue<NumericArrayType>) iterator.next();
@@ -359,7 +359,9 @@ public class TestExpressionNumericArrayIteratorMultiply extends BaseNumericTest 
               .put(ExpressionTimeSeries.LEFT_KEY, left)
               .put(ExpressionTimeSeries.RIGHT_KEY, right)
               .build());
-    Whitebox.setInternalState(iterator, "infectious_nan", true);
+    Field infectious_nanField = iterator.getClass().getDeclaredField("infectious_nan");
+    infectious_nanField.setAccessible(true);
+    infectious_nanField.set(iterator, true);
     assertTrue(iterator.hasNext());
     TimeSeriesValue<NumericArrayType> value = 
         (TimeSeriesValue<NumericArrayType>) iterator.next();
