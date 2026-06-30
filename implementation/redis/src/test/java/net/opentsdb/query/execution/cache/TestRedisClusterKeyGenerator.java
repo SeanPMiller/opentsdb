@@ -18,32 +18,35 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
+import org.junit.After;
+
+import java.lang.reflect.Field;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import net.opentsdb.core.Const;
 import net.opentsdb.core.MockTSDB;
-import net.opentsdb.query.pojo.TimeSeriesQuery;
-import net.opentsdb.query.pojo.Timespan;
 import net.opentsdb.query.readcache.DefaultReadCacheKeyGenerator;
 import net.opentsdb.utils.Bytes;
 import net.opentsdb.utils.DateTime;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ DateTime.class, TimeSeriesQuery.class, Timespan.class })
 public class TestRedisClusterKeyGenerator {
+
+  private MockedStatic<DateTime> mockedDateTime;
 
   private MockTSDB tsdb;
   
   @Before
   public void before() throws Exception {
+    mockedDateTime = Mockito.mockStatic(DateTime.class);
     tsdb = new MockTSDB();
-    PowerMockito.mockStatic(DateTime.class);
+  }
+
+  @After
+  public void tearDownStaticMocks() {
+    mockedDateTime.closeOnDemand();
   }
   
   @Test
@@ -51,7 +54,7 @@ public class TestRedisClusterKeyGenerator {
     final RedisClusterKeyGenerator generator = new RedisClusterKeyGenerator();
     generator.initialize(tsdb, null).join(1);
     
-    when(DateTime.currentTimeMillis()).thenReturn((long) ((1514764800L + (86400L * 2)) * 1000L));
+    mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L + (86400L * 2)) * 1000L));
     long[] expirations = new long[] { 300000 };
     byte[][] keys = generator.generate(42L, 
         "1h", 
@@ -69,7 +72,7 @@ public class TestRedisClusterKeyGenerator {
         expirations[0]);
     
     // now our query starts at the current time so we expire earlier.
-    when(DateTime.currentTimeMillis()).thenReturn((long) ((1514764800L + (300L * 2)) * 1000L));
+    mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L + (300L * 2)) * 1000L));
     expirations[0] = 300000;
     keys = generator.generate(42L, 
         "1h", 
@@ -79,7 +82,7 @@ public class TestRedisClusterKeyGenerator {
     assertEquals(600000, expirations[0]);
     
     // if the times match or the segment is for the future, expire it immediately
-    when(DateTime.currentTimeMillis()).thenReturn((long) ((1514764800L) * 1000L));
+    mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L) * 1000L));
     expirations[0] = 300000;
     keys = generator.generate(42L, 
         "1h", 
@@ -89,7 +92,7 @@ public class TestRedisClusterKeyGenerator {
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[0]);
     
     // future
-    when(DateTime.currentTimeMillis()).thenReturn((long) ((1514764800L - 900L) * 1000L));
+    mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L - 900L) * 1000L));
     expirations[0] = 300000;
     keys = generator.generate(42L, 
         "1h", 
@@ -99,9 +102,11 @@ public class TestRedisClusterKeyGenerator {
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[0]);
     
     // historical cutoff
-    when(DateTime.currentTimeMillis()).thenReturn((long) ((1514764800L + (86400L * 2)) * 1000L));
+    mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L + (86400L * 2)) * 1000L));
     expirations[0] = 300000;
-    Whitebox.setInternalState(generator, "historical_cutoff", 86400000L);
+    Field historical_cutoffField = generator.getClass().getSuperclass().getDeclaredField("historical_cutoff");
+    historical_cutoffField.setAccessible(true);
+    historical_cutoffField.set(generator, 86400000L);
     keys = generator.generate(42L, 
         "1h", 
         new int[] { 1514764800 }, 
@@ -115,7 +120,7 @@ public class TestRedisClusterKeyGenerator {
     final RedisClusterKeyGenerator generator = new RedisClusterKeyGenerator();
     generator.initialize(tsdb, null).join(1);
     
-    when(DateTime.currentTimeMillis()).thenReturn((long) ((1514764800L + (86400L * 2)) * 1000L));
+    mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L + (86400L * 2)) * 1000L));
     long[] expirations = new long[] { 300000, 0, 0, 0 };
     byte[][] keys = generator.generate(42L, 
         "1h", 
@@ -163,7 +168,7 @@ public class TestRedisClusterKeyGenerator {
         expirations[3]);
     
     // now our query starts at the current time so we expire earlier.
-    when(DateTime.currentTimeMillis()).thenReturn((long) ((1514764800L + (3600 * 3) + (300L * 2)) * 1000L));
+    mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L + (3600 * 3) + (300L * 2)) * 1000L));
     expirations = new long[] { 300000, 0, 0, 0 };
     keys = generator.generate(42L, 
         "1h", 
@@ -179,7 +184,7 @@ public class TestRedisClusterKeyGenerator {
     assertEquals(600000, expirations[3]);
     
     // if the times match or the segment is for the future, expire it immediately
-    when(DateTime.currentTimeMillis()).thenReturn((long) ((1514764800L) * 1000L));
+    mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L) * 1000L));
     expirations = new long[] { 300000, 0, 0, 0 };
     keys = generator.generate(42L, 
         "1h", 
@@ -195,7 +200,7 @@ public class TestRedisClusterKeyGenerator {
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[3]);
     
     // future
-    when(DateTime.currentTimeMillis()).thenReturn((long) ((1514764800L - 900L) * 1000L));
+    mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L - 900L) * 1000L));
     expirations = new long[] { 300000, 0, 0, 0 };
     keys = generator.generate(42L, 
         "1h", 
@@ -211,8 +216,10 @@ public class TestRedisClusterKeyGenerator {
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[3]);
     
     // historical cutoff
-    when(DateTime.currentTimeMillis()).thenReturn((long) ((1514764800L + (86400L * 2)) * 1000L));
-    Whitebox.setInternalState(generator, "historical_cutoff", 86400000L);
+    mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L + (86400L * 2)) * 1000L));
+    Field historical_cutoffField = generator.getClass().getSuperclass().getDeclaredField("historical_cutoff");
+    historical_cutoffField.setAccessible(true);
+    historical_cutoffField.set(generator, 86400000L);
     expirations = new long[] { 300000, 0, 0, 0 };
     keys = generator.generate(42L, 
         "1h", 
