@@ -358,7 +358,8 @@ public class DefaultQueryPlanner implements QueryPlanner {
       }
     }
     
-    Set<QueryNodeConfig> incoming = config_graph.predecessors(node);
+    final Set<QueryNodeConfig> incoming = Sets.newHashSet(config_graph.predecessors(
+        node));
     for (final QueryNodeConfig n : incoming) {
       config_graph.putEdge(n, parent);
       if (Graphs.hasCycle(config_graph)) {
@@ -374,7 +375,6 @@ public class DefaultQueryPlanner implements QueryPlanner {
     
     // see if we can walk up for more
     if (!incoming.isEmpty()) {
-      incoming = Sets.newHashSet(incoming);
       for (final QueryNodeConfig n : incoming) {
         pushDown(parent, node, factory, n, push_downs);
       }
