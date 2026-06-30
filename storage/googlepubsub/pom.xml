@@ -46,16 +46,10 @@
         </dependency>
         
          <dependency>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-          <version>23.0</version>
-        </dependency>
-        <dependency>
           <groupId>com.google.cloud</groupId>
           <artifactId>google-cloud-pubsub</artifactId>
-          <version>1.36.0</version>
+          <version>1.151.0</version>
         </dependency>
-                
       </dependencies>
     </dependencyManagement>
     
@@ -67,6 +61,10 @@
       <dependency>
         <groupId>net.opentsdb</groupId>
         <artifactId>opentsdb-core</artifactId>
+      </dependency>
+      <dependency>
+        <groupId>com.stumbleupon</groupId>
+        <artifactId>async</artifactId>
       </dependency>
       
       <dependency>
@@ -138,7 +136,7 @@
           <plugin> 
                 <groupId>org.apache.maven.plugins</groupId>  
                 <artifactId>maven-shade-plugin</artifactId>  
-                <version>3.2.1</version> 
+                <version>${maven.plugin.shade.version}</version>
                 <configuration>  
                     <artifactSet>  
                         <excludes> 

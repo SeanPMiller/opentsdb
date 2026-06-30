@@ -60,6 +60,10 @@
          <artifactId>opentsdb-core</artifactId>
       </dependency>
       <dependency>
+        <groupId>com.stumbleupon</groupId>
+        <artifactId>async</artifactId>
+      </dependency>
+      <dependency>
          <groupId>org.elasticsearch</groupId>
          <artifactId>elasticsearch</artifactId>
       </dependency>
@@ -116,7 +120,7 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
-            <version>3.2.1</version>
+            <version>${maven.plugin.shade.version}</version>
             <configuration>
                <shadedArtifactAttached>true</shadedArtifactAttached>
                <artifactSet>

@@ -41,10 +41,8 @@
         <dependency>
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-exec</artifactId>
-    <version>1.3</version>
+          <version>1.6.0</version>
 </dependency>
-
-
       </dependencies>
     </dependencyManagement>
     
@@ -65,7 +63,6 @@
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-exec</artifactId>
 </dependency>
-
       
       <!-- TESTING Deps. -->
       <dependency>
@@ -103,7 +100,7 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
-            <version>3.2.1</version>
+            <version>${maven.plugin.shade.version}</version>
             <configuration>
                <artifactSet>
                   <excludes>

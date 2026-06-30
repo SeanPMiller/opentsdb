@@ -28,7 +28,7 @@
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>
                 <artifactId>bom</artifactId>
-                <version>2.15.61</version>
+                <version>2.15.82</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -41,7 +41,7 @@
             <dependency>
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java</artifactId>
-                <version>2.5.0</version>
+                <version>${protobuf.version}</version>
                 <scope>provided</scope>
             </dependency>
         </dependencies>
@@ -203,7 +203,7 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>${maven.plugin.assembly.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -239,7 +239,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-antrun-plugin</artifactId>
-                        <version>3.0.0</version>
+                        <version>3.2.0</version>
                         <executions>
                             <execution>
                                 <id>horizon-ui</id>
@@ -527,7 +527,7 @@
 
                     <plugin>
                         <artifactId>maven-antrun-plugin</artifactId>
-                        <version>3.0.0</version>
+                        <version>3.2.0</version>
                         <executions>
                             <execution>
                                 <id>horizon-ui</id>
