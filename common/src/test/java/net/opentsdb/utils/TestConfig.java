@@ -19,22 +19,21 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.InputStream;
-import java.util.Properties;
 
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.rules.TemporaryFolder;
+import org.mockito.Mockito;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Config.class, FileInputStream.class })
 public final class TestConfig {
+
+  @Rule
+  public TemporaryFolder tempDir = new TemporaryFolder();
 
   @Test
   public void constructor() throws Exception {
@@ -72,15 +71,14 @@ public final class TestConfig {
 
   @Test
   public void constructorWithFile() throws Exception {
-    PowerMockito.whenNew(FileInputStream.class).withAnyArguments()
-      .thenReturn(mock(FileInputStream.class));
-    final Properties props = new Properties();
-    props.setProperty("tsd.test", "val1");
-    PowerMockito.whenNew(Properties.class).withNoArguments().thenReturn(props);
+    final File confFile = tempDir.newFile("config.file");
+    final FileWriter writer = new FileWriter(confFile, false);
+    writer.write("tsd.test = val1\n");
+    writer.close();
     
-    final Config config = new Config("/tmp/config.file");
+    final Config config = new Config(confFile.toString());
     assertNotNull(config);
-    assertEquals("/tmp/config.file", config.config_location);
+    assertEquals(confFile.toString(), config.config_location);
     assertEquals("val1", config.getString("tsd.test"));
   }
 

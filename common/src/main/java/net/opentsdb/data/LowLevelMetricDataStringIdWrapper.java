@@ -14,11 +14,12 @@
 // limitations under the License.
  package net.opentsdb.data;
 
+import java.util.Map;
+
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
-import net.opentsdb.common.Const;
 
-import java.util.Map;
+import net.opentsdb.common.Const;
 
 public class LowLevelMetricDataStringIdWrapper implements TimeSeriesDatumStringId {
 

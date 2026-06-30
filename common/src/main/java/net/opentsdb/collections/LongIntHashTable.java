@@ -14,12 +14,13 @@
 // limitations under the License.
 package net.opentsdb.collections;
 
+import java.io.Closeable;
+import java.math.BigInteger;
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.Unsafe;
-
-import java.io.Closeable;
-import java.math.BigInteger;
 
 /**
  * A linear probing Map for long keys and int values. Stores data off heap.
