@@ -16,10 +16,10 @@ package net.opentsdb.grpc;
 
 import java.io.File;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.stumbleupon.async.Deferred;
 
