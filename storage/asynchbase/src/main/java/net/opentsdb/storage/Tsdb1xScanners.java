@@ -22,38 +22,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import net.opentsdb.data.TimeSeries;
-import net.opentsdb.query.*;
-import net.opentsdb.query.readcache.CachedQueryNode;
-import net.opentsdb.rollup.RollupInterval;
-import org.hbase.async.Bytes.ByteMap;
-import org.hbase.async.FilterList.Operator;
-import org.hbase.async.KeyRegexpFilter;
-import org.hbase.async.BinaryPrefixComparator;
-import org.hbase.async.CompareFilter;
-import org.hbase.async.FilterList;
-import org.hbase.async.FuzzyRowFilter;
-import org.hbase.async.QualifierFilter;
-import org.hbase.async.ScanFilter;
-import org.hbase.async.Scanner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import com.stumbleupon.async.Callback;
-
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
-import io.netty.util.Timeout;
-import io.netty.util.TimerTask;
 import net.opentsdb.configuration.Configuration;
 import net.opentsdb.core.Const;
 import net.opentsdb.data.SecondTimeStamp;
+import net.opentsdb.data.TimeSeries;
 import net.opentsdb.data.TimeStamp;
 import net.opentsdb.exceptions.QueryExecutionException;
 import net.opentsdb.pools.CloseablePooledObject;
 import net.opentsdb.pools.PooledObject;
+import net.opentsdb.query.*;
 import net.opentsdb.query.filter.ExplicitTagsFilter;
 import net.opentsdb.query.filter.NotFilter;
 import net.opentsdb.query.filter.QueryFilter;
@@ -62,7 +39,9 @@ import net.opentsdb.query.filter.TagValueLiteralOrFilter;
 import net.opentsdb.query.filter.TagValueRegexFilter;
 import net.opentsdb.query.filter.TagValueWildcardFilter;
 import net.opentsdb.query.processor.rate.Rate;
+import net.opentsdb.query.readcache.CachedQueryNode;
 import net.opentsdb.rollup.DefaultRollupInterval;
+import net.opentsdb.rollup.RollupInterval;
 import net.opentsdb.rollup.RollupUtils;
 import net.opentsdb.rollup.RollupUtils.RollupUsage;
 import net.opentsdb.stats.Span;
@@ -80,6 +59,27 @@ import net.opentsdb.utils.Bytes;
 import net.opentsdb.utils.DateTime;
 import net.opentsdb.utils.JSON;
 import net.opentsdb.utils.Pair;
+
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import io.netty.util.Timeout;
+import io.netty.util.TimerTask;
+import org.hbase.async.BinaryPrefixComparator;
+import org.hbase.async.Bytes.ByteMap;
+import org.hbase.async.CompareFilter;
+import org.hbase.async.FilterList;
+import org.hbase.async.FilterList.Operator;
+import org.hbase.async.FuzzyRowFilter;
+import org.hbase.async.KeyRegexpFilter;
+import org.hbase.async.QualifierFilter;
+import org.hbase.async.ScanFilter;
+import org.hbase.async.Scanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import com.stumbleupon.async.Callback;
 
 /**
  * The owner/container for one or more HBase scanners used to execute a

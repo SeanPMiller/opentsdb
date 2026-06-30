@@ -23,43 +23,38 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import com.stumbleupon.async.Deferred;
-
 import net.opentsdb.core.TSDB;
 import net.opentsdb.storage.schemas.tsdb1x.Schema;
 import net.opentsdb.storage.schemas.tsdb1x.Tsdb1xDataStore;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Tsdb1xHBaseFactory.class })
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
+
+import com.stumbleupon.async.Deferred;
+
 public class TestTsdb1xHBaseFactory {
 
   private TSDB tsdb;
   private Schema schema;
+  private MockedConstruction<Tsdb1xHBaseDataStore> mockedDataStore;
   
   @Before
   public void before() throws Exception {
     tsdb = mock(TSDB.class);
     schema = mock(Schema.class);
-    PowerMockito.whenNew(Tsdb1xHBaseDataStore.class).withAnyArguments()
-      .thenAnswer(new Answer<Tsdb1xHBaseDataStore>() {
-      @Override
-      public Tsdb1xHBaseDataStore answer(InvocationOnMock invocation) throws Throwable {
-        final Tsdb1xHBaseDataStore client = mock(Tsdb1xHBaseDataStore.class);
-        final String id = (String) invocation.getArguments()[1];
-        when(client.id()).thenReturn(id);
-        when(client.shutdown()).thenReturn(Deferred.fromResult(null));
-        return client;
-      }
+    mockedDataStore = Mockito.mockConstruction(Tsdb1xHBaseDataStore.class, (mock, ctx) -> {
+      final String id = (String) ctx.arguments().get(1);
+      when(mock.id()).thenReturn(id);
+      when(mock.shutdown()).thenReturn(Deferred.fromResult(null));
     });
+      }
+
+  @After
+  public void tearDown() {
+    if (mockedDataStore != null) mockedDataStore.close();
   }
   
   @Test
@@ -93,20 +88,17 @@ public class TestTsdb1xHBaseFactory {
     Tsdb1xDataStore store = factory.newInstance(tsdb, null, schema);
     assertSame(store, factory.default_client);
     assertTrue(factory.clients.isEmpty());
-    PowerMockito.verifyNew(Tsdb1xHBaseDataStore.class, times(1))
-      .withArguments(factory, null, schema);
+    assertEquals(1, mockedDataStore.constructed().size());
     
     store = factory.newInstance(tsdb, null, schema);
     assertSame(store, factory.default_client);
     assertTrue(factory.clients.isEmpty());
-    PowerMockito.verifyNew(Tsdb1xHBaseDataStore.class, times(1))
-      .withArguments(factory, null, schema);
+    assertEquals(1, mockedDataStore.constructed().size());
     
     store = factory.newInstance(tsdb, null, schema);
     assertSame(store, factory.default_client);
     assertTrue(factory.clients.isEmpty());
-    PowerMockito.verifyNew(Tsdb1xHBaseDataStore.class, times(1))
-      .withArguments(factory, null, schema);
+    assertEquals(1, mockedDataStore.constructed().size());
   }
   
   @Test
@@ -121,26 +113,21 @@ public class TestTsdb1xHBaseFactory {
     assertEquals(1, factory.clients.size());
     assertSame(store, factory.clients.get("id1"));
     assertEquals("id1", store.id());
-    PowerMockito.verifyNew(Tsdb1xHBaseDataStore.class, times(1))
-      .withArguments(factory, "id1", schema);
+    assertEquals(1, mockedDataStore.constructed().size());
     
     store = factory.newInstance(tsdb, "id1", schema);
     assertNull(factory.default_client);
     assertEquals(1, factory.clients.size());
     assertSame(store, factory.clients.get("id1"));
     assertEquals("id1", store.id());
-    PowerMockito.verifyNew(Tsdb1xHBaseDataStore.class, times(1))
-      .withArguments(factory, "id1", schema);
+    assertEquals(1, mockedDataStore.constructed().size());
     
     store = factory.newInstance(tsdb, "id2", schema);
     assertNull(factory.default_client);
     assertEquals(2, factory.clients.size());
     assertSame(store, factory.clients.get("id2"));
     assertEquals("id2", store.id());
-    PowerMockito.verifyNew(Tsdb1xHBaseDataStore.class, times(1))
-      .withArguments(factory, "id1", schema);
-    PowerMockito.verifyNew(Tsdb1xHBaseDataStore.class, times(1))
-      .withArguments(factory, "id2", schema);
+    assertEquals(2, mockedDataStore.constructed().size());
   }
   
   @Test

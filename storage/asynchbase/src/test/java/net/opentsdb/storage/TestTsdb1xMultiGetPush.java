@@ -21,38 +21,17 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
-import net.opentsdb.query.DefaultTimeSeriesDataSourceConfig;
-import net.opentsdb.rollup.RollupInterval;
-import org.hbase.async.BinaryPrefixComparator;
-import org.hbase.async.FilterList;
-import org.hbase.async.GetRequest;
-import org.hbase.async.HBaseClient;
-import org.hbase.async.QualifierFilter;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
-
-import com.google.common.collect.Lists;
-import com.google.common.primitives.Bytes;
-
-import net.openhft.hashing.LongHashFunction;
 import net.opentsdb.data.MillisecondTimeStamp;
 import net.opentsdb.data.NoDataPartialTimeSeries;
 import net.opentsdb.data.SecondTimeStamp;
@@ -63,6 +42,7 @@ import net.opentsdb.pools.DummyObjectPool;
 import net.opentsdb.pools.LongArrayPool;
 import net.opentsdb.pools.NoDataPartialTimeSeriesPool;
 import net.opentsdb.pools.ObjectPool;
+import net.opentsdb.query.DefaultTimeSeriesDataSourceConfig;
 import net.opentsdb.query.QueryContext;
 import net.opentsdb.query.QueryMode;
 import net.opentsdb.query.QueryNode;
@@ -74,6 +54,7 @@ import net.opentsdb.query.WrappedTimeSeriesDataSourceConfig;
 import net.opentsdb.query.filter.MetricLiteralFilter;
 import net.opentsdb.rollup.DefaultRollupConfig;
 import net.opentsdb.rollup.DefaultRollupInterval;
+import net.opentsdb.rollup.RollupInterval;
 import net.opentsdb.rollup.RollupUtils.RollupUsage;
 import net.opentsdb.storage.HBaseExecutor.State;
 import net.opentsdb.storage.schemas.tsdb1x.PooledPartialTimeSeriesRunnable;
@@ -87,8 +68,22 @@ import net.opentsdb.storage.schemas.tsdb1x.Tsdb1xPartialTimeSeriesSet;
 import net.opentsdb.storage.schemas.tsdb1x.Tsdb1xPartialTimeSeriesSetPool;
 import net.opentsdb.utils.UnitTestException;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ HBaseClient.class })
+import net.openhft.hashing.LongHashFunction;
+import org.hbase.async.BinaryPrefixComparator;
+import org.hbase.async.FilterList;
+import org.hbase.async.GetRequest;
+import org.hbase.async.HBaseClient;
+import org.hbase.async.QualifierFilter;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
+
+import com.google.common.collect.Lists;
+import com.google.common.primitives.Bytes;
+
 public class TestTsdb1xMultiGetPush extends UTBase {
 
   // GMT: Sunday, April 1, 2018 12:15:00 AM
@@ -109,6 +104,8 @@ public class TestTsdb1xMultiGetPush extends UTBase {
   private static long HASH_B;
   private static long HASH_C;
   private static long HASH_D;
+  
+  private MockedConstruction<Tsdb1xScanner> mockedScanner;
   
   public Tsdb1xHBaseQueryNode node;
   public TimeSeriesDataSourceConfig source_config;
@@ -220,14 +217,7 @@ public class TestTsdb1xMultiGetPush extends UTBase {
     when(node.push()).thenReturn(true);
     tsdb.runnables.clear();
     
-    PowerMockito.whenNew(Tsdb1xScanner.class).withAnyArguments()
-      .thenAnswer(new Answer<Tsdb1xScanner>() {
-        @Override
-        public Tsdb1xScanner answer(InvocationOnMock invocation)
-            throws Throwable {
-          return mock(Tsdb1xScanner.class);
-        }
-      });
+    mockedScanner = Mockito.mockConstruction(Tsdb1xScanner.class);
     
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
@@ -253,6 +243,11 @@ public class TestTsdb1xMultiGetPush extends UTBase {
     tsuids.add(Bytes.concat(METRIC_BYTES, TAGK_BYTES, TAGV_BYTES));
     tsuids.add(Bytes.concat(METRIC_B_BYTES, TAGK_BYTES, TAGV_B_BYTES));
     storage.getMultiGets().clear();
+  }
+
+  @After
+  public void tearDown() {
+    if (mockedScanner != null) mockedScanner.close();
   }
   
   @Test
@@ -636,7 +631,9 @@ public class TestTsdb1xMultiGetPush extends UTBase {
   public void fetchNextSmallEvenBatch() throws Exception {
     Tsdb1xMultiGet mget = new Tsdb1xMultiGet();
     mget.reset(node, source_config, tsuids);
-    Whitebox.setInternalState(mget, "batch_size", 2);
+    Field batch_sizeField = mget.getClass().getDeclaredField("batch_size");
+    batch_sizeField.setAccessible(true);
+    batch_sizeField.set(mget, 2);
     mget.fetchNext(null, null);
     assertEquals(4, storage.getMultiGets().size());
     assertEquals(2, storage.getMultiGets().get(0).size());
@@ -697,7 +694,9 @@ public class TestTsdb1xMultiGetPush extends UTBase {
   public void fetchNextSmallOddBatch() throws Exception {
     Tsdb1xMultiGet mget = new Tsdb1xMultiGet();
     mget.reset(node, source_config, tsuids);
-    Whitebox.setInternalState(mget, "batch_size", 3);
+    Field batch_sizeField = mget.getClass().getDeclaredField("batch_size");
+    batch_sizeField.setAccessible(true);
+    batch_sizeField.set(mget, 3);
     mget.fetchNext(null, null);
     assertEquals(4, storage.getMultiGets().size());
     assertEquals(3, storage.getMultiGets().get(0).size());
@@ -929,7 +928,9 @@ public class TestTsdb1xMultiGetPush extends UTBase {
     when(node.sentData()).thenReturn(true); // pretend we sent it.
     Tsdb1xMultiGet mget = new Tsdb1xMultiGet();
     mget.reset(node, source_config, tsuids);
-    Whitebox.setInternalState(mget, "batch_size", 2);
+    Field batch_sizeField = mget.getClass().getDeclaredField("batch_size");
+    batch_sizeField.setAccessible(true);
+    batch_sizeField.set(mget, 2);
     mget.fetchNext(null, null);
     assertEquals(6, storage.getMultiGets().size());
     assertEquals(2, storage.getMultiGets().get(0).size());
@@ -1027,7 +1028,9 @@ public class TestTsdb1xMultiGetPush extends UTBase {
     when(node.sentData()).thenReturn(true); // pretend we sent it.
     Tsdb1xMultiGet mget = new Tsdb1xMultiGet();
     mget.reset(node, source_config, tsuids);
-    Whitebox.setInternalState(mget, "batch_size", 3);
+    Field batch_sizeField = mget.getClass().getDeclaredField("batch_size");
+    batch_sizeField.setAccessible(true);
+    batch_sizeField.set(mget, 3);
     mget.fetchNext(null, null);
     assertEquals(6, storage.getMultiGets().size());
     assertEquals(3, storage.getMultiGets().get(0).size());

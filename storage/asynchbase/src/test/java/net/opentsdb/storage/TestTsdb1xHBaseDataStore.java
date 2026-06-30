@@ -19,35 +19,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import net.opentsdb.data.MockLowLevelMetricData;
-import net.opentsdb.data.MockLowLevelRollupMetricData;
-import net.opentsdb.data.TimeSeriesDataType;
-import net.opentsdb.data.TimeSeriesSharedTagsAndTimeData;
-import net.opentsdb.data.TimeSeriesValue;
-import net.opentsdb.data.TimeStamp;
-import net.opentsdb.rollup.DefaultRollupConfig;
-import net.opentsdb.rollup.MutableRollupDatum;
-import net.opentsdb.rollup.RollupConfig;
-import net.opentsdb.uid.UniqueId;
-import net.opentsdb.utils.UnitTestException;
-import org.hbase.async.HBaseClient;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 import net.opentsdb.common.Const;
 import net.opentsdb.configuration.Configuration;
@@ -56,31 +38,47 @@ import net.opentsdb.core.DefaultRegistry;
 import net.opentsdb.core.DefaultTSDB;
 import net.opentsdb.data.BaseTimeSeriesDatumStringId;
 import net.opentsdb.data.MillisecondTimeStamp;
+import net.opentsdb.data.MockLowLevelMetricData;
+import net.opentsdb.data.MockLowLevelRollupMetricData;
 import net.opentsdb.data.SecondTimeStamp;
+import net.opentsdb.data.TimeSeriesDataType;
 import net.opentsdb.data.TimeSeriesDatum;
 import net.opentsdb.data.TimeSeriesDatumStringId;
+import net.opentsdb.data.TimeSeriesSharedTagsAndTimeData;
+import net.opentsdb.data.TimeSeriesValue;
+import net.opentsdb.data.TimeStamp;
 import net.opentsdb.data.types.numeric.MutableNumericValue;
+import net.opentsdb.rollup.DefaultRollupConfig;
+import net.opentsdb.rollup.MutableRollupDatum;
+import net.opentsdb.rollup.RollupConfig;
 import net.opentsdb.storage.WriteStatus.WriteState;
 import net.opentsdb.storage.schemas.tsdb1x.NumericCodec;
 import net.opentsdb.storage.schemas.tsdb1x.Schema;
 import net.opentsdb.storage.schemas.tsdb1x.Tsdb1xDataStoreFactory;
+import net.opentsdb.uid.UniqueId;
 import net.opentsdb.uid.UniqueIdStore;
+import net.opentsdb.utils.UnitTestException;
 
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
+import org.hbase.async.HBaseClient;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.MockedConstruction;
+import org.mockito.Mockito;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ Tsdb1xHBaseDataStore.class, HBaseClient.class })
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+
 public class TestTsdb1xHBaseDataStore extends UTBase {
 
   private Tsdb1xHBaseFactory factory;
+
 //  private DefaultTSDB tsdb;
 //  private Configuration config;
 //  private DefaultRegistry registry;
   
   @Before
   public void before() throws Exception {
+    try (MockedConstruction<HBaseClient> mockHBaseClient = Mockito.mockConstruction(HBaseClient.class)) {
     factory = mock(Tsdb1xHBaseFactory.class);
 //    tsdb = mock(DefaultTSDB.class);
 //    config = UnitTestConfiguration.getConfiguration();
@@ -88,9 +86,9 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
 //    when(tsdb.getConfig()).thenReturn(config);
 //    when(tsdb.getRegistry()).thenReturn(registry);
     when(factory.tsdb()).thenReturn(tsdb);
-    PowerMockito.whenNew(HBaseClient.class).withAnyArguments().thenReturn(client);
     storage.flushStorage("tsdb".getBytes(Const.ASCII_US_CHARSET));
     when(schema_factory.rollupConfig()).thenReturn(null);
+    }
   }
   
   @Test
@@ -114,9 +112,9 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
         .addTags(TAGK_STRING, TAGV_STRING)
         .build();
     
-    Tsdb1xHBaseDataStore store = 
-        new Tsdb1xHBaseDataStore(factory, "UT", schema);
-    Whitebox.setInternalState(store, "use_dp_timestamp", false);
+    Tsdb1xHBaseDataStore store = newStore();
+    Field use_dp_timestampField = getField(store, "use_dp_timestamp");
+    use_dp_timestampField.set(store, false);
     store.write(null, TimeSeriesDatum.wrap(id, value), null);
 
     byte[] row_key = new byte[] { 0, 0, 1, 75, 61, 59, 0, 0, 0, 1, 0, 0, 1 };
@@ -124,15 +122,17 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
         store.dataTable(), row_key, Tsdb1xHBaseDataStore.DATA_FAMILY, 
         new byte[] { 0, 0 }));
 
-    // appends
-    Whitebox.setInternalState(store, "write_appends", true);
+    Field write_appendsField1 = getField(store, "write_appends");
+    write_appendsField1.set(store, true);
     store.write(null, TimeSeriesDatum.wrap(id, value), null);
     assertArrayEquals(new byte[] { 0, 0, 42 }, storage.getColumn(
         store.dataTable(), row_key, Tsdb1xHBaseDataStore.DATA_FAMILY, 
         NumericCodec.APPEND_QUALIFIER));
     
-    Whitebox.setInternalState(store, "write_appends", false);
-    Whitebox.setInternalState(store, "encode_as_appends", true);
+    Field write_appendsField = getField(store, "write_appends");
+    write_appendsField.set(store, false);
+    Field encode_as_appendsField = getField(store, "encode_as_appends");
+    encode_as_appendsField.set(store, true);
     value.resetValue(1);
     store.write(null, TimeSeriesDatum.wrap(id, value), null);
     // overwrites
@@ -174,9 +174,9 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
 
     TimeSeriesSharedTagsAndTimeData shared =
             TimeSeriesSharedTagsAndTimeData.fromCollection(data);
-    Tsdb1xHBaseDataStore store =
-            new Tsdb1xHBaseDataStore(factory, "UT", schema);
-    Whitebox.setInternalState(store, "use_dp_timestamp", false);
+    Tsdb1xHBaseDataStore store = newStore();
+    Field use_dp_timestampField = getField(store, "use_dp_timestamp");
+    use_dp_timestampField.set(store, false);
     store.write(null, shared, null);
 
     byte[] row_key = new byte[] { 0, 0, 1, 75, 61, 59, 0, 0, 0, 1, 0, 0, 1 };
@@ -189,8 +189,8 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
             store.dataTable(), row_key, Tsdb1xHBaseDataStore.DATA_FAMILY,
             new byte[] { 0, 0 }));
 
-    // appends
-    Whitebox.setInternalState(store, "write_appends", true);
+    Field write_appendsField1 = getField(store, "write_appends");
+    write_appendsField1.set(store, true);
     store.write(null, shared, null);
 
     row_key = new byte[] { 0, 0, 1, 75, 61, 59, 0, 0, 0, 1, 0, 0, 1 };
@@ -203,8 +203,10 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
             store.dataTable(), row_key, Tsdb1xHBaseDataStore.DATA_FAMILY,
             NumericCodec.APPEND_QUALIFIER));
 
-    Whitebox.setInternalState(store, "write_appends", false);
-    Whitebox.setInternalState(store, "encode_as_appends", true);
+    Field write_appendsField = getField(store, "write_appends");
+    write_appendsField.set(store, false);
+    Field encode_as_appendsField = getField(store, "encode_as_appends");
+    encode_as_appendsField.set(store, true);
     ((MutableNumericValue) data.get(0).value()).resetValue(1);
     ((MutableNumericValue) data.get(1).value()).resetValue(2);
 
@@ -256,9 +258,9 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
     TimeSeriesDatum datum_2 = TimeSeriesDatum.wrap(id, dp);
 
     MockLowLevelMetricData data = lowLevel(datum_1, datum_2);
-    Tsdb1xHBaseDataStore store =
-            new Tsdb1xHBaseDataStore(factory, "UT", schema);
-    Whitebox.setInternalState(store, "use_dp_timestamp", false);
+    Tsdb1xHBaseDataStore store = newStore();
+    Field use_dp_timestampField = getField(store, "use_dp_timestamp");
+    use_dp_timestampField.set(store, false);
     store.write(null, data, null);
 
     byte[] row_key = new byte[] { 0, 0, 1, 75, 61, 59, 0, 0, 0, 1, 0, 0, 1 };
@@ -273,7 +275,8 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
 
     // appends
     data = lowLevel(datum_1, datum_2);
-    Whitebox.setInternalState(store, "write_appends", true);
+    Field write_appendsField1 = getField(store, "write_appends");
+    write_appendsField1.set(store, true);
     store.write(null, data, null);
 
     row_key = new byte[] { 0, 0, 1, 75, 61, 59, 0, 0, 0, 1, 0, 0, 1 };
@@ -287,8 +290,10 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
             NumericCodec.APPEND_QUALIFIER));
 
     data = lowLevel(datum_1, datum_2);
-    Whitebox.setInternalState(store, "write_appends", false);
-    Whitebox.setInternalState(store, "encode_as_appends", true);
+    Field write_appendsField = getField(store, "write_appends");
+    write_appendsField.set(store, false);
+    Field encode_as_appendsField = getField(store, "encode_as_appends");
+    encode_as_appendsField.set(store, true);
     ((MutableNumericValue) datum_1.value()).resetValue(1);
     ((MutableNumericValue) datum_2.value()).resetValue(2);
 
@@ -326,8 +331,7 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
             .addTags(TAGK_STRING, TAGV_STRING)
             .build();
 
-    Tsdb1xHBaseDataStore store =
-            new Tsdb1xHBaseDataStore(factory, "UT", schema);
+    Tsdb1xHBaseDataStore store = newStore();
     store.write(null, TimeSeriesDatum.wrap(id, value), null);
     byte[] row_key = new byte[] { 0, 0, 1, 75, 61, 59, 0, 0, 0, 1, 0, 0, 1 };
     assertArrayEquals(new byte[] { 42 }, storage.getColumn(
@@ -337,7 +341,8 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
 
     // now without the timestamp
     value.resetValue(24);
-    Whitebox.setInternalState(store, "use_dp_timestamp", false);
+    Field use_dp_timestampField = getField(store, "use_dp_timestamp");
+    use_dp_timestampField.set(store, false);
     store.write(null, TimeSeriesDatum.wrap(id, value), null);
     row_key = new byte[] { 0, 0, 1, 75, 61, 59, 0, 0, 0, 1, 0, 0, 1 };
     assertArrayEquals(new byte[] { 24 }, storage.getColumn(
@@ -363,9 +368,9 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
     value.resetValue(3, 0);
     value.setInterval("1h");
 
-    Tsdb1xHBaseDataStore store =
-            new Tsdb1xHBaseDataStore(factory, "UT", schema);
-    Whitebox.setInternalState(store, "use_dp_timestamp", false);
+    Tsdb1xHBaseDataStore store = newStore();
+    Field use_dp_timestampField = getField(store, "use_dp_timestamp");
+    use_dp_timestampField.set(store, false);
     store.write(null, value, null);
 
     byte[] row_key = new byte[] { 0, 0, 1, 75, 61, 59, 0, 0, 0, 1, 0, 0, 1 };
@@ -382,8 +387,8 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
             ROLLUP_TABLE, row_key, Tsdb1xHBaseDataStore.DATA_FAMILY,
             new byte[] { 3, 0, 0 }));
 
-    // appends
-    Whitebox.setInternalState(store, "write_appends", true);
+    Field write_appendsField = getField(store, "write_appends");
+    write_appendsField.set(store, true);
     store.write(null, value, null);
     assertArrayEquals(new byte[] { 0, 0, 42 }, storage.getColumn(
             ROLLUP_TABLE, row_key, Tsdb1xHBaseDataStore.DATA_FAMILY,
@@ -431,9 +436,9 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
 
     TimeSeriesSharedTagsAndTimeData shared =
             TimeSeriesSharedTagsAndTimeData.fromCollection(data);
-    Tsdb1xHBaseDataStore store =
-            new Tsdb1xHBaseDataStore(factory, "UT", schema);
-    Whitebox.setInternalState(store, "use_dp_timestamp", false);
+    Tsdb1xHBaseDataStore store = newStore();
+    Field use_dp_timestampField = getField(store, "use_dp_timestamp");
+    use_dp_timestampField.set(store, false);
     store.write(null, shared, null);
 
     byte[] row_key = new byte[] { 0, 0, 1, 75, 61, 59, 0, 0, 0, 1, 0, 0, 1 };
@@ -452,8 +457,8 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
             ROLLUP_TABLE, row_key, Tsdb1xHBaseDataStore.DATA_FAMILY,
             new byte[] { 1, 0, 0 }));
 
-    // appends
-    Whitebox.setInternalState(store, "write_appends", true);
+    Field write_appendsField = getField(store, "write_appends");
+    write_appendsField.set(store, true);
     store.write(null, shared, null);
 
     row_key = new byte[] { 0, 0, 1, 75, 61, 59, 0, 0, 0, 1, 0, 0, 1 };
@@ -500,9 +505,9 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
     datum_2.setInterval("1h");
 
     MockLowLevelRollupMetricData data = lowLevelRollup(datum_1, datum_2);
-    Tsdb1xHBaseDataStore store =
-            new Tsdb1xHBaseDataStore(factory, "UT", schema);
-    Whitebox.setInternalState(store, "use_dp_timestamp", false);
+    Tsdb1xHBaseDataStore store = newStore();
+    Field use_dp_timestampField = getField(store, "use_dp_timestamp");
+    use_dp_timestampField.set(store, false);
     store.write(null, data, null);
 
     byte[] row_key = new byte[] { 0, 0, 1, 75, 61, 59, 0, 0, 0, 1, 0, 0, 1 };
@@ -523,7 +528,8 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
 
     // appends
     data = lowLevelRollup(datum_1, datum_2);
-    Whitebox.setInternalState(store, "write_appends", true);
+    Field write_appendsField = getField(store, "write_appends");
+    write_appendsField.set(store, true);
     store.write(null, data, null);
 
     row_key = new byte[] { 0, 0, 1, 75, 61, 59, 0, 0, 0, 1, 0, 0, 1 };
@@ -541,6 +547,32 @@ public class TestTsdb1xHBaseDataStore extends UTBase {
     assertArrayEquals(new byte[] { 0, 0, 30 }, storage.getColumn(
             ROLLUP_TABLE, row_key, Tsdb1xHBaseDataStore.DATA_FAMILY,
             new byte[] { 1 }));
+  }
+
+  /**
+   * Constructs a real data store but injects the MockBase-wired HBase client
+   * so writes land in the in-memory storage. Replaces the old PowerMock
+   * {@code whenNew(HBaseClient.class).thenReturn(client)} behavior.
+   */
+  private Tsdb1xHBaseDataStore newStore() throws Exception {
+    final Tsdb1xHBaseDataStore store =
+        new Tsdb1xHBaseDataStore(factory, "UT", schema);
+    getField(store, "client").set(store, client);
+    return store;
+  }
+
+  private static Field getField(Object obj, String fieldName) throws Exception {
+    Class<?> clazz = obj.getClass();
+    while (clazz != null) {
+      try {
+        Field f = clazz.getDeclaredField(fieldName);
+        f.setAccessible(true);
+        return f;
+      } catch (NoSuchFieldException e) {
+        clazz = clazz.getSuperclass();
+      }
+    }
+    throw new NoSuchFieldException(fieldName);
   }
 
   MockLowLevelMetricData lowLevel(TimeSeriesDatum... data) {

@@ -14,14 +14,16 @@
 // limitations under the License.
 package net.opentsdb.storage;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mock;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,11 +43,11 @@ import net.opentsdb.core.Const;
 import net.opentsdb.core.TSDB;
 import net.opentsdb.utils.Pair;
 
+import org.hbase.async.AppendRequest;
 import org.hbase.async.AtomicIncrementRequest;
 import org.hbase.async.BinaryPrefixComparator;
 import org.hbase.async.Bytes;
 import org.hbase.async.Bytes.ByteMap;
-import org.hbase.async.AppendRequest;
 import org.hbase.async.DeleteRequest;
 import org.hbase.async.FilterComparator;
 import org.hbase.async.FilterList;
@@ -62,7 +64,6 @@ import org.hbase.async.Scanner;
 import org.junit.Ignore;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.powermock.reflect.Whitebox;
 
 import com.google.common.collect.Lists;
 import com.stumbleupon.async.Deferred;
@@ -755,9 +756,9 @@ public final class MockBase {
         for (final byte[] k : deletes) {
           row.remove(k);
         }
-        final KeyValue compacted =
-            Whitebox.invokeMethod(tsdb, "compact", kvs, Collections.EMPTY_LIST,
-                Collections.EMPTY_LIST);
+        Method compactMethod = tsdb.getClass().getDeclaredMethod("compact", ArrayList.class, List.class, List.class);
+        compactMethod.setAccessible(true);
+        KeyValue compacted = (KeyValue) compactMethod.invoke(tsdb, kvs, Collections.EMPTY_LIST, Collections.EMPTY_LIST);
         final TreeMap<Long, byte[]> compacted_value = new TreeMap<Long, byte[]>();
         compacted_value.put(current_timestamp++, compacted.value());
         row.put(compacted.qualifier(), compacted_value);
@@ -1816,22 +1817,27 @@ public final class MockBase {
               if (!qfs.isEmpty()) {
                 boolean matched = false;
                 for (final QualifierFilter qf : qfs) {
-                  final FilterComparator fc = Whitebox
-                      .getInternalState(qf, "comparator");
+                  Field comparatorField = qf.getClass().getDeclaredField("comparator");
+                  comparatorField.setAccessible(true);
+                  FilterComparator fc = (FilterComparator) comparatorField.get(qf);
                   if (fc instanceof BinaryPrefixComparator) {
-                    final byte[] comparator = Whitebox
-                        .getInternalState(fc, "value");
+                    Field valueField = fc.getClass().getDeclaredField("value");
+                    valueField.setAccessible(true);
+                    byte[] comparator = (byte[]) valueField.get(fc);
                     if (Bytes.memcmp(comparator, column.getKey(), 0, 
                         comparator.length) == 0) {
                       matched = true;
                     }
                   } else if (fc instanceof RegexStringComparator) {
                     // not using this yet but.... *shrug*
-                   final Pattern p = Pattern.compile((String) Whitebox
-                       .getInternalState(fc, "expr"));
+                    Field exprField = fc.getClass().getDeclaredField("expr");
+                    exprField.setAccessible(true);
+                    final Pattern p = Pattern.compile((String) exprField.get(fc));
                    
+                    Field charsetField = fc.getClass().getDeclaredField("charset");
+                    charsetField.setAccessible(true);
                    final String qualifier = new String(column.getKey(), 
-                       (Charset) Whitebox.getInternalState(fc, "charset"));
+                        (Charset) charsetField.get(fc));
                    if (p.matcher(qualifier).matches()) {
                      matched = true;
                    }

@@ -23,20 +23,16 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.inOrder;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,29 +41,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.stumbleupon.async.Callback;
-import com.stumbleupon.async.Deferred;
-import com.stumbleupon.async.TimeoutException;
-
-import io.netty.util.Timer;
-import net.opentsdb.core.Const;
-import net.opentsdb.core.MockTSDB;
-import net.opentsdb.core.MockTSDB.FakeTaskTimer;
-import net.opentsdb.core.TSDB;
-import net.opentsdb.data.BaseTimeSeriesDatumStringId;
-import net.opentsdb.data.TimeSeriesDatumId;
-import net.opentsdb.data.TimeSeriesDatumStringId;
-import net.opentsdb.stats.MockTrace;
-import net.opentsdb.stats.Span;
-import net.opentsdb.stats.Span.SpanBuilder;
 import net.opentsdb.auth.AuthState;
 import net.opentsdb.configuration.Configuration;
 import net.opentsdb.configuration.UnitTestConfiguration;
+import net.opentsdb.core.Const;
+import net.opentsdb.core.MockTSDB;
+import net.opentsdb.core.MockTSDB.FakeTaskTimer;
+import net.opentsdb.data.BaseTimeSeriesDatumStringId;
+import net.opentsdb.data.TimeSeriesDatumId;
+import net.opentsdb.data.TimeSeriesDatumStringId;
 import net.opentsdb.query.pojo.Filter;
 import net.opentsdb.query.pojo.TagVFilter;
+import net.opentsdb.stats.MockTrace;
+import net.opentsdb.stats.Span;
+import net.opentsdb.stats.Span.SpanBuilder;
 import net.opentsdb.storage.MockBase;
 import net.opentsdb.storage.WriteStatus.WriteState;
 import net.opentsdb.storage.schemas.tsdb1x.ResolvedQueryFilter;
@@ -75,9 +62,9 @@ import net.opentsdb.uid.IdOrError;
 import net.opentsdb.uid.RandomUniqueId;
 import net.opentsdb.uid.UniqueIdAssignmentAuthorizer;
 import net.opentsdb.uid.UniqueIdType;
-import net.opentsdb.utils.Config;
 import net.opentsdb.utils.UnitTestException;
 
+import io.netty.util.Timer;
 import org.hbase.async.AtomicIncrementRequest;
 import org.hbase.async.Bytes;
 import org.hbase.async.DeleteRequest;
@@ -86,30 +73,26 @@ import org.hbase.async.HBaseClient;
 import org.hbase.async.HBaseException;
 import org.hbase.async.KeyValue;
 import org.hbase.async.PutRequest;
-import org.hbase.async.Scanner;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import org.mockito.ArgumentMatcher;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 
-@RunWith(PowerMockRunner.class)
-// "Classloader hell"...  It's real.  Tell PowerMock to ignore these classes
-// because they fiddle with the class loader.  We don't test them anyway.
-@PowerMockIgnore({"javax.management.*", "javax.xml.*",
-                  "ch.qos.*", "org.slf4j.*",
-                  "com.sum.*", "org.xml.*"})
-@PrepareForTest({ HBaseClient.class, TSDB.class, Config.class, 
-  Scanner.class, RandomUniqueId.class, Const.class, Deferred.class })
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.stumbleupon.async.Callback;
+import com.stumbleupon.async.Deferred;
+import com.stumbleupon.async.TimeoutException;
+
 public class TestTsdb1xUniqueIdStore extends UTBase {
+
+  private MockedStatic<RandomUniqueId> mockedRandomUniqueId;
   
   private static final String UNI_STRING = "\u00a5123";
   private static final byte[] UNI_BYTES = new byte[] { 0, 0, 6 };
@@ -159,7 +142,16 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
 
   @Before
   public void before() throws Exception {
+    // Default to the real implementation so tests that don't stub
+    // getRandomUID() (e.g. getOrCreateIdRandom) still get a valid random ID.
+    // Collision tests override specific calls via when(...).thenReturn(...).
+    mockedRandomUniqueId = Mockito.mockStatic(RandomUniqueId.class,
+        Mockito.CALLS_REAL_METHODS);
     tsdb.config = (UnitTestConfiguration) UnitTestConfiguration.getConfiguration();
+  }
+
+  @After public void tearDownStaticMocks() {
+    mockedRandomUniqueId.closeOnDemand();
   }
   
   @Test
@@ -1016,7 +1008,7 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
   @Test
   public void getOrCreateIdAssignFilterBlocked() throws Exception {
     resetAssignmentState();
-    when(filter.allowUIDAssignment(any(AuthState.class), any(UniqueIdType.class), anyString(), 
+    when(filter.allowUIDAssignment(nullable(AuthState.class), any(UniqueIdType.class), nullable(String.class),
         any(TimeSeriesDatumId.class)))
       .thenReturn(Deferred.fromResult("Nope!"));
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store, null);
@@ -1042,7 +1034,7 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
   @Test
   public void getOrCreateIdAssignFilterReturnException() throws Exception{
     resetAssignmentState();
-    when(filter.allowUIDAssignment(any(AuthState.class), any(UniqueIdType.class), anyString(), 
+    when(filter.allowUIDAssignment(nullable(AuthState.class), any(UniqueIdType.class), nullable(String.class),
         any(TimeSeriesDatumId.class))).thenAnswer(new Answer<Deferred<String>>() {
           @Override
           public Deferred<String> answer(InvocationOnMock invocation)
@@ -1074,7 +1066,7 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
   @Test
   public void getOrCreateIdAssignFilterThrowsException() throws Exception {
     resetAssignmentState();
-    when(filter.allowUIDAssignment(any(AuthState.class), any(UniqueIdType.class), anyString(), 
+    when(filter.allowUIDAssignment(nullable(AuthState.class), any(UniqueIdType.class), nullable(String.class),
         any(TimeSeriesDatumId.class))).thenThrow(new UnitTestException());
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store, null);
     Deferred<IdOrError> deferred = uid.getOrCreateId(null, 
@@ -1409,7 +1401,8 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
   public void getOrCreateIdRandom() throws Exception {
     resetAssignmentState();
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store, null);
-    Whitebox.setInternalState(uid, "randomize_metric_ids", true);
+    Field randomize_metric_idsField = getField(uid, "randomize_metric_ids");
+    randomize_metric_idsField.set(uid, true);
     IdOrError result = uid.getOrCreateId(null, 
         UniqueIdType.METRIC, 
         UNASSIGNED_ID_NAME, 
@@ -1434,14 +1427,13 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
   @Test
   public void getOrCreateIdRandomCollision() throws Exception {
     resetAssignmentState();
-    
-    PowerMockito.mockStatic(RandomUniqueId.class);
-    when(RandomUniqueId.getRandomUID(anyInt()))
+    mockedRandomUniqueId.when(() -> RandomUniqueId.getRandomUID(anyInt()))
       .thenReturn(24898L)
       .thenReturn(42L);
     
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store, null);
-    Whitebox.setInternalState(uid, "randomize_metric_ids", true);
+    Field randomize_metric_idsField = getField(uid, "randomize_metric_ids");
+    randomize_metric_idsField.set(uid, true);
     
     Deferred<IdOrError> deferred = uid.getOrCreateId(null, 
         UniqueIdType.METRIC, 
@@ -1452,7 +1444,8 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
     try {
       deferred.join(1);
       fail("Expected TimeoutException");
-    } catch (TimeoutException e) { }
+    } catch (TimeoutException e) {
+    }
     
     assertNotNull(timer.pausedTask);
     timer.continuePausedTask();
@@ -1477,16 +1470,16 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
   @Test
   public void getOrCreateIdRandomCollisionTooManyAttempts() throws Exception {
     resetAssignmentState();
-    
-    PowerMockito.mockStatic(RandomUniqueId.class);
-    when(RandomUniqueId.getRandomUID(anyInt()))
+    mockedRandomUniqueId.when(() -> RandomUniqueId.getRandomUID(anyInt()))
       .thenReturn(24898L)
       .thenReturn(24898L)
       .thenReturn(24898L);
     
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store, null);
-    Whitebox.setInternalState(uid, "randomize_metric_ids", true);
-    Whitebox.setInternalState(uid, "max_attempts_assign_random", (short) 3); 
+    Field randomize_metric_idsField = getField(uid, "randomize_metric_ids");
+    randomize_metric_idsField.set(uid, true);
+    Field max_attempts_assign_randomField = getField(uid, "max_attempts_assign_random");
+    max_attempts_assign_randomField.set(uid, (short) 3);
     Deferred<IdOrError> deferred = uid.getOrCreateId(null, 
         UniqueIdType.METRIC, 
         UNASSIGNED_ID_NAME, 
@@ -1496,7 +1489,8 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
     try {
       deferred.join(1);
       fail("Expected TimeoutException");
-    } catch (TimeoutException e) { }
+    } catch (TimeoutException e) {
+    }
     
     assertNotNull(timer.pausedTask);
     timer.continuePausedTask();
@@ -1516,9 +1510,7 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
   @Test
   public void getOrCreateIdRandomWithRaceConditionReverseMap() throws Exception {
     resetAssignmentState();
-    
-    PowerMockito.mockStatic(RandomUniqueId.class);
-    when(RandomUniqueId.getRandomUID(anyInt()))
+    mockedRandomUniqueId.when(() -> RandomUniqueId.getRandomUID(anyInt()))
       .thenReturn(1L)
       .thenReturn(42L);
     
@@ -1545,7 +1537,8 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
       .thenReturn(Deferred.fromResult(true));
     
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store_a, null);
-    Whitebox.setInternalState(uid, "randomize_metric_ids", true);
+    Field randomize_metric_idsField = getField(uid, "randomize_metric_ids");
+    randomize_metric_idsField.set(uid, true);
     
     Deferred<IdOrError> deferred = uid.getOrCreateId(null, 
         UniqueIdType.METRIC, 
@@ -1556,7 +1549,8 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
     try {
       deferred.join(1);
       fail("Expected TimeoutException");
-    } catch (TimeoutException e) { }
+    } catch (TimeoutException e) {
+    }
     
     assertNotNull(timer.pausedTask);
     timer.continuePausedTask();
@@ -1571,9 +1565,7 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
   @Test
   public void getOrCreateIdRandomWithRaceConditionForwardMap() throws Exception {
     resetAssignmentState();
-    
-    PowerMockito.mockStatic(RandomUniqueId.class);
-    when(RandomUniqueId.getRandomUID(anyInt()))
+    mockedRandomUniqueId.when(() -> RandomUniqueId.getRandomUID(anyInt()))
       .thenReturn(1L);
     
     resetAssignmentState();
@@ -1604,7 +1596,8 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
       .thenReturn(Deferred.fromResult(true));
     
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store_a, null);
-    Whitebox.setInternalState(uid, "randomize_metric_ids", true);
+    Field randomize_metric_idsField = getField(uid, "randomize_metric_ids");
+    randomize_metric_idsField.set(uid, true);
     
     IdOrError result = uid.getOrCreateId(null, 
         UniqueIdType.METRIC, 
@@ -1662,7 +1655,8 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
   public void getOrCreateIdAssignAndRetry() throws Exception {
     resetAssignmentState();
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store, null);
-    Whitebox.setInternalState(uid, "assign_and_retry", true);
+    Field assign_and_retryField = getField(uid, "assign_and_retry");
+    assign_and_retryField.set(uid, true);
     IdOrError result = uid.getOrCreateId(null, 
         UniqueIdType.METRIC, 
         UNASSIGNED_ID_NAME, 
@@ -1720,7 +1714,8 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
   public void getOrCreateIdsAssignAndRetry() throws Exception {
     resetAssignmentState();
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store, null);
-    Whitebox.setInternalState(uid, "assign_and_retry", true);
+    Field assign_and_retryField = getField(uid, "assign_and_retry");
+    assign_and_retryField.set(uid, true);
     
     List<String> names = Lists.newArrayList(ASSIGNED_TAGV_NAME,
         UNASSIGNED_TAGV_NAME);
@@ -2676,9 +2671,10 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
 
   private static AtomicIncrementRequest incrementForRow(final byte[] row) {
     return argThat(new ArgumentMatcher<AtomicIncrementRequest>() {
-      public boolean matches(Object incr) {
-        return Arrays.equals(((AtomicIncrementRequest) incr).key(), row);
+      public boolean matches(AtomicIncrementRequest incr) {
+        return Arrays.equals(incr.key(), row);
       }
+
       public void describeTo(org.hamcrest.Description description) {
         description.appendText("AtomicIncrementRequest for row "
                                + Arrays.toString(row));
@@ -2709,9 +2705,10 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
 
   private static PutRequest putForRow(final byte[] row) {
     return argThat(new ArgumentMatcher<PutRequest>() {
-      public boolean matches(Object put) {
-        return Arrays.equals(((PutRequest) put).key(), row);
+      public boolean matches(PutRequest put) {
+        return Arrays.equals(put.key(), row);
       }
+
       public void describeTo(org.hamcrest.Description description) {
         description.appendText("PutRequest for row " + Arrays.toString(row));
       }
@@ -2731,10 +2728,9 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
   private void resetAssignmentState() {
     filter = mock(UniqueIdAssignmentAuthorizer.class);
     when(filter.fillterUIDAssignments()).thenReturn(true);
-    when(filter.allowUIDAssignment(any(AuthState.class), any(UniqueIdType.class), anyString(), 
+    when(filter.allowUIDAssignment(nullable(AuthState.class), any(UniqueIdType.class), nullable(String.class),
         any(TimeSeriesDatumId.class)))
-      .thenReturn(Deferred.fromResult(null))
-      .thenReturn(Deferred.fromResult(null));
+      .thenAnswer(invocation -> Deferred.fromResult(null));
     
     timer = new FakeTaskTimer();
     tsdb.maint_timer = timer;
@@ -2818,5 +2814,19 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
 //      }
 //    });
     return data_store;
+  }
+
+  private static Field getField(Object obj, String fieldName) throws Exception {
+    Class<?> clazz = obj.getClass();
+    while (clazz != null) {
+      try {
+        Field f = clazz.getDeclaredField(fieldName);
+        f.setAccessible(true);
+        return f;
+      } catch (NoSuchFieldException e) {
+        clazz = clazz.getSuperclass();
+}
+    }
+    throw new NoSuchFieldException(fieldName);
   }
 }
