@@ -14,18 +14,19 @@
 // limitations under the License.
 package net.opentsdb.servlet.sinks;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
-import com.stumbleupon.async.Deferred;
-
 import net.opentsdb.core.BaseTSDBPlugin;
 import net.opentsdb.core.TSDB;
 import net.opentsdb.query.QueryContext;
 import net.opentsdb.query.QuerySink;
 import net.opentsdb.query.QuerySinkConfig;
 import net.opentsdb.query.QuerySinkFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.google.common.base.Strings;
+import com.stumbleupon.async.Deferred;
 
 /**
  * A factory to generate the servlet sink.
