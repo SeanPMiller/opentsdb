@@ -360,6 +360,13 @@ public class Tsdb1xScanners implements HBaseExecutor, CloseablePooledObject, Tim
       send_upstream = true;
     }
     
+    if (!send_upstream && node.push()) {
+      // A scanner in a multi-scanner (salted) set finished but the set isn't
+      // complete yet. In push mode results flow upstream via the partial time
+      // series sets, so drop the now-stale current_result.
+      current_result = null;
+    }
+
     if (send_upstream) {
       try {
         if (node.push()) {
@@ -372,6 +379,7 @@ public class Tsdb1xScanners implements HBaseExecutor, CloseablePooledObject, Tim
                     + "implementation error.");
               }
             }
+            current_result = null;
           } else if (node.rollup_usage != RollupUsage.ROLLUP_NOFALLBACK && 
                      scanner_index + 1 < scanners.size()) {
             if (LOG.isDebugEnabled()) {
@@ -390,6 +398,7 @@ public class Tsdb1xScanners implements HBaseExecutor, CloseablePooledObject, Tim
             for (final Tsdb1xPartialTimeSeriesSet set : sets.get(0).valueCollection()) {
               set.sendEmpty();
             }
+            current_result = null;
           }
         } else {
           if (scanners.size() == 1 || scanner_index + 1 >= scanners.size()) {
@@ -432,6 +441,7 @@ public class Tsdb1xScanners implements HBaseExecutor, CloseablePooledObject, Tim
         }
       } catch (Exception e) {
         LOG.error("Unexpected exception handling scanner complete", e);
+        current_result = null;
         node.onError(e);
       }
     }
