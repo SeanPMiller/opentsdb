@@ -44,9 +44,9 @@ import com.google.common.hash.HashCode;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = Id.NAME,
-  include = JsonTypeInfo.As.PROPERTY,
-  property = "executorType",
-  visible = true)
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "executorType",
+    visible = true)
 public abstract class QueryExecutorConfig<B extends QueryExecutorConfig.Builder<B, C>, C extends QueryExecutorConfig> implements QueryNodeConfig<B, C> {
   /** The class type of executor. */
   protected final String executor_type;

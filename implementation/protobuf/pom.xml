@@ -100,16 +100,16 @@
          <artifactId>grpc-core</artifactId>
       </dependency>
       <dependency>
-        <groupId>io.grpc</groupId>
-        <artifactId>grpc-stub</artifactId>
+         <groupId>io.grpc</groupId>
+         <artifactId>grpc-stub</artifactId>
       </dependency>
       <dependency>
-        <groupId>io.grpc</groupId>
-        <artifactId>grpc-protobuf</artifactId>
+         <groupId>io.grpc</groupId>
+         <artifactId>grpc-protobuf</artifactId>
       </dependency>
       <dependency>
-        <groupId>io.grpc</groupId>
-        <artifactId>grpc-netty-shaded</artifactId>
+         <groupId>io.grpc</groupId>
+         <artifactId>grpc-netty-shaded</artifactId>
       </dependency>
 
       <dependency>

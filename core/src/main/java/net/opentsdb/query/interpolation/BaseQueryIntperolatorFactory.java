@@ -44,7 +44,7 @@ import com.google.common.reflect.TypeToken;
  * 
  * @since 3.0
  */
-public abstract class BaseQueryIntperolatorFactory extends BaseTSDBPlugin 
+public abstract class BaseQueryIntperolatorFactory extends BaseTSDBPlugin
     implements QueryInterpolatorFactory {
   private static final Logger LOG = LoggerFactory.getLogger(
       BaseQueryIntperolatorFactory.class);

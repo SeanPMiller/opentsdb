@@ -94,7 +94,7 @@ public class TestTsdb1xQueryNode extends UTBase {
   private QueryNode upstream_a;
   private QueryNode upstream_b;
   private SemanticQuery query;
-  
+
   @Before
   public void before() throws Exception {
     mockedScanners = Mockito.mockConstruction(Tsdb1xScanners.class);
@@ -102,7 +102,7 @@ public class TestTsdb1xQueryNode extends UTBase {
     context = mock(QueryPipelineContext.class);
     QueryContext query_context = mock(QueryContext.class);
     when(context.queryContext()).thenReturn(query_context);
-    
+
     rollup_config = mock(DefaultRollupConfig.class);
     result = mock(Tsdb1xQueryResult.class);
     scanners = mock(Tsdb1xScanners.class);
@@ -110,13 +110,13 @@ public class TestTsdb1xQueryNode extends UTBase {
     meta_deferred = new Deferred<MetaDataStorageResult>();
     upstream_a = mock(QueryNode.class);
     upstream_b = mock(QueryNode.class);
-    
+
     ObjectPool scanners_pool = mock(ObjectPool.class);
     when(scanners_pool.claim()).thenReturn(scanners);
     when(scanners.object()).thenReturn(scanners);
     when(tsdb.getRegistry().getObjectPool(Tsdb1xScannersPool.TYPE))
-      .thenReturn(scanners_pool);
-    
+        .thenReturn(scanners_pool);
+
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
         .setStart(Integer.toString(START_TS))
@@ -124,27 +124,27 @@ public class TestTsdb1xQueryNode extends UTBase {
         .setExecutionGraph(Collections.emptyList())
         .build();
     when(context.query()).thenReturn(query);
-    
+
     source_config = (TimeSeriesDataSourceConfig) baseConfig()
         .build();
-    
-    when(meta_schema.runQuery(any(QueryPipelineContext.class), 
+
+    when(meta_schema.runQuery(any(QueryPipelineContext.class),
         any(TimeSeriesDataSourceConfig.class), nullable(Span.class)))
-      .thenReturn(meta_deferred);
+        .thenReturn(meta_deferred);
     // 'schema' is a static spy shared across tests; meta tests stub
     // metaSchema() to a non-null value which would otherwise leak into the
     // scanner-path tests and send them down the meta branch. Reset it here so
     // each test starts on the scanner path unless it explicitly opts in.
     when(schema.metaSchema()).thenReturn(null);
-    
+
     when(context.upstream(any(QueryNode.class)))
-      .thenReturn(Lists.newArrayList(upstream_a, upstream_b));
+        .thenReturn(Lists.newArrayList(upstream_a, upstream_b));
     when(context.tsdb()).thenReturn(tsdb);
-    
+
     when(data_store.dynamicInt(Tsdb1xHBaseDataStore.MULTI_GET_CONCURRENT_KEY))
-      .thenReturn(2);
+        .thenReturn(2);
     when(data_store.dynamicInt(Tsdb1xHBaseDataStore.MULTI_GET_BATCH_KEY))
-      .thenReturn(4);
+        .thenReturn(4);
     tsdb.runnables.clear();
   }
 
@@ -308,10 +308,10 @@ public class TestTsdb1xQueryNode extends UTBase {
     assertTrue(node.initialized.get());
     assertTrue(node.initializing.get());
     assertEquals(1, mockedResult.constructed().size());
-    
+
     // next call
     node.fetchNext(null);
-    
+
     assertSame(mockedScanners.constructed().get(0), node.executor);
     verify(mockedScanners.constructed().get(0), times(2)).fetchNext(any(Tsdb1xQueryResult.class),
         nullable(Span.class));
@@ -319,10 +319,10 @@ public class TestTsdb1xQueryNode extends UTBase {
     assertTrue(node.initialized.get());
     assertTrue(node.initializing.get());
     assertEquals(2, mockedResult.constructed().size());
-    
+
     // next call
     node.fetchNext(null);
-    
+
     assertSame(mockedScanners.constructed().get(0), node.executor);
     verify(mockedScanners.constructed().get(0), times(3)).fetchNext(any(Tsdb1xQueryResult.class),
         nullable(Span.class));
@@ -335,19 +335,19 @@ public class TestTsdb1xQueryNode extends UTBase {
   @Test
   public void fetchNextMeta() throws Exception {
     when(schema.metaSchema()).thenReturn(meta_schema);
-    
+
     Tsdb1xHBaseQueryNode node = new Tsdb1xHBaseQueryNode(
         data_store, context, source_config);
     node.fetchNext(null);
     
     assertNull(node.executor);
-    verify(scanners, never()).fetchNext(any(Tsdb1xQueryResult.class), 
+    verify(scanners, never()).fetchNext(any(Tsdb1xQueryResult.class),
         nullable(Span.class));
     assertEquals(0, node.sequence_id.get());
     assertFalse(node.initialized.get());
     assertTrue(node.initializing.get());
     assertTrue(mockedResult.constructed().isEmpty());
-    verify(meta_schema, times(1)).runQuery(any(QueryPipelineContext.class), 
+    verify(meta_schema, times(1)).runQuery(any(QueryPipelineContext.class),
         any(TimeSeriesDataSourceConfig.class), nullable(Span.class));
     
     try {
@@ -419,7 +419,7 @@ public class TestTsdb1xQueryNode extends UTBase {
     Tsdb1xHBaseQueryNode node = new Tsdb1xHBaseQueryNode(
         data_store, context, source_config);
     node.setup(null);
-    
+
     assertSame(mockedScanners.constructed().get(0), node.executor);
     verify(mockedScanners.constructed().get(0), times(1)).fetchNext(any(Tsdb1xQueryResult.class),
         nullable(Span.class));
@@ -427,22 +427,22 @@ public class TestTsdb1xQueryNode extends UTBase {
     assertTrue(node.initialized.get());
     assertEquals(1, mockedResult.constructed().size());
   }
-  
+
   @Test
   public void setupMeta() throws Exception {
     when(schema.metaSchema()).thenReturn(meta_schema);
-    
+
     Tsdb1xHBaseQueryNode node = new Tsdb1xHBaseQueryNode(
         data_store, context, source_config);
     node.setup(null);
     
     assertNull(node.executor);
-    verify(scanners, never()).fetchNext(any(Tsdb1xQueryResult.class), 
+    verify(scanners, never()).fetchNext(any(Tsdb1xQueryResult.class),
         nullable(Span.class));
     assertEquals(0, node.sequence_id.get());
     assertFalse(node.initialized.get());
     assertTrue(mockedResult.constructed().isEmpty());
-    verify(meta_schema, times(1)).runQuery(any(QueryPipelineContext.class), 
+    verify(meta_schema, times(1)).runQuery(any(QueryPipelineContext.class),
         any(TimeSeriesDataSourceConfig.class), nullable(Span.class));
   }
 
@@ -650,7 +650,7 @@ public class TestTsdb1xQueryNode extends UTBase {
         data_store, context, source_config);
     
     node.new MetaCB(null).call(meta_result);
-    
+
     assertSame(mockedScanners.constructed().get(0), node.executor);
     verify(mockedScanners.constructed().get(0), times(1)).fetchNext(any(Tsdb1xQueryResult.class),
         nullable(Span.class));
@@ -658,7 +658,7 @@ public class TestTsdb1xQueryNode extends UTBase {
     assertTrue(node.initialized.get());
     assertEquals(1, mockedResult.constructed().size());
   }
-  
+
   @Test
   public void metaCBExceptionFallback() throws Exception {
     MetaDataStorageResult meta_result = mock(MetaDataStorageResult.class);
@@ -668,7 +668,7 @@ public class TestTsdb1xQueryNode extends UTBase {
         data_store, context, source_config);
     
     node.new MetaCB(null).call(meta_result);
-    
+
     assertSame(mockedScanners.constructed().get(0), node.executor);
     verify(mockedScanners.constructed().get(0), times(1)).fetchNext(any(Tsdb1xQueryResult.class),
         nullable(Span.class));
@@ -816,7 +816,7 @@ public class TestTsdb1xQueryNode extends UTBase {
     verify(upstream_a, times(1)).onError(any(QueryExecutionException.class));
     verify(upstream_b, times(1)).onError(any(QueryExecutionException.class));
   }
-  
+
   @Test
   public void resolveMetaStringTagkNSUNAllowed() throws Exception {
     // Seems the PowerMockito won't mock down to the nested classes
@@ -892,7 +892,7 @@ public class TestTsdb1xQueryNode extends UTBase {
     verify(upstream_a, times(1)).onError(any(QueryExecutionException.class));
     verify(upstream_b, times(1)).onError(any(QueryExecutionException.class));
   }
-  
+
   @Test
   public void resolveMetaStringTagvNSUNAllowed() throws Exception {
     // Seems the PowerMockito won't mock down to the nested classes

@@ -52,7 +52,7 @@ public class TestPluginsConfig {
   private PluginsConfig config;
 
   MockedConstruction<Schema> mockSchema;
-  
+
   @Before
   public void before() throws Exception {
     ORDER = 0;
@@ -62,7 +62,7 @@ public class TestPluginsConfig {
     Field pluginsField = tsdb.registry.getClass().getDeclaredField("plugins");
     pluginsField.setAccessible(true);
     pluginsField.set(tsdb.registry, config);
-    
+
     when(tsdb.getRegistry().getDefaultPlugin(TimeSeriesDataConsumerFactory.class))
       .thenReturn((TimeSeriesDataConsumerFactory) mock(SchemaFactory.class));
     when(tsdb.getRegistry().getDefaultPlugin(TimeSeriesDataSourceFactory.class))

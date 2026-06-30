@@ -37,7 +37,7 @@ import com.google.common.reflect.TypeToken;
  * 
  * @since 3.0
  */
-public abstract class BaseExpressionNumericIterator<T extends TimeSeriesDataType> 
+public abstract class BaseExpressionNumericIterator<T extends TimeSeriesDataType>
     implements QueryIterator, TimeSeriesValue<T> {
 
   /** Epsilon used for floating point calculations. */

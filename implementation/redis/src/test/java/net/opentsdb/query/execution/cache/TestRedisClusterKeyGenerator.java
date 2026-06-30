@@ -48,69 +48,69 @@ public class TestRedisClusterKeyGenerator {
   public void tearDownStaticMocks() {
     mockedDateTime.closeOnDemand();
   }
-  
+
   @Test
   public void generate() throws Exception {
     final RedisClusterKeyGenerator generator = new RedisClusterKeyGenerator();
     generator.initialize(tsdb, null).join(1);
-    
+
     mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L + (86400L * 2)) * 1000L));
-    long[] expirations = new long[] { 300000 };
-    byte[][] keys = generator.generate(42L, 
-        "1h", 
-        new int[] { 1514764800 }, 
-        expirations);
+    long[] expirations = new long[]{300000};
+    byte[][] keys = generator.generate(42L,
+         "1h",
+         new int[]{1514764800},
+         expirations);
     assertEquals(1, keys.length);
     assertArrayEquals(com.google.common.primitives.Bytes.concat(
-        new byte[] { '{' },
-        DefaultReadCacheKeyGenerator.CACHE_PREFIX, 
-        "1h".getBytes(Const.ASCII_CHARSET),
-        Bytes.fromLong(42),
-        new byte[] { '}' },
-        Bytes.fromInt(1514764800)), keys[0]);
-    assertEquals((86400L * 2) * 1000, 
-        expirations[0]);
-    
+         new byte[]{'{'},
+         DefaultReadCacheKeyGenerator.CACHE_PREFIX,
+         "1h".getBytes(Const.ASCII_CHARSET),
+         Bytes.fromLong(42),
+         new byte[]{'}'},
+         Bytes.fromInt(1514764800)), keys[0]);
+    assertEquals((86400L * 2) * 1000,
+         expirations[0]);
+
     // now our query starts at the current time so we expire earlier.
     mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L + (300L * 2)) * 1000L));
     expirations[0] = 300000;
-    keys = generator.generate(42L, 
-        "1h", 
-        new int[] { 1514764800 }, 
-        expirations);
+    keys = generator.generate(42L,
+         "1h",
+         new int[]{1514764800},
+         expirations);
     assertEquals(1, keys.length);
     assertEquals(600000, expirations[0]);
-    
+
     // if the times match or the segment is for the future, expire it immediately
     mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L) * 1000L));
     expirations[0] = 300000;
-    keys = generator.generate(42L, 
-        "1h", 
-        new int[] { 1514764800 }, 
-        expirations);
+    keys = generator.generate(42L,
+         "1h",
+         new int[]{1514764800},
+         expirations);
     assertEquals(1, keys.length);
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[0]);
-    
+
     // future
     mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L - 900L) * 1000L));
     expirations[0] = 300000;
-    keys = generator.generate(42L, 
-        "1h", 
-        new int[] { 1514764800 }, 
-        expirations);
+    keys = generator.generate(42L,
+         "1h",
+         new int[]{1514764800},
+         expirations);
     assertEquals(1, keys.length);
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[0]);
-    
+
     // historical cutoff
     mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L + (86400L * 2)) * 1000L));
     expirations[0] = 300000;
     Field historical_cutoffField = generator.getClass().getSuperclass().getDeclaredField("historical_cutoff");
     historical_cutoffField.setAccessible(true);
     historical_cutoffField.set(generator, 86400000L);
-    keys = generator.generate(42L, 
-        "1h", 
-        new int[] { 1514764800 }, 
-        expirations);
+    keys = generator.generate(42L,
+         "1h",
+         new int[]{1514764800},
+         expirations);
     assertEquals(1, keys.length);
     assertEquals(86400000L, expirations[0]);
   }
@@ -119,119 +119,119 @@ public class TestRedisClusterKeyGenerator {
   public void generateMulti() throws Exception {
     final RedisClusterKeyGenerator generator = new RedisClusterKeyGenerator();
     generator.initialize(tsdb, null).join(1);
-    
+
     mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L + (86400L * 2)) * 1000L));
-    long[] expirations = new long[] { 300000, 0, 0, 0 };
-    byte[][] keys = generator.generate(42L, 
-        "1h", 
-        new int[] { 1514764800, 
-                    1514764800 + 3600, 
-                    1514764800 + (3600 * 2), 
-                    1514764800 + (3600 * 3) }, 
-        expirations);
+    long[] expirations = new long[]{300000, 0, 0, 0};
+    byte[][] keys = generator.generate(42L,
+         "1h",
+         new int[]{1514764800,
+              1514764800 + 3600,
+              1514764800 + (3600 * 2),
+              1514764800 + (3600 * 3)},
+         expirations);
     assertEquals(4, keys.length);
     assertArrayEquals(com.google.common.primitives.Bytes.concat(
-        new byte[] { '{' },
-        DefaultReadCacheKeyGenerator.CACHE_PREFIX, 
-        "1h".getBytes(Const.ASCII_CHARSET),
-        Bytes.fromLong(42),
-        new byte[] { '}' },
-        Bytes.fromInt(1514764800)), keys[0]);
+         new byte[]{'{'},
+         DefaultReadCacheKeyGenerator.CACHE_PREFIX,
+         "1h".getBytes(Const.ASCII_CHARSET),
+         Bytes.fromLong(42),
+         new byte[]{'}'},
+         Bytes.fromInt(1514764800)), keys[0]);
     assertArrayEquals(com.google.common.primitives.Bytes.concat(
-        new byte[] { '{' },
-        DefaultReadCacheKeyGenerator.CACHE_PREFIX, 
-        "1h".getBytes(Const.ASCII_CHARSET),
-        Bytes.fromLong(42),
-        new byte[] { '}' },
-        Bytes.fromInt(1514764800 + 3600)), keys[1]);
+         new byte[]{'{'},
+         DefaultReadCacheKeyGenerator.CACHE_PREFIX,
+         "1h".getBytes(Const.ASCII_CHARSET),
+         Bytes.fromLong(42),
+         new byte[]{'}'},
+         Bytes.fromInt(1514764800 + 3600)), keys[1]);
     assertArrayEquals(com.google.common.primitives.Bytes.concat(
-        new byte[] { '{' },
-        DefaultReadCacheKeyGenerator.CACHE_PREFIX, 
-        "1h".getBytes(Const.ASCII_CHARSET),
-        Bytes.fromLong(42),
-        new byte[] { '}' },
-        Bytes.fromInt(1514764800 + (3600 * 2))), keys[2]);
+         new byte[]{'{'},
+         DefaultReadCacheKeyGenerator.CACHE_PREFIX,
+         "1h".getBytes(Const.ASCII_CHARSET),
+         Bytes.fromLong(42),
+         new byte[]{'}'},
+         Bytes.fromInt(1514764800 + (3600 * 2))), keys[2]);
     assertArrayEquals(com.google.common.primitives.Bytes.concat(
-        new byte[] { '{' },
-        DefaultReadCacheKeyGenerator.CACHE_PREFIX, 
-        "1h".getBytes(Const.ASCII_CHARSET),
-        Bytes.fromLong(42),
-        new byte[] { '}' },
-        Bytes.fromInt(1514764800 + (3600 * 3))), keys[3]);
-    assertEquals((86400L * 2) * 1000, 
-        expirations[0]);
-    assertEquals(((86400L * 2) - 3600) * 1000, 
-        expirations[1]);
-    assertEquals(((86400L * 2) - (3600 * 2)) * 1000, 
-        expirations[2]);
-    assertEquals(((86400L * 2) - (3600 * 3)) * 1000, 
-        expirations[3]);
-    
+         new byte[]{'{'},
+         DefaultReadCacheKeyGenerator.CACHE_PREFIX,
+         "1h".getBytes(Const.ASCII_CHARSET),
+         Bytes.fromLong(42),
+         new byte[]{'}'},
+         Bytes.fromInt(1514764800 + (3600 * 3))), keys[3]);
+    assertEquals((86400L * 2) * 1000,
+         expirations[0]);
+    assertEquals(((86400L * 2) - 3600) * 1000,
+         expirations[1]);
+    assertEquals(((86400L * 2) - (3600 * 2)) * 1000,
+         expirations[2]);
+    assertEquals(((86400L * 2) - (3600 * 3)) * 1000,
+         expirations[3]);
+
     // now our query starts at the current time so we expire earlier.
     mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L + (3600 * 3) + (300L * 2)) * 1000L));
-    expirations = new long[] { 300000, 0, 0, 0 };
-    keys = generator.generate(42L, 
-        "1h", 
-        new int[] { 1514764800, 
-                    1514764800 + 3600, 
-                    1514764800 + (3600 * 2), 
-                    1514764800 + (3600 * 3) }, 
-        expirations);
+    expirations = new long[]{300000, 0, 0, 0};
+    keys = generator.generate(42L,
+         "1h",
+         new int[]{1514764800,
+              1514764800 + 3600,
+              1514764800 + (3600 * 2),
+              1514764800 + (3600 * 3)},
+         expirations);
     assertEquals(4, keys.length);
     assertEquals(11400000, expirations[0]);
     assertEquals(7800000, expirations[1]);
-    assertEquals(4200000,  expirations[2]);
+    assertEquals(4200000, expirations[2]);
     assertEquals(600000, expirations[3]);
-    
+
     // if the times match or the segment is for the future, expire it immediately
     mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L) * 1000L));
-    expirations = new long[] { 300000, 0, 0, 0 };
-    keys = generator.generate(42L, 
-        "1h", 
-        new int[] { 1514764800, 
-                    1514764800 + 3600, 
-                    1514764800 + (3600 * 2), 
-                    1514764800 + (3600 * 3) }, 
-        expirations);
+    expirations = new long[]{300000, 0, 0, 0};
+    keys = generator.generate(42L,
+         "1h",
+         new int[]{1514764800,
+              1514764800 + 3600,
+              1514764800 + (3600 * 2),
+              1514764800 + (3600 * 3)},
+         expirations);
     assertEquals(4, keys.length);
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[0]);
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[1]);
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[2]);
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[3]);
-    
+
     // future
     mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L - 900L) * 1000L));
-    expirations = new long[] { 300000, 0, 0, 0 };
-    keys = generator.generate(42L, 
-        "1h", 
-        new int[] { 1514764800, 
-                    1514764800 + 3600, 
-                    1514764800 + (3600 * 2), 
-                    1514764800 + (3600 * 3) }, 
-        expirations);
+    expirations = new long[]{300000, 0, 0, 0};
+    keys = generator.generate(42L,
+         "1h",
+         new int[]{1514764800,
+              1514764800 + 3600,
+              1514764800 + (3600 * 2),
+              1514764800 + (3600 * 3)},
+         expirations);
     assertEquals(4, keys.length);
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[0]);
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[1]);
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[2]);
     assertEquals(DefaultReadCacheKeyGenerator.DEFAULT_EXPIRATION, expirations[3]);
-    
+
     // historical cutoff
     mockedDateTime.when(DateTime::currentTimeMillis).thenReturn((long) ((1514764800L + (86400L * 2)) * 1000L));
     Field historical_cutoffField = generator.getClass().getSuperclass().getDeclaredField("historical_cutoff");
     historical_cutoffField.setAccessible(true);
     historical_cutoffField.set(generator, 86400000L);
-    expirations = new long[] { 300000, 0, 0, 0 };
-    keys = generator.generate(42L, 
-        "1h", 
-        new int[] { 1514764800, 
-                    1514764800 + 3600, 
-                    1514764800 + (3600 * 2), 
-                    1514764800 + (3600 * 3) }, 
-        expirations);
+    expirations = new long[]{300000, 0, 0, 0};
+    keys = generator.generate(42L,
+         "1h",
+         new int[]{1514764800,
+              1514764800 + 3600,
+              1514764800 + (3600 * 2),
+              1514764800 + (3600 * 3)},
+         expirations);
     assertEquals(4, keys.length);
     assertEquals(86400000L, expirations[0]);
     assertEquals(86400000L, expirations[1]);
-    assertEquals(86400000L,  expirations[2]);
+    assertEquals(86400000L, expirations[2]);
     assertEquals(86400000L, expirations[3]);
   }
 }

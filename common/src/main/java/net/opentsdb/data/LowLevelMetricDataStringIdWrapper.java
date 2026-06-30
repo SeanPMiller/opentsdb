@@ -21,7 +21,7 @@ import com.google.common.reflect.TypeToken;
 
 import net.opentsdb.common.Const;
 
-public class LowLevelMetricDataStringIdWrapper implements TimeSeriesDatumStringId {
+ public class LowLevelMetricDataStringIdWrapper implements TimeSeriesDatumStringId {
 
   private LowLevelMetricData data;
   private Map<String, String> tags;

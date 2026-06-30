@@ -81,7 +81,7 @@ import net.opentsdb.uid.NoSuchUniqueName;
 import net.opentsdb.utils.UnitTestException;
 
 public class TestTsdb1xBigtableQueryNode extends UTBase {
-  
+
   private MockedConstruction<Tsdb1xBigtableScanners> mockedScanners;
   private MockedConstruction<Tsdb1xBigtableQueryResult> mockedResult;
   private QueryPipelineContext context;
@@ -100,7 +100,7 @@ public class TestTsdb1xBigtableQueryNode extends UTBase {
     mockedScanners = Mockito.mockConstruction(Tsdb1xBigtableScanners.class);
     mockedResult = Mockito.mockConstruction(Tsdb1xBigtableQueryResult.class);
     context = mock(QueryPipelineContext.class);
-    
+
     rollup_config = mock(DefaultRollupConfig.class);
     result = mock(Tsdb1xBigtableQueryResult.class);
     scanners = mock(Tsdb1xBigtableScanners.class);
@@ -125,10 +125,10 @@ public class TestTsdb1xBigtableQueryNode extends UTBase {
         .setId("m1")
         .build();
     
-    when(meta_schema.runQuery(any(QueryPipelineContext.class), 
+    when(meta_schema.runQuery(any(QueryPipelineContext.class),
         any(TimeSeriesDataSourceConfig.class), nullable(Span.class)))
       .thenReturn(meta_deferred);
-    
+
     when(context.upstream(any(QueryNode.class)))
       .thenReturn(Lists.newArrayList(upstream_a, upstream_b));
     when(context.tsdb()).thenReturn(tsdb);
@@ -145,7 +145,7 @@ public class TestTsdb1xBigtableQueryNode extends UTBase {
     if (mockedScanners != null) mockedScanners.close();
     if (mockedResult != null) mockedResult.close();
   }
-  
+
   @Test
   public void ctorDefault() throws Exception {
     Tsdb1xBigtableQueryNode node = new Tsdb1xBigtableQueryNode(
@@ -304,7 +304,7 @@ public class TestTsdb1xBigtableQueryNode extends UTBase {
     Tsdb1xBigtableQueryNode node = new Tsdb1xBigtableQueryNode(
         data_store, context, source_config);
     node.fetchNext(null);
-    
+
     assertSame(mockedScanners.constructed().get(0), node.executor);
     verify(mockedScanners.constructed().get(0), times(1)).fetchNext(any(Tsdb1xBigtableQueryResult.class),
         nullable(Span.class));
@@ -312,10 +312,10 @@ public class TestTsdb1xBigtableQueryNode extends UTBase {
     assertTrue(node.initialized.get());
     assertTrue(node.initializing.get());
     assertEquals(1, mockedResult.constructed().size());
-    
+
     // next call
     node.fetchNext(null);
-    
+
     assertSame(mockedScanners.constructed().get(0), node.executor);
     verify(mockedScanners.constructed().get(0), times(2)).fetchNext(any(Tsdb1xBigtableQueryResult.class),
         nullable(Span.class));
@@ -323,10 +323,10 @@ public class TestTsdb1xBigtableQueryNode extends UTBase {
     assertTrue(node.initialized.get());
     assertTrue(node.initializing.get());
     assertEquals(2, mockedResult.constructed().size());
-    
+
     // next call
     node.fetchNext(null);
-    
+
     assertSame(mockedScanners.constructed().get(0), node.executor);
     verify(mockedScanners.constructed().get(0), times(3)).fetchNext(any(Tsdb1xBigtableQueryResult.class),
         nullable(Span.class));
@@ -348,15 +348,15 @@ public class TestTsdb1xBigtableQueryNode extends UTBase {
     node.fetchNext(null);
     
     assertNull(node.executor);
-    verify(scanners, never()).fetchNext(any(Tsdb1xBigtableQueryResult.class), 
+    verify(scanners, never()).fetchNext(any(Tsdb1xBigtableQueryResult.class),
         nullable(Span.class));
     assertEquals(0, node.sequence_id.get());
     assertFalse(node.initialized.get());
     assertTrue(node.initializing.get());
     assertTrue(mockedResult.constructed().isEmpty());
-    verify(meta_schema, times(1)).runQuery(any(QueryPipelineContext.class), 
+    verify(meta_schema, times(1)).runQuery(any(QueryPipelineContext.class),
         any(TimeSeriesDataSourceConfig.class), nullable(Span.class));
-    
+
     try {
       node.fetchNext(null);
       fail("Expected IllegalStateException");
@@ -424,7 +424,7 @@ public class TestTsdb1xBigtableQueryNode extends UTBase {
     Tsdb1xBigtableQueryNode node = new Tsdb1xBigtableQueryNode(
         data_store, context, source_config);
     node.setup(null);
-    
+
     assertSame(mockedScanners.constructed().get(0), node.executor);
     verify(mockedScanners.constructed().get(0), times(1)).fetchNext(any(Tsdb1xBigtableQueryResult.class),
         nullable(Span.class));
@@ -432,7 +432,7 @@ public class TestTsdb1xBigtableQueryNode extends UTBase {
     assertTrue(node.initialized.get());
     assertEquals(1, mockedResult.constructed().size());
   }
-  
+
   @Test
   public void setupMeta() throws Exception {
     Tsdb1xBigtableDataStore data_store = mock(Tsdb1xBigtableDataStore.class);
@@ -445,12 +445,12 @@ public class TestTsdb1xBigtableQueryNode extends UTBase {
     node.setup(null);
     
     assertNull(node.executor);
-    verify(scanners, never()).fetchNext(any(Tsdb1xBigtableQueryResult.class), 
+    verify(scanners, never()).fetchNext(any(Tsdb1xBigtableQueryResult.class),
         nullable(Span.class));
     assertEquals(0, node.sequence_id.get());
     assertFalse(node.initialized.get());
     assertTrue(mockedResult.constructed().isEmpty());
-    verify(meta_schema, times(1)).runQuery(any(QueryPipelineContext.class), 
+    verify(meta_schema, times(1)).runQuery(any(QueryPipelineContext.class),
         any(TimeSeriesDataSourceConfig.class), nullable(Span.class));
   }
 
@@ -635,7 +635,7 @@ public class TestTsdb1xBigtableQueryNode extends UTBase {
         data_store, context, source_config);
     
     node.new MetaCB(null).call(meta_result);
-    
+
     assertSame(mockedScanners.constructed().get(0), node.executor);
     verify(mockedScanners.constructed().get(0), times(1)).fetchNext(any(Tsdb1xBigtableQueryResult.class),
         nullable(Span.class));
@@ -643,7 +643,7 @@ public class TestTsdb1xBigtableQueryNode extends UTBase {
     assertTrue(node.initialized.get());
     assertEquals(1, mockedResult.constructed().size());
   }
-  
+
   @Test
   public void metaCBExceptionFallback() throws Exception {
     MetaDataStorageResult meta_result = mock(MetaDataStorageResult.class);
@@ -653,7 +653,7 @@ public class TestTsdb1xBigtableQueryNode extends UTBase {
         data_store, context, source_config);
     
     node.new MetaCB(null).call(meta_result);
-    
+
     assertSame(mockedScanners.constructed().get(0), node.executor);
     verify(mockedScanners.constructed().get(0), times(1)).fetchNext(any(Tsdb1xBigtableQueryResult.class),
         nullable(Span.class));

@@ -36,7 +36,7 @@ import com.google.common.reflect.TypeToken;
  */
 public class ExpressionNumericArrayIterator extends 
     BaseExpressionNumericIterator<NumericArrayType>
-  implements NumericArrayType {
+    implements NumericArrayType {
 
   private static final int STATIC_ARRAY_LEN = 86_400;
   private static final double[] NAN_ARRAY = new double[STATIC_ARRAY_LEN];

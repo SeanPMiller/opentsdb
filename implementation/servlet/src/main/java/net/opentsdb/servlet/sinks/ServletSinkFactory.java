@@ -33,7 +33,7 @@ import com.stumbleupon.async.Deferred;
  * 
  * @since 3.0
  */
-public class ServletSinkFactory extends BaseTSDBPlugin 
+public class ServletSinkFactory extends BaseTSDBPlugin
     implements QuerySinkFactory {
 
   public static final String TYPE = "TSDBServletSink";

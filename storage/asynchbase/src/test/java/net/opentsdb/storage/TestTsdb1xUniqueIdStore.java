@@ -1396,124 +1396,124 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
     } catch (UnitTestException e) { }
     assertTrue(uid.pending().get(UniqueIdType.METRIC).isEmpty());
   }
-  
+
   @Test
   public void getOrCreateIdRandom() throws Exception {
     resetAssignmentState();
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store, null);
     Field randomize_metric_idsField = getField(uid, "randomize_metric_ids");
     randomize_metric_idsField.set(uid, true);
-    IdOrError result = uid.getOrCreateId(null, 
-        UniqueIdType.METRIC, 
-        UNASSIGNED_ID_NAME, 
+    IdOrError result = uid.getOrCreateId(null,
+        UniqueIdType.METRIC,
+        UNASSIGNED_ID_NAME,
         UNASSIGNED_DATUM_ID,
         null).join();
     assertTrue(Bytes.memcmp(UNASSIGNED_ID, result.id()) != 0);
     assertEquals(3, result.id().length);
     assertNull(result.error());
 
-    assertArrayEquals(result.id(), storage.getColumn(data_store.uidTable(), 
-        UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET), 
-        Tsdb1xUniqueIdStore.ID_FAMILY, 
+    assertArrayEquals(result.id(), storage.getColumn(data_store.uidTable(),
+        UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET),
+        Tsdb1xUniqueIdStore.ID_FAMILY,
         Tsdb1xUniqueIdStore.METRICS_QUAL));
-    assertArrayEquals(UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET), 
-        storage.getColumn(data_store.uidTable(), 
-            result.id(), 
-            Tsdb1xUniqueIdStore.NAME_FAMILY, 
+    assertArrayEquals(UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET),
+        storage.getColumn(data_store.uidTable(),
+            result.id(),
+            Tsdb1xUniqueIdStore.NAME_FAMILY,
             Tsdb1xUniqueIdStore.METRICS_QUAL));
     assertTrue(uid.pending().get(UniqueIdType.METRIC).isEmpty());
   }
-  
+
   @Test
   public void getOrCreateIdRandomCollision() throws Exception {
     resetAssignmentState();
     mockedRandomUniqueId.when(() -> RandomUniqueId.getRandomUID(anyInt()))
-      .thenReturn(24898L)
-      .thenReturn(42L);
-    
+        .thenReturn(24898L)
+        .thenReturn(42L);
+
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store, null);
     Field randomize_metric_idsField = getField(uid, "randomize_metric_ids");
     randomize_metric_idsField.set(uid, true);
-    
-    Deferred<IdOrError> deferred = uid.getOrCreateId(null, 
-        UniqueIdType.METRIC, 
-        UNASSIGNED_ID_NAME, 
+
+    Deferred<IdOrError> deferred = uid.getOrCreateId(null,
+        UniqueIdType.METRIC,
+        UNASSIGNED_ID_NAME,
         UNASSIGNED_DATUM_ID,
         null);
-    
+
     try {
       deferred.join(1);
       fail("Expected TimeoutException");
     } catch (TimeoutException e) {
     }
-    
+
     assertNotNull(timer.pausedTask);
     timer.continuePausedTask();
-    
+
     IdOrError result = deferred.join();
     assertTrue(Bytes.memcmp(UNASSIGNED_ID, result.id()) != 0);
     assertEquals(3, result.id().length);
     assertNull(result.error());
 
-    assertArrayEquals(result.id(), storage.getColumn(data_store.uidTable(), 
-        UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET), 
-        Tsdb1xUniqueIdStore.ID_FAMILY, 
+    assertArrayEquals(result.id(), storage.getColumn(data_store.uidTable(),
+        UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET),
+        Tsdb1xUniqueIdStore.ID_FAMILY,
         Tsdb1xUniqueIdStore.METRICS_QUAL));
-    assertArrayEquals(UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET), 
-        storage.getColumn(data_store.uidTable(), 
-            result.id(), 
-            Tsdb1xUniqueIdStore.NAME_FAMILY, 
+    assertArrayEquals(UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET),
+        storage.getColumn(data_store.uidTable(),
+            result.id(),
+            Tsdb1xUniqueIdStore.NAME_FAMILY,
             Tsdb1xUniqueIdStore.METRICS_QUAL));
     assertTrue(uid.pending().get(UniqueIdType.METRIC).isEmpty());
   }
-  
+
   @Test
   public void getOrCreateIdRandomCollisionTooManyAttempts() throws Exception {
     resetAssignmentState();
     mockedRandomUniqueId.when(() -> RandomUniqueId.getRandomUID(anyInt()))
-      .thenReturn(24898L)
-      .thenReturn(24898L)
-      .thenReturn(24898L);
-    
+        .thenReturn(24898L)
+        .thenReturn(24898L)
+        .thenReturn(24898L);
+
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store, null);
     Field randomize_metric_idsField = getField(uid, "randomize_metric_ids");
     randomize_metric_idsField.set(uid, true);
     Field max_attempts_assign_randomField = getField(uid, "max_attempts_assign_random");
     max_attempts_assign_randomField.set(uid, (short) 3);
-    Deferred<IdOrError> deferred = uid.getOrCreateId(null, 
-        UniqueIdType.METRIC, 
-        UNASSIGNED_ID_NAME, 
+    Deferred<IdOrError> deferred = uid.getOrCreateId(null,
+        UniqueIdType.METRIC,
+        UNASSIGNED_ID_NAME,
         UNASSIGNED_DATUM_ID,
         null);
-    
+
     try {
       deferred.join(1);
       fail("Expected TimeoutException");
     } catch (TimeoutException e) {
     }
-    
+
     assertNotNull(timer.pausedTask);
     timer.continuePausedTask();
-    
+
     IdOrError result = deferred.join();
     assertNull(result.id());
     assertEquals(WriteState.RETRY, result.state());
     assertNotNull(result.error());
 
-    assertNull(storage.getColumn(data_store.uidTable(), 
-        UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET), 
-        Tsdb1xUniqueIdStore.ID_FAMILY, 
+    assertNull(storage.getColumn(data_store.uidTable(),
+        UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET),
+        Tsdb1xUniqueIdStore.ID_FAMILY,
         Tsdb1xUniqueIdStore.METRICS_QUAL));
     assertTrue(uid.pending().get(UniqueIdType.METRIC).isEmpty());
   }
-  
+
   @Test
   public void getOrCreateIdRandomWithRaceConditionReverseMap() throws Exception {
     resetAssignmentState();
     mockedRandomUniqueId.when(() -> RandomUniqueId.getRandomUID(anyInt()))
-      .thenReturn(1L)
-      .thenReturn(42L);
-    
+        .thenReturn(1L)
+        .thenReturn(42L);
+
     resetAssignmentState();
     Tsdb1xHBaseDataStore data_store_a = mock(Tsdb1xHBaseDataStore.class);
     HBaseClient client = mock(HBaseClient.class);
@@ -1527,47 +1527,47 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
       }
     });
     when(data_store_a.uidTable()).thenReturn(UID_TABLE);
-    
+
     when(client.get(anyGet()))
-      .thenReturn(Deferred.fromResult(null));
-    
+        .thenReturn(Deferred.fromResult(null));
+
     when(client.compareAndSet(anyPut(), emptyArray()))
-      .thenReturn(Deferred.fromResult(false))
-      .thenReturn(Deferred.fromResult(true))
-      .thenReturn(Deferred.fromResult(true));
-    
+        .thenReturn(Deferred.fromResult(false))
+        .thenReturn(Deferred.fromResult(true))
+        .thenReturn(Deferred.fromResult(true));
+
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store_a, null);
     Field randomize_metric_idsField = getField(uid, "randomize_metric_ids");
     randomize_metric_idsField.set(uid, true);
-    
-    Deferred<IdOrError> deferred = uid.getOrCreateId(null, 
-        UniqueIdType.METRIC, 
-        UNASSIGNED_ID_NAME, 
+
+    Deferred<IdOrError> deferred = uid.getOrCreateId(null,
+        UniqueIdType.METRIC,
+        UNASSIGNED_ID_NAME,
         UNASSIGNED_DATUM_ID,
         null);
-    
+
     try {
       deferred.join(1);
       fail("Expected TimeoutException");
     } catch (TimeoutException e) {
     }
-    
+
     assertNotNull(timer.pausedTask);
     timer.continuePausedTask();
-    
+
     IdOrError result = deferred.join();
     assertTrue(Bytes.memcmp(UNASSIGNED_ID, result.id()) != 0);
     assertEquals(3, result.id().length);
     assertNull(result.error());
     assertTrue(uid.pending().get(UniqueIdType.METRIC).isEmpty());
   }
-  
+
   @Test
   public void getOrCreateIdRandomWithRaceConditionForwardMap() throws Exception {
     resetAssignmentState();
     mockedRandomUniqueId.when(() -> RandomUniqueId.getRandomUID(anyInt()))
-      .thenReturn(1L);
-    
+        .thenReturn(1L);
+
     resetAssignmentState();
     Tsdb1xHBaseDataStore data_store_a = mock(Tsdb1xHBaseDataStore.class);
     HBaseClient client = mock(HBaseClient.class);
@@ -1581,30 +1581,30 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
       }
     });
     when(data_store_a.uidTable()).thenReturn(UID_TABLE);
-    
+
     when(client.get(anyGet()))
-      .thenReturn(Deferred.fromResult(null))
-      .thenReturn(Deferred.fromResult(
-          Lists.newArrayList(new KeyValue(UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET), 
-              Tsdb1xUniqueIdStore.ID_FAMILY, 
-              Tsdb1xUniqueIdStore.METRICS_QUAL, 
-              new byte[] { 0, 0, 1 }))));
-    
+        .thenReturn(Deferred.fromResult(null))
+        .thenReturn(Deferred.fromResult(
+            Lists.newArrayList(new KeyValue(UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET),
+                Tsdb1xUniqueIdStore.ID_FAMILY,
+                Tsdb1xUniqueIdStore.METRICS_QUAL,
+                new byte[]{0, 0, 1}))));
+
     when(client.compareAndSet(anyPut(), emptyArray()))
-      .thenReturn(Deferred.fromResult(true))
-      .thenReturn(Deferred.fromResult(false))
-      .thenReturn(Deferred.fromResult(true));
-    
+        .thenReturn(Deferred.fromResult(true))
+        .thenReturn(Deferred.fromResult(false))
+        .thenReturn(Deferred.fromResult(true));
+
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store_a, null);
     Field randomize_metric_idsField = getField(uid, "randomize_metric_ids");
     randomize_metric_idsField.set(uid, true);
-    
-    IdOrError result = uid.getOrCreateId(null, 
-        UniqueIdType.METRIC, 
-        UNASSIGNED_ID_NAME, 
+
+    IdOrError result = uid.getOrCreateId(null,
+        UniqueIdType.METRIC,
+        UNASSIGNED_ID_NAME,
         UNASSIGNED_DATUM_ID,
         null).join();
-    assertArrayEquals(new byte[] { 0, 0, 1 }, result.id());
+    assertArrayEquals(new byte[]{0, 0, 1}, result.id());
     assertEquals(3, result.id().length);
     assertNull(result.error());
     assertTrue(uid.pending().get(UniqueIdType.METRIC).isEmpty());
@@ -1650,31 +1650,31 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
     assertArrayEquals(UNASSIGNED_ID, result.id());
     assertNull(result.error());
   }
-  
+
   @Test
   public void getOrCreateIdAssignAndRetry() throws Exception {
     resetAssignmentState();
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store, null);
     Field assign_and_retryField = getField(uid, "assign_and_retry");
     assign_and_retryField.set(uid, true);
-    IdOrError result = uid.getOrCreateId(null, 
-        UniqueIdType.METRIC, 
-        UNASSIGNED_ID_NAME, 
-        UNASSIGNED_DATUM_ID, 
+    IdOrError result = uid.getOrCreateId(null,
+        UniqueIdType.METRIC,
+        UNASSIGNED_ID_NAME,
+        UNASSIGNED_DATUM_ID,
         null).join();
     assertNull(result.id());
     assertEquals(WriteState.RETRY, result.state());
     assertSame(IdOrError.ASSIGNMENT_RETRY, result);
-    
+
     // still assigns
-    assertArrayEquals(UNASSIGNED_ID, storage.getColumn(data_store.uidTable(), 
-        UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET), 
-        Tsdb1xUniqueIdStore.ID_FAMILY, 
+    assertArrayEquals(UNASSIGNED_ID, storage.getColumn(data_store.uidTable(),
+        UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET),
+        Tsdb1xUniqueIdStore.ID_FAMILY,
         Tsdb1xUniqueIdStore.METRICS_QUAL));
-    assertArrayEquals(UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET), 
-        storage.getColumn(data_store.uidTable(), 
-            UNASSIGNED_ID, 
-            Tsdb1xUniqueIdStore.NAME_FAMILY, 
+    assertArrayEquals(UNASSIGNED_ID_NAME.getBytes(Const.UTF8_CHARSET),
+        storage.getColumn(data_store.uidTable(),
+            UNASSIGNED_ID,
+            Tsdb1xUniqueIdStore.NAME_FAMILY,
             Tsdb1xUniqueIdStore.METRICS_QUAL));
     assertTrue(uid.pending().get(UniqueIdType.METRIC).isEmpty());
   }
@@ -1709,37 +1709,37 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
             Tsdb1xUniqueIdStore.TAG_VALUE_QUAL));
     assertTrue(uid.pending().get(UniqueIdType.TAGV).isEmpty());
   }
-  
+
   @Test
   public void getOrCreateIdsAssignAndRetry() throws Exception {
     resetAssignmentState();
     Tsdb1xUniqueIdStore uid = new Tsdb1xUniqueIdStore(data_store, null);
     Field assign_and_retryField = getField(uid, "assign_and_retry");
     assign_and_retryField.set(uid, true);
-    
+
     List<String> names = Lists.newArrayList(ASSIGNED_TAGV_NAME,
         UNASSIGNED_TAGV_NAME);
-    List<IdOrError> result = uid.getOrCreateIds(null, 
-        UniqueIdType.TAGV, 
-        names, 
-        ASSIGNED_DATUM_ID, 
+    List<IdOrError> result = uid.getOrCreateIds(null,
+        UniqueIdType.TAGV,
+        names,
+        ASSIGNED_DATUM_ID,
         null).join();
-    
+
     assertEquals(2, result.size());
     assertArrayEquals(ASSIGNED_TAGV, result.get(0).id());
     assertNull(result.get(0).error());
     assertNull(result.get(1).id());
     assertEquals(WriteState.RETRY, result.get(1).state());
     assertSame(IdOrError.ASSIGNMENT_RETRY, result.get(1));
-    
-    assertArrayEquals(UNASSIGNED_TAGV, storage.getColumn(data_store.uidTable(), 
-        UNASSIGNED_TAGV_NAME.getBytes(Const.UTF8_CHARSET), 
-        Tsdb1xUniqueIdStore.ID_FAMILY, 
+
+    assertArrayEquals(UNASSIGNED_TAGV, storage.getColumn(data_store.uidTable(),
+        UNASSIGNED_TAGV_NAME.getBytes(Const.UTF8_CHARSET),
+        Tsdb1xUniqueIdStore.ID_FAMILY,
         Tsdb1xUniqueIdStore.TAG_VALUE_QUAL));
-    assertArrayEquals(UNASSIGNED_TAGV_NAME.getBytes(Const.UTF8_CHARSET), 
-        storage.getColumn(data_store.uidTable(), 
-            UNASSIGNED_TAGV, 
-            Tsdb1xUniqueIdStore.NAME_FAMILY, 
+    assertArrayEquals(UNASSIGNED_TAGV_NAME.getBytes(Const.UTF8_CHARSET),
+        storage.getColumn(data_store.uidTable(),
+            UNASSIGNED_TAGV,
+            Tsdb1xUniqueIdStore.NAME_FAMILY,
             Tsdb1xUniqueIdStore.TAG_VALUE_QUAL));
     assertTrue(uid.pending().get(UniqueIdType.TAGV).isEmpty());
   }
@@ -2825,7 +2825,7 @@ public class TestTsdb1xUniqueIdStore extends UTBase {
         return f;
       } catch (NoSuchFieldException e) {
         clazz = clazz.getSuperclass();
-}
+      }
     }
     throw new NoSuchFieldException(fieldName);
   }

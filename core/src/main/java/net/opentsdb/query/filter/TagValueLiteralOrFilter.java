@@ -48,7 +48,7 @@ import com.stumbleupon.async.Deferred;
 @JsonInclude(Include.NON_NULL)
 @JsonDeserialize(builder = TagValueLiteralOrFilter.Builder.class)
 public class TagValueLiteralOrFilter extends BaseTagValueFilter
-   implements TagValueFilter {
+    implements TagValueFilter {
   
   /** A list of strings to match on */
   protected final List<String> literals;

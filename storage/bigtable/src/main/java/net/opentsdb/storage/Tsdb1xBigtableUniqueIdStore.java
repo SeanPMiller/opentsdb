@@ -451,8 +451,8 @@ public class Tsdb1xBigtableUniqueIdStore extends Base1xUniqueIdStore {
 
     // Let any synchronous exception propagate to the caller's handler (getName
     // /getId wrap it once); catching it here would double-wrap the cause.
-      Futures.addCallback(data_store.executor().readRowsAsync(request),
-              new ResultCB(), data_store.pool());
+    Futures.addCallback(data_store.executor().readRowsAsync(request),
+            new ResultCB(), data_store.pool());
     return deferred;
   }
 

@@ -312,7 +312,7 @@ public class TestTsdb1xQueryResult extends SchemaBase {
       assertEquals(8, value);
     }
   }
-  
+
   @Test
   public void addSequenceMultipleRowsReversed() throws Exception {
     Tsdb1xQueryResult result = new Tsdb1xQueryResult(9, node, schema);
@@ -321,14 +321,14 @@ public class TestTsdb1xQueryResult extends SchemaBase {
     reversedField.set(result, true);
     long base_time = BASE_TIME;
     int value = 0;
-    
+
     NumericRowSeq seq = new NumericRowSeq(base_time);
     for (int i = 0; i < 4; i++) {
-      seq.addColumn(Schema.APPENDS_PREFIX, APPEND_Q, 
+      seq.addColumn(Schema.APPENDS_PREFIX, APPEND_Q,
           NumericCodec.encodeAppendValue(OffsetResolution.SECONDS, 900 * i, value++));
     }
     seq.dedupe(tsdb, false, true);
-    
+
     result.addSequence(LongHashFunction.xx().hashBytes(TSUID_A),
         TSUID_A, seq, ChronoUnit.SECONDS);
     assertEquals(1, result.results.size());
@@ -336,7 +336,7 @@ public class TestTsdb1xQueryResult extends SchemaBase {
     assertEquals(4, result.dps.get());
     assertFalse(result.isFull());
     assertEquals(ChronoUnit.SECONDS, result.resolution());
-    
+
     // another TSUID
     result.addSequence(LongHashFunction.xx().hashBytes(TSUID_B),
         TSUID_B, seq, ChronoUnit.MILLIS);
@@ -345,19 +345,19 @@ public class TestTsdb1xQueryResult extends SchemaBase {
     assertEquals(8, result.dps.get());
     assertFalse(result.isFull());
     assertEquals(ChronoUnit.MILLIS, result.resolution());
-    
+
     List<TimeSeries> series = Lists.newArrayList(result.timeSeries());
     assertEquals(2, series.size());
-    
+
     // next row
     base_time += 3600;
     seq = new NumericRowSeq(base_time);
     for (int i = 0; i < 4; i++) {
-      seq.addColumn(Schema.APPENDS_PREFIX, APPEND_Q, 
+      seq.addColumn(Schema.APPENDS_PREFIX, APPEND_Q,
           NumericCodec.encodeAppendValue(OffsetResolution.SECONDS, 900 * i, value++));
     }
     seq.dedupe(tsdb, false, true);
-    
+
     result.addSequence(LongHashFunction.xx().hashBytes(TSUID_A),
         TSUID_A, seq, ChronoUnit.SECONDS);
     assertEquals(2, result.results.size());
@@ -365,7 +365,7 @@ public class TestTsdb1xQueryResult extends SchemaBase {
     assertEquals(12, result.dps.get());
     assertFalse(result.isFull());
     assertEquals(ChronoUnit.MILLIS, result.resolution());
-    
+
     // B
     result.addSequence(LongHashFunction.xx().hashBytes(TSUID_B),
         TSUID_B, seq, ChronoUnit.MILLIS);
@@ -374,7 +374,7 @@ public class TestTsdb1xQueryResult extends SchemaBase {
     assertEquals(16, result.dps.get());
     assertFalse(result.isFull());
     assertEquals(ChronoUnit.MILLIS, result.resolution());
-    
+
     series = Lists.newArrayList(result.timeSeries());
     assertEquals(2, series.size());
     for (final TimeSeries ts : series) {

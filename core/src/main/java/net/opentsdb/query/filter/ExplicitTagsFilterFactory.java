@@ -28,7 +28,7 @@ import com.stumbleupon.async.Deferred;
  * 
  * @since 3.0
  */
-public class ExplicitTagsFilterFactory extends BaseTSDBPlugin 
+public class ExplicitTagsFilterFactory extends BaseTSDBPlugin
     implements QueryFilterFactory {
 
   static final String TYPE = "ExplicitTags";

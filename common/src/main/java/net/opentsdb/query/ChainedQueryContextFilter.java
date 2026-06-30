@@ -39,7 +39,7 @@ import net.opentsdb.meta.MetaQuery;
  * @since 3.0
  */
 public class ChainedQueryContextFilter extends BaseTSDBPlugin
-        implements QueryContextFilter {
+    implements QueryContextFilter {
   private static final Logger LOG = LoggerFactory.getLogger(
           ChainedQueryContextFilter.class);
 

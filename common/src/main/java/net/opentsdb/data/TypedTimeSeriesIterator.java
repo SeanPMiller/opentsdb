@@ -25,7 +25,7 @@ import com.google.common.reflect.TypeToken;
  * 
  * @since 3.0
  */
-public interface TypedTimeSeriesIterator<T extends TimeSeriesDataType> 
+public interface TypedTimeSeriesIterator<T extends TimeSeriesDataType>
     extends Iterator<TimeSeriesValue<T>>, Closeable {
 
   /**

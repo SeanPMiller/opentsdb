@@ -70,7 +70,7 @@ public class TestSchemaFactory extends SchemaBase {
         (mock, context) -> {
             when(mock.dataStore()).thenReturn(store);
         });
-      }
+  }
 
   @After
   public void after() {
@@ -131,7 +131,7 @@ public class TestSchemaFactory extends SchemaBase {
         .addSummaryAggregation("sum")
         .setId("m1")
         .build();
-    
+
     // Build real DefaultRollupConfig. No need for a spy/mock.
     final DefaultRollupConfig rollup_config = DefaultRollupConfig.newBuilder()
         .addAggregationId("sum", 0)

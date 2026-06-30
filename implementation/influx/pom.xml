@@ -66,7 +66,7 @@
         <groupId>net.opentsdb</groupId>
         <artifactId>opentsdb-servlet</artifactId>
       </dependency>
-      
+
       <dependency>
         <groupId>com.stumbleupon</groupId>
         <artifactId>async</artifactId>

@@ -47,8 +47,8 @@ import redis.clients.jedis.params.SetParams;
  * 
  * @since 3.0
  */
-public class RedisClusterPredictionCache extends BaseTSDBPlugin 
-    implements PredictionCache {
+public class RedisClusterPredictionCache extends BaseTSDBPlugin
+     implements PredictionCache {
   private static final Logger LOG = LoggerFactory.getLogger(
       RedisClusterPredictionCache.class);
   

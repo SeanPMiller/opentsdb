@@ -27,18 +27,18 @@ import org.junit.Test;
 
 public class TestByteArrayPool {
   private static MockTSDB TSDB;
-  
+
   @BeforeClass
   public static void beforeClass() throws Exception {
     TSDB = new MockTSDB();
   }
-  
+
   @Test
   public void initialize() throws Exception {
     ArrayObjectPool pool = mock(ArrayObjectPool.class);
     ArrayObjectPoolFactory factory = mock(ArrayObjectPoolFactory.class);
     when(factory.newPool(any(ObjectPoolConfig.class))).thenReturn(pool);
-    
+
     ByteArrayPool allocator = new ByteArrayPool();
     assertNull(allocator.initialize(TSDB, null).join());
     assertEquals(ByteArrayPool.TYPE, allocator.id());
@@ -46,14 +46,14 @@ public class TestByteArrayPool {
         any(DummyArrayObjectPool.class));
     verify(TSDB.getRegistry(), never()).registerObjectPool(pool);
     assertEquals(8192, ((byte[]) allocator.allocate()).length);
-    
+
     when(TSDB.getRegistry().getPlugin(ArrayObjectPoolFactory.class, null))
       .thenReturn(factory);
     assertNull(allocator.initialize(TSDB, null).join());
     verify(TSDB.getRegistry(), times(1)).registerObjectPool(pool);
     assertEquals(ByteArrayPool.TYPE, allocator.id());
     assertEquals(8192, ((byte[]) allocator.allocate()).length);
-    
+
     allocator.id = "foo";
     allocator.registerConfigs(TSDB.config, ByteArrayPool.TYPE);
     TSDB.config.override("objectpool.foo.pool.id", "myfactory");
@@ -64,10 +64,10 @@ public class TestByteArrayPool {
     when(factory2.newPool(any(ObjectPoolConfig.class))).thenReturn(pool2);
     when(TSDB.getRegistry().getPlugin(ArrayObjectPoolFactory.class, "myfactory"))
       .thenReturn(factory);
-    
+
     assertNull(allocator.initialize(TSDB, "foo").join());
     verify(TSDB.getRegistry(), never()).registerObjectPool(pool2);
     assertEquals(16, ((byte[]) allocator.allocate()).length);
   }
-  
+
 }

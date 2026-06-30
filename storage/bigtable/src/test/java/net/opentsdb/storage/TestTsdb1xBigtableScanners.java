@@ -97,7 +97,7 @@ public class TestTsdb1xBigtableScanners extends UTBase {
   private QueryPipelineContext context;
   private SemanticQuery query;
   private MockedConstruction<Tsdb1xBigtableScanner> mockedScanner;
-  
+
   @Before
   public void before() throws Exception {
     node = mock(Tsdb1xBigtableQueryNode.class);
@@ -105,12 +105,12 @@ public class TestTsdb1xBigtableScanners extends UTBase {
     when(node.parent()).thenReturn(data_store);
     rollup_config = mock(DefaultRollupConfig.class);
     when(schema.rollupConfig()).thenReturn(rollup_config);
-    
+
     mockedScanner = Mockito.mockConstruction(Tsdb1xBigtableScanner.class,
         (mock, ctx) -> {
           when(mock.state()).thenReturn(State.CONTINUE);
-      });
-    
+        });
+
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
         .setStart(Integer.toString(START_TS))
@@ -141,12 +141,12 @@ public class TestTsdb1xBigtableScanners extends UTBase {
     when(context.upstreamOfType(any(QueryNode.class), any()))
       .thenReturn(Collections.emptyList());
   }
-    
+
   @After
   public void tearDown() {
     if (mockedScanner != null) mockedScanner.close();
   }
-  
+
   @Test
   public void ctorDefaults() throws Exception {
     try {
@@ -2317,7 +2317,7 @@ public class TestTsdb1xBigtableScanners extends UTBase {
     while (clazz != null) {
       try { Field f = clazz.getDeclaredField(fieldName); f.setAccessible(true); return f; }
       catch (NoSuchFieldException e) { clazz = clazz.getSuperclass(); }
-}
+    }
     throw new NoSuchFieldException(fieldName);
   }
 }

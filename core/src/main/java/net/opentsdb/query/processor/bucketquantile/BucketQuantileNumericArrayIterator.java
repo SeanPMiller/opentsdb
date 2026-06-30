@@ -28,7 +28,7 @@ import com.google.common.reflect.TypeToken;
  * 
  * @since 3.0
  */
-public class BucketQuantileNumericArrayIterator extends BucketQuantileIterator 
+public class BucketQuantileNumericArrayIterator extends BucketQuantileIterator
     implements TimeSeries, 
                TypedTimeSeriesIterator<NumericArrayType>, 
                TimeSeriesValue<NumericArrayType>, 

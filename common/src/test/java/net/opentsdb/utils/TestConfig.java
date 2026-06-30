@@ -39,19 +39,19 @@ public final class TestConfig {
   public void constructor() throws Exception {
     assertNotNull(new Config(false));
   }
-  
+
   @Test
   public void constructorDefault() throws Exception {
     assertEquals("0.0.0.0", new Config(false).getString("tsd.network.bind"));
   }
-  
+
   @Test
   public void constructorChild() throws Exception {
     Config c = new Config(false);
     assertNotNull(c);
     assertNotNull(new Config(c));
   }
-  
+
   @Test
   public void constructorChildCopy() throws Exception {
     Config c = new Config(false);
@@ -63,7 +63,7 @@ public final class TestConfig {
     assertEquals("Parent", c.getString("MyProp"));
     assertEquals("Child", ch.getString("MyProp"));
   }
-  
+
   @Test(expected = NullPointerException.class)
   public void constructorNullChild() throws Exception {
     new Config((Config) null);
@@ -75,7 +75,7 @@ public final class TestConfig {
     final FileWriter writer = new FileWriter(confFile, false);
     writer.write("tsd.test = val1\n");
     writer.close();
-    
+
     final Config config = new Config(confFile.toString());
     assertNotNull(config);
     assertEquals(confFile.toString(), config.config_location);
@@ -91,7 +91,7 @@ public final class TestConfig {
   public void constructorNullFile() throws Exception {
     new Config((String) null);
   }
-  
+
   @Test(expected = NullPointerException.class)
   public void constructorNullInputStream() throws Exception {
     new Config((InputStream) null);
@@ -114,43 +114,43 @@ public final class TestConfig {
     config.overrideConfig("tsd.core.bind", "127.0.0.1");
     assertEquals("127.0.0.1", config.getString("tsd.core.bind"));
   }
-  
-  @Test 
+
+  @Test
   public void getString() throws Exception {
     final Config config = new Config(false);
     assertEquals("1000", config.getString("tsd.storage.flush_interval"));
   }
-  
+
   @Test
   public void getStringNull() throws Exception {
     final Config config = new Config(false);
     assertNull(config.getString("tsd.blarg"));
   }
-  
+
   @Test
   public void getInt() throws Exception {
     final Config config = new Config(false);
-    config.overrideConfig("tsd.int", 
+    config.overrideConfig("tsd.int",
         Integer.toString(Integer.MAX_VALUE));
-    assertEquals(Integer.MAX_VALUE, 
+    assertEquals(Integer.MAX_VALUE,
         config.getInt("tsd.int"));
   }
 
   @Test
   public void getIntWithSpaces() throws Exception {
     final Config config = new Config(false);
-    config.overrideConfig("tsd.int", 
+    config.overrideConfig("tsd.int",
         " " + Integer.toString(Integer.MAX_VALUE) + " ");
-    assertEquals(Integer.MAX_VALUE, 
+    assertEquals(Integer.MAX_VALUE,
         config.getInt("tsd.int"));
   }
 
   @Test
   public void getIntNegative() throws Exception {
     final Config config = new Config(false);
-    config.overrideConfig("tsd.int", 
+    config.overrideConfig("tsd.int",
         Integer.toString(Integer.MIN_VALUE));
-    assertEquals(Integer.MIN_VALUE, 
+    assertEquals(Integer.MIN_VALUE,
         config.getInt("tsd.int"));
   }
 
@@ -170,7 +170,7 @@ public final class TestConfig {
   @Test(expected = NumberFormatException.class)
   public void getIntNFE() throws Exception {
     final Config config = new Config(false);
-    config.overrideConfig("tsd.int", 
+    config.overrideConfig("tsd.int",
         "this can't be parsed to int");
     config.getInt("tsd.int");
   }
@@ -178,27 +178,27 @@ public final class TestConfig {
   @Test
   public void getShort() throws Exception {
     final Config config = new Config(false);
-    config.overrideConfig("tsd.short", 
+    config.overrideConfig("tsd.short",
         Short.toString(Short.MAX_VALUE));
-    assertEquals(Short.MAX_VALUE, 
+    assertEquals(Short.MAX_VALUE,
         config.getShort("tsd.short"));
   }
 
   @Test
   public void getShortWithSpaces() throws Exception {
     final Config config = new Config(false);
-    config.overrideConfig("tsd.short", 
+    config.overrideConfig("tsd.short",
         " " + Short.toString(Short.MAX_VALUE) + " ");
-    assertEquals(Short.MAX_VALUE, 
+    assertEquals(Short.MAX_VALUE,
         config.getShort("tsd.short"));
   }
 
   @Test
   public void getShortNegative() throws Exception {
     final Config config = new Config(false);
-    config.overrideConfig("tsd.short", 
+    config.overrideConfig("tsd.short",
         Short.toString(Short.MIN_VALUE));
-    assertEquals(Short.MIN_VALUE, 
+    assertEquals(Short.MIN_VALUE,
         config.getShort("tsd.short"));
   }
 
@@ -218,7 +218,7 @@ public final class TestConfig {
   @Test(expected = NumberFormatException.class)
   public void getShortNFE() throws Exception {
     final Config config = new Config(false);
-    config.overrideConfig("tsd.short", 
+    config.overrideConfig("tsd.short",
         "this can't be parsed to short");
     config.getShort("tsd.short");
   }
@@ -241,7 +241,7 @@ public final class TestConfig {
   public void getLongNegative() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.long", Long.toString(Long.MIN_VALUE));
-    assertEquals(Long.MIN_VALUE, 
+    assertEquals(Long.MIN_VALUE,
         config.getLong("tsd.long"));
   }
 
@@ -269,7 +269,7 @@ public final class TestConfig {
   public void getFloat() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.float", Float.toString(Float.MAX_VALUE));
-    assertEquals(Float.MAX_VALUE, 
+    assertEquals(Float.MAX_VALUE,
         config.getFloat("tsd.float"), 0.000001);
   }
 
@@ -277,7 +277,7 @@ public final class TestConfig {
   public void getFloatWithSpaces() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.float", " " + Float.toString(Float.MAX_VALUE) + " ");
-    assertEquals(Float.MAX_VALUE, 
+    assertEquals(Float.MAX_VALUE,
         config.getFloat("tsd.float"), 0.000001);
   }
 
@@ -285,7 +285,7 @@ public final class TestConfig {
   public void getFloatNegative() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.float", Float.toString(Float.MIN_VALUE));
-    assertEquals(Float.MIN_VALUE, 
+    assertEquals(Float.MIN_VALUE,
         config.getFloat("tsd.float"), 0.000001);
   }
 
@@ -293,7 +293,7 @@ public final class TestConfig {
   public void getFloatNaN() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.float", "NaN");
-    assertEquals(Float.NaN, 
+    assertEquals(Float.NaN,
         config.getDouble("tsd.float"), 0.000001);
   }
 
@@ -301,7 +301,7 @@ public final class TestConfig {
   public void getFloatNaNBadCase() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.float", "nan");
-    assertEquals(Float.NaN, 
+    assertEquals(Float.NaN,
         config.getDouble("tsd.float"), 0.000001);
   }
 
@@ -309,7 +309,7 @@ public final class TestConfig {
   public void getFloatPIfinity() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.float", "Infinity");
-    assertEquals(Float.POSITIVE_INFINITY, 
+    assertEquals(Float.POSITIVE_INFINITY,
         config.getDouble("tsd.float"), 0.000001);
   }
 
@@ -317,7 +317,7 @@ public final class TestConfig {
   public void getFloatNIfinity() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.float", "-Infinity");
-    assertEquals(Float.NEGATIVE_INFINITY, 
+    assertEquals(Float.NEGATIVE_INFINITY,
         config.getDouble("tsd.float"), 0.000001);
   }
 
@@ -345,7 +345,7 @@ public final class TestConfig {
   public void getDouble() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.double", Double.toString(Double.MAX_VALUE));
-    assertEquals(Double.MAX_VALUE, 
+    assertEquals(Double.MAX_VALUE,
         config.getDouble("tsd.double"), 0.000001);
   }
 
@@ -353,7 +353,7 @@ public final class TestConfig {
   public void getDoubleWithSpaces() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.double", " " + Double.toString(Double.MAX_VALUE) + " ");
-    assertEquals(Double.MAX_VALUE, 
+    assertEquals(Double.MAX_VALUE,
         config.getDouble("tsd.double"), 0.000001);
   }
 
@@ -361,7 +361,7 @@ public final class TestConfig {
   public void getDoubleNegative() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.double", Double.toString(-Double.MAX_VALUE));
-    assertEquals(-Double.MAX_VALUE, 
+    assertEquals(-Double.MAX_VALUE,
         config.getDouble("tsd.double"), 0.000001);
   }
 
@@ -369,7 +369,7 @@ public final class TestConfig {
   public void getDoubleNaN() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.double", "NaN");
-    assertEquals(Double.NaN, 
+    assertEquals(Double.NaN,
         config.getDouble("tsd.double"), 0.000001);
   }
 
@@ -377,7 +377,7 @@ public final class TestConfig {
   public void getDoubleNaNBadCase() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.double", "nan");
-    assertEquals(Double.NaN, 
+    assertEquals(Double.NaN,
         config.getDouble("tsd.double"), 0.000001);
   }
 
@@ -413,7 +413,7 @@ public final class TestConfig {
   @Test(expected = NumberFormatException.class)
   public void getDoubleNFE() throws Exception {
     final Config config = new Config(false);
-    config.overrideConfig("tsd.double", 
+    config.overrideConfig("tsd.double",
         "this can't be parsed to double");
     config.getDouble("tsd.double");
   }
@@ -536,7 +536,7 @@ public final class TestConfig {
     config.overrideConfig("tsd.unitest", "/my/dir");
     assertEquals("/my/dir/", config.getDirectoryName("tsd.unitest"));
   }
-  
+
   @Test
   public void getDirectoryNameHasSlash() throws Exception {
     // same for Windows && Unix
@@ -544,7 +544,7 @@ public final class TestConfig {
     config.overrideConfig("tsd.unitest", "/my/dir/");
     assertEquals("/my/dir/", config.getDirectoryName("tsd.unitest"));
   }
-  
+
   @Test
   public void getDirectoryNameWindowsAddSlash() throws Exception {
     if (Config.IS_WINDOWS) {
@@ -555,7 +555,7 @@ public final class TestConfig {
       assertTrue(true);
     }
   }
-  
+
   @Test
   public void getDirectoryNameWindowsHasSlash() throws Exception {
     if (Config.IS_WINDOWS) {
@@ -566,7 +566,7 @@ public final class TestConfig {
       assertTrue(true);
     }
   }
-  
+
   @Test (expected = IllegalArgumentException.class)
   public void getDirectoryNameWindowsOnLinuxException() throws Exception {
     if (Config.IS_WINDOWS) {
@@ -577,20 +577,20 @@ public final class TestConfig {
       config.getDirectoryName("tsd.unitest");
     }
   }
-  
+
   @Test
   public void getDirectoryNameNull() throws Exception {
     final Config config = new Config(false);
     assertNull(config.getDirectoryName("tsd.unitest"));
   }
-  
+
   @Test
   public void getDirectoryNameEmpty() throws Exception {
     final Config config = new Config(false);
     config.overrideConfig("tsd.unitest", "");
     assertNull(config.getDirectoryName("tsd.unitest"));
   }
-  
+
   @Test
   public void getDirectoryNameNoslash() throws Exception {
     final Config config = new Config(false);

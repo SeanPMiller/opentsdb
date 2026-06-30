@@ -55,7 +55,7 @@ import net.opentsdb.stats.Span;
  * 
  * @since 3.0
  */
-public class QueryGRPCClientFactory extends BaseTSDBPlugin 
+public class QueryGRPCClientFactory extends BaseTSDBPlugin
     implements TimeSeriesDataSourceFactory<TimeSeriesDataSourceConfig, QueryGRPCClient> {
   private static final Logger LOG = LoggerFactory.getLogger(
       QueryGRPCClientFactory.class);

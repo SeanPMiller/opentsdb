@@ -80,8 +80,8 @@ public class TestYmsESClient {
           if (!args.isEmpty() && args.get(0) != null) {
             settings.add((Settings) args.get(0));
             clients.add(mock);
-              }
-            });
+          }
+        });
   }
 
   @After

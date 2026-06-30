@@ -163,7 +163,7 @@ public class TestReadCacheQueryPipelineContext {
           }
     });
   }
-  
+
   @After
   public void tearDownStaticMocks() {
     mockedDateTime.closeOnDemand();

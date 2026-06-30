@@ -48,8 +48,8 @@ import com.stumbleupon.async.Deferred;
  * 
  * @since 3.0
  */
-public class MockDataStoreFactory extends BaseTSDBPlugin 
-  implements TimeSeriesDataSourceFactory<TimeSeriesDataSourceConfig, MockDataStore.LocalNode>,
+public class MockDataStoreFactory extends BaseTSDBPlugin
+    implements TimeSeriesDataSourceFactory<TimeSeriesDataSourceConfig, MockDataStore.LocalNode>,
              TimeSeriesDataConsumerFactory {
   private static final Logger LOG = LoggerFactory.getLogger(
       MockDataStoreFactory.class);

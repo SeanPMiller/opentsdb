@@ -42,8 +42,8 @@ import redis.clients.jedis.params.SetParams;
  * 
  * @since 3.0
  */
-public class RedisQueryCache extends BaseTSDBPlugin 
-    implements ByteCache {
+public class RedisQueryCache extends BaseTSDBPlugin
+     implements ByteCache {
   private static final Logger LOG = LoggerFactory.getLogger(
       RedisQueryCache.class);
   

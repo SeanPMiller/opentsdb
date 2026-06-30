@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
  * @since 3.0
  */
 public class Tsdb1xNumericPartialTimeSeries extends 
-    Tsdb1xPartialTimeSeries<NumericLongArrayType> 
-      implements NumericLongArrayType{
+    Tsdb1xPartialTimeSeries<NumericLongArrayType>
+    implements NumericLongArrayType{
   private static final Logger LOG = LoggerFactory.getLogger(
       Tsdb1xNumericPartialTimeSeries.class);
   

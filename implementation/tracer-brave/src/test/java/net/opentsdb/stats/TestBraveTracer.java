@@ -72,7 +72,7 @@ public class TestBraveTracer {
     reporter_builder = mock(AsyncReporter.Builder.class);
     trace = Mockito.mock(Trace.class);
     tracer_builder = Mockito.mock(BraveTraceBuilder.class);
-    
+
     when(tsdb.getConfig()).thenReturn(config);
     mockedOkHttpSender = Mockito.mockStatic(OkHttpSender.class);
     mockedOkHttpSender.when(() -> OkHttpSender.create(anyString())).thenReturn(sender);
@@ -90,7 +90,7 @@ public class TestBraveTracer {
     when(tracer_builder.setId(anyString())).thenReturn(tracer_builder);
     when(tracer_builder.build()).thenReturn(trace);
   }
-  
+
   @After
   public void tearDownStaticMocks() {
     mockedBraveTrace.closeOnDemand();

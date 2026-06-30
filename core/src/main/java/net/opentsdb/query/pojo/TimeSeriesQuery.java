@@ -67,7 +67,7 @@ import com.google.common.hash.Hashing;
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonDeserialize(builder = TimeSeriesQuery.Builder.class)
-public class TimeSeriesQuery extends Validatable 
+public class TimeSeriesQuery extends Validatable
     implements Comparable<TimeSeriesQuery>{
   private static final Logger LOG = LoggerFactory.getLogger(TimeSeriesQuery.class);
   

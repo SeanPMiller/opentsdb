@@ -53,7 +53,7 @@ public class TestPubSubWriter {
     if (mockedCreds != null) mockedCreds.close();
     if (mockedPublisher != null) mockedPublisher.close();
   }
-  
+
   @Before
   public void before() throws Exception {
     // Point the json key at a real (empty) temp file so the writer's
@@ -68,15 +68,15 @@ public class TestPubSubWriter {
     mockedCreds.when(() -> GoogleCredentials.fromStream(any(InputStream.class)))
       .thenReturn(mock(GoogleCredentials.class));
     mockedPublisher = Mockito.mockStatic(Publisher.class);
-    
+
     tsdb = new MockTSDB();
     serdes = mock(TimeSeriesDataConverter.class);
     when(tsdb.registry.getDefaultPlugin(TimeSeriesDataConverter.class))
       .thenReturn(serdes);
-    
+
     pub_builder = mock(Publisher.Builder.class);
     publisher = mock(Publisher.class);
-    
+
     mockedPublisher.when(() -> Publisher.newBuilder(any(TopicName.class)))
       .thenReturn(pub_builder);
     when(pub_builder.setCredentialsProvider(any(CredentialsProvider.class)))

@@ -30,7 +30,7 @@ import com.stumbleupon.async.Deferred;
  * @since 3.0
  */
 public class MetricRegexFactory extends BaseTSDBPlugin
-        implements QueryFilterFactory {
+    implements QueryFilterFactory {
 
   static final String TYPE = "MetricRegex";
 

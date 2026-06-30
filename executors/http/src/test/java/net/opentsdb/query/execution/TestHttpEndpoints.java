@@ -48,7 +48,7 @@ public class TestHttpEndpoints {
 
   @Rule
   public TemporaryFolder tempDir = new TemporaryFolder();
-  
+
   @Before
   public void before() throws Exception {
     config = new Config(false);
@@ -171,7 +171,7 @@ public class TestHttpEndpoints {
         HttpEndpoints.DEFAULT_LOAD_INTERVAL, TimeUnit.MILLISECONDS);
     assertEquals(0, endpoints.getEndpoints().size());
   }
-  
+ 
   @Test
   public void loadFileExceptionOnRead() throws Exception {
     mockedFiles.when(() -> Files.toString(file, Const.UTF8_CHARSET))
@@ -245,7 +245,7 @@ public class TestHttpEndpoints {
   private void setFile(String json) throws Exception {
     final File jsonFile = new File(tempDir.getRoot(), "test.json");
     config.overrideConfig("tsd.query.http.endpoints.config", jsonFile.getAbsolutePath());
-    
+
     final FileWriter writer = new FileWriter(jsonFile, false);
     if (json == null || json.isEmpty()) {
       json = "{\"" + HttpEndpoints.DEFAULT_KEY + "\":[\"host1\",\"host2\"],"

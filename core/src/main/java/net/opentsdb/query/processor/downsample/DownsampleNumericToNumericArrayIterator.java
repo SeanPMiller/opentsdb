@@ -75,7 +75,7 @@ import com.google.common.reflect.TypeToken;
  * <p>
  * @since 3.0
  */
-public class DownsampleNumericToNumericArrayIterator 
+public class DownsampleNumericToNumericArrayIterator
     implements AggregatingQueryIterator, TimeSeriesValue<NumericArrayType> {
 
   private static final Logger LOG =

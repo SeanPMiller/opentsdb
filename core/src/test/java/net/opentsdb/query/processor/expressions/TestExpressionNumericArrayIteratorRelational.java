@@ -1092,38 +1092,38 @@ public class TestExpressionNumericArrayIteratorRelational extends BaseNumericTes
 
   @Test
   public void fillNaNInfectious() throws Exception {
-    left = new NumericArrayTimeSeries(LEFT_ID, 
+    left = new NumericArrayTimeSeries(LEFT_ID,
         new SecondTimeStamp(60));
     ((NumericArrayTimeSeries) left).add(1.1);
     ((NumericArrayTimeSeries) left).add(Double.NaN);
     ((NumericArrayTimeSeries) left).add(37.66);
-    
-    right = new NumericArrayTimeSeries(RIGHT_ID, 
+
+    right = new NumericArrayTimeSeries(RIGHT_ID,
         new SecondTimeStamp(60));
     ((NumericArrayTimeSeries) right).add(4.5);
     ((NumericArrayTimeSeries) right).add(5.75);
     ((NumericArrayTimeSeries) right).add(8.9);
-    
+
     // EQ
-    ExpressionNumericArrayIterator iterator = 
-        new ExpressionNumericArrayIterator(node, RESULT, 
+    ExpressionNumericArrayIterator iterator =
+        new ExpressionNumericArrayIterator(node, RESULT,
             (Map) ImmutableMap.builder()
-              .put(ExpressionTimeSeries.LEFT_KEY, left)
-              .put(ExpressionTimeSeries.RIGHT_KEY, right)
-              .build());
+                .put(ExpressionTimeSeries.LEFT_KEY, left)
+                .put(ExpressionTimeSeries.RIGHT_KEY, right)
+                .build());
     Field infectious_nanField5 = iterator.getClass().getDeclaredField("infectious_nan");
     infectious_nanField5.setAccessible(true);
     infectious_nanField5.set(iterator, true);
     assertTrue(iterator.hasNext());
-    TimeSeriesValue<NumericArrayType> value = 
+    TimeSeriesValue<NumericArrayType> value =
         (TimeSeriesValue<NumericArrayType>) iterator.next();
-    assertArrayEquals(new double[] { 0, Double.NaN, 0 },
+    assertArrayEquals(new double[]{0, Double.NaN, 0},
         value.value().doubleArray(), 0.001);
     assertEquals(60, value.timestamp().epoch());
     assertEquals(0, value.value().offset());
     assertEquals(3, value.value().end());
     assertFalse(iterator.hasNext());
-    
+
     // NE
     expression_config = (ExpressionParseNode) ExpressionParseNode.newBuilder()
         .setLeft("a")
@@ -1135,24 +1135,24 @@ public class TestExpressionNumericArrayIteratorRelational extends BaseNumericTes
         .setId("expression")
         .build();
     when(node.config()).thenReturn(expression_config);
-    
-    iterator = new ExpressionNumericArrayIterator(node, RESULT, 
-            (Map) ImmutableMap.builder()
-              .put(ExpressionTimeSeries.LEFT_KEY, left)
-              .put(ExpressionTimeSeries.RIGHT_KEY, right)
-              .build());
+
+    iterator = new ExpressionNumericArrayIterator(node, RESULT,
+        (Map) ImmutableMap.builder()
+            .put(ExpressionTimeSeries.LEFT_KEY, left)
+            .put(ExpressionTimeSeries.RIGHT_KEY, right)
+            .build());
     Field infectious_nanField4 = iterator.getClass().getDeclaredField("infectious_nan");
     infectious_nanField4.setAccessible(true);
     infectious_nanField4.set(iterator, true);
     assertTrue(iterator.hasNext());
-    value =  (TimeSeriesValue<NumericArrayType>) iterator.next();
-    assertArrayEquals(new double[] { 1, Double.NaN, 1 },
+    value = (TimeSeriesValue<NumericArrayType>) iterator.next();
+    assertArrayEquals(new double[]{1, Double.NaN, 1},
         value.value().doubleArray(), 0.001);
     assertEquals(60, value.timestamp().epoch());
     assertEquals(0, value.value().offset());
     assertEquals(3, value.value().end());
     assertFalse(iterator.hasNext());
-    
+
     // LT
     expression_config = (ExpressionParseNode) ExpressionParseNode.newBuilder()
         .setLeft("a")
@@ -1164,24 +1164,24 @@ public class TestExpressionNumericArrayIteratorRelational extends BaseNumericTes
         .setId("expression")
         .build();
     when(node.config()).thenReturn(expression_config);
-    
-    iterator = new ExpressionNumericArrayIterator(node, RESULT, 
-            (Map) ImmutableMap.builder()
-              .put(ExpressionTimeSeries.LEFT_KEY, left)
-              .put(ExpressionTimeSeries.RIGHT_KEY, right)
-              .build());
+
+    iterator = new ExpressionNumericArrayIterator(node, RESULT,
+        (Map) ImmutableMap.builder()
+            .put(ExpressionTimeSeries.LEFT_KEY, left)
+            .put(ExpressionTimeSeries.RIGHT_KEY, right)
+            .build());
     Field infectious_nanField3 = iterator.getClass().getDeclaredField("infectious_nan");
     infectious_nanField3.setAccessible(true);
     infectious_nanField3.set(iterator, true);
     assertTrue(iterator.hasNext());
-    value =  (TimeSeriesValue<NumericArrayType>) iterator.next();
-    assertArrayEquals(new double[] { 1, Double.NaN, 0 },
+    value = (TimeSeriesValue<NumericArrayType>) iterator.next();
+    assertArrayEquals(new double[]{1, Double.NaN, 0},
         value.value().doubleArray(), 0.001);
     assertEquals(60, value.timestamp().epoch());
     assertEquals(0, value.value().offset());
     assertEquals(3, value.value().end());
     assertFalse(iterator.hasNext());
-    
+
     // GT
     expression_config = (ExpressionParseNode) ExpressionParseNode.newBuilder()
         .setLeft("a")
@@ -1193,24 +1193,24 @@ public class TestExpressionNumericArrayIteratorRelational extends BaseNumericTes
         .setId("expression")
         .build();
     when(node.config()).thenReturn(expression_config);
-    
-    iterator = new ExpressionNumericArrayIterator(node, RESULT, 
-            (Map) ImmutableMap.builder()
-              .put(ExpressionTimeSeries.LEFT_KEY, left)
-              .put(ExpressionTimeSeries.RIGHT_KEY, right)
-              .build());
+
+    iterator = new ExpressionNumericArrayIterator(node, RESULT,
+        (Map) ImmutableMap.builder()
+            .put(ExpressionTimeSeries.LEFT_KEY, left)
+            .put(ExpressionTimeSeries.RIGHT_KEY, right)
+            .build());
     Field infectious_nanField2 = iterator.getClass().getDeclaredField("infectious_nan");
     infectious_nanField2.setAccessible(true);
     infectious_nanField2.set(iterator, true);
     assertTrue(iterator.hasNext());
-    value =  (TimeSeriesValue<NumericArrayType>) iterator.next();
-    assertArrayEquals(new double[] { 0, Double.NaN, 1 },
+    value = (TimeSeriesValue<NumericArrayType>) iterator.next();
+    assertArrayEquals(new double[]{0, Double.NaN, 1},
         value.value().doubleArray(), 0.001);
     assertEquals(60, value.timestamp().epoch());
     assertEquals(0, value.value().offset());
     assertEquals(3, value.value().end());
     assertFalse(iterator.hasNext());
-    
+
     // LE
     expression_config = (ExpressionParseNode) ExpressionParseNode.newBuilder()
         .setLeft("a")
@@ -1222,24 +1222,24 @@ public class TestExpressionNumericArrayIteratorRelational extends BaseNumericTes
         .setId("expression")
         .build();
     when(node.config()).thenReturn(expression_config);
-    
-    iterator = new ExpressionNumericArrayIterator(node, RESULT, 
-            (Map) ImmutableMap.builder()
-              .put(ExpressionTimeSeries.LEFT_KEY, left)
-              .put(ExpressionTimeSeries.RIGHT_KEY, right)
-              .build());
+
+    iterator = new ExpressionNumericArrayIterator(node, RESULT,
+        (Map) ImmutableMap.builder()
+            .put(ExpressionTimeSeries.LEFT_KEY, left)
+            .put(ExpressionTimeSeries.RIGHT_KEY, right)
+            .build());
     Field infectious_nanField1 = iterator.getClass().getDeclaredField("infectious_nan");
     infectious_nanField1.setAccessible(true);
     infectious_nanField1.set(iterator, true);
     assertTrue(iterator.hasNext());
-    value =  (TimeSeriesValue<NumericArrayType>) iterator.next();
-    assertArrayEquals(new double[] { 1, Double.NaN, 0 },
+    value = (TimeSeriesValue<NumericArrayType>) iterator.next();
+    assertArrayEquals(new double[]{1, Double.NaN, 0},
         value.value().doubleArray(), 0.001);
     assertEquals(60, value.timestamp().epoch());
     assertEquals(0, value.value().offset());
     assertEquals(3, value.value().end());
     assertFalse(iterator.hasNext());
-    
+
     // GE
     expression_config = (ExpressionParseNode) ExpressionParseNode.newBuilder()
         .setLeft("a")
@@ -1251,18 +1251,18 @@ public class TestExpressionNumericArrayIteratorRelational extends BaseNumericTes
         .setId("expression")
         .build();
     when(node.config()).thenReturn(expression_config);
-    
-    iterator = new ExpressionNumericArrayIterator(node, RESULT, 
-            (Map) ImmutableMap.builder()
-              .put(ExpressionTimeSeries.LEFT_KEY, left)
-              .put(ExpressionTimeSeries.RIGHT_KEY, right)
-              .build());
+
+    iterator = new ExpressionNumericArrayIterator(node, RESULT,
+        (Map) ImmutableMap.builder()
+            .put(ExpressionTimeSeries.LEFT_KEY, left)
+            .put(ExpressionTimeSeries.RIGHT_KEY, right)
+            .build());
     Field infectious_nanField = iterator.getClass().getDeclaredField("infectious_nan");
     infectious_nanField.setAccessible(true);
     infectious_nanField.set(iterator, true);
     assertTrue(iterator.hasNext());
-    value =  (TimeSeriesValue<NumericArrayType>) iterator.next();
-    assertArrayEquals(new double[] { 0, Double.NaN, 1 },
+    value = (TimeSeriesValue<NumericArrayType>) iterator.next();
+    assertArrayEquals(new double[]{0, Double.NaN, 1},
         value.value().doubleArray(), 0.001);
     assertEquals(60, value.timestamp().epoch());
     assertEquals(0, value.value().offset());

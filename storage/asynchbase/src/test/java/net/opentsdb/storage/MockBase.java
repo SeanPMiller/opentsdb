@@ -1656,7 +1656,7 @@ public final class MockBase {
          .append(filter);
       return buf.toString();
     }
-    
+
     @Override
     public Deferred<ArrayList<ArrayList<KeyValue>>> answer(
         final InvocationOnMock invocation) throws Throwable {
@@ -1665,7 +1665,7 @@ public final class MockBase {
         final ByteMap<ByteMap<ByteMap<TreeMap<Long, byte[]>>>> map =
             storage.get(table);
         if (map == null) {
-          return Deferred.fromError( new RuntimeException(
+          return Deferred.fromError(new RuntimeException(
               "No such table " + Bytes.pretty(table)));
         }
 
@@ -1688,10 +1688,10 @@ public final class MockBase {
           final ByteMap<ByteMap<TreeMap<Long, byte[]>>> cf = map.get(family);
           if (cf == null) {
             return Deferred.fromError(new RuntimeException(
-            "No such CF " + Bytes.pretty(family)));
+                "No such CF " + Bytes.pretty(family)));
           }
           final Iterator<Entry<byte[], ByteMap<TreeMap<Long, byte[]>>>>
-            cursor = cf.iterator();
+              cursor = cf.iterator();
           cursors.put(family, cursor);
           cf_rows.put(family, null);
         }
@@ -1711,11 +1711,11 @@ public final class MockBase {
         KeyRegexpFilter regex_filter = null;
 
         if (filter instanceof KeyRegexpFilter) {
-          regex_filter = (KeyRegexpFilter)filter;
+          regex_filter = (KeyRegexpFilter) filter;
         } else if (filter instanceof FilterList) {
-          for (final ScanFilter f : ((FilterList)filter).filters()) {
+          for (final ScanFilter f : ((FilterList) filter).filters()) {
             if (f instanceof KeyRegexpFilter) {
-              regex_filter = (KeyRegexpFilter)f;
+              regex_filter = (KeyRegexpFilter) f;
             }
           }
         }
@@ -1723,7 +1723,7 @@ public final class MockBase {
         if (regex_filter != null) {
           try {
             // key regex filter uses Bytes.UTF8(<string>)
-            pattern = Pattern.compile(new String(regex_filter.getRegexp(), 
+            pattern = Pattern.compile(new String(regex_filter.getRegexp(),
                 Charset.forName("UTF-8")));
             regex_charset = regex_filter.getCharset();
           } catch (PatternSyntaxException e) {
@@ -1735,7 +1735,7 @@ public final class MockBase {
 
       // start scanning
       final ArrayList<ArrayList<KeyValue>> results =
-        new ArrayList<ArrayList<KeyValue>>();
+          new ArrayList<ArrayList<KeyValue>>();
       int rows_read = 0;
       int columns_read = 0;
       while (hasNext()) {
@@ -1787,7 +1787,7 @@ public final class MockBase {
           if (column_cursor == null) {
             column_cursor = row.getValue().getValue().entrySet().iterator();
           }
-          while(column_cursor.hasNext()) {
+          while (column_cursor.hasNext()) {
             final Entry<byte[], TreeMap<Long, byte[]>> column = column_cursor.next();
             // if the qualifier isn't in the set, continue
             if (scnr_qualifiers != null &&
@@ -1813,7 +1813,7 @@ public final class MockBase {
               } else if (filter instanceof QualifierFilter) {
                 qfs.add((QualifierFilter) filter);
               }
-              
+
               if (!qfs.isEmpty()) {
                 boolean matched = false;
                 for (final QualifierFilter qf : qfs) {
@@ -1824,7 +1824,7 @@ public final class MockBase {
                     Field valueField = fc.getClass().getDeclaredField("value");
                     valueField.setAccessible(true);
                     byte[] comparator = (byte[]) valueField.get(fc);
-                    if (Bytes.memcmp(comparator, column.getKey(), 0, 
+                    if (Bytes.memcmp(comparator, column.getKey(), 0,
                         comparator.length) == 0) {
                       matched = true;
                     }
@@ -1833,14 +1833,14 @@ public final class MockBase {
                     Field exprField = fc.getClass().getDeclaredField("expr");
                     exprField.setAccessible(true);
                     final Pattern p = Pattern.compile((String) exprField.get(fc));
-                   
+
                     Field charsetField = fc.getClass().getDeclaredField("charset");
                     charsetField.setAccessible(true);
-                   final String qualifier = new String(column.getKey(), 
+                    final String qualifier = new String(column.getKey(),
                         (Charset) charsetField.get(fc));
-                   if (p.matcher(qualifier).matches()) {
-                     matched = true;
-                   }
+                    if (p.matcher(qualifier).matches()) {
+                      matched = true;
+                    }
                   }
                 }
                 if (!matched) {
@@ -1848,7 +1848,7 @@ public final class MockBase {
                 }
               }
             }
-            
+
             kvs.add(new KeyValue(row.getValue().getKey(), row.getKey(),
                 column.getKey(), column.getValue().firstKey(),
                 column.getValue().firstEntry().getValue()));
@@ -1859,7 +1859,7 @@ public final class MockBase {
               results.add(kvs);
               return Deferred.fromResult(results);
             }
-            
+
           }
           // end of column so flush it.
           column_cursor = null;
@@ -1869,7 +1869,7 @@ public final class MockBase {
           results.add(kvs);
         }
         rows_read++;
-        
+
         if (rows_read >= max_num_rows) {
           Thread.sleep(10); // this is here for time based unit tests
           break;

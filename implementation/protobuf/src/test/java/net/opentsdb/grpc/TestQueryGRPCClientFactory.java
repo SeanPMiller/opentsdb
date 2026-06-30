@@ -111,17 +111,17 @@ public class TestQueryGRPCClientFactory {
     assertTrue(factory.supportsPushdown(DownsampleConfig.class));
     assertFalse(factory.supportsPushdown(ExpressionConfig.class));
   }
-  
+
   @Test
   public void newNode() throws Exception {
     final QueryGRPCClientFactory factory = new QueryGRPCClientFactory();
     try (MockedConstruction<QueryGRPCClient> mockQueryGRPCClient = Mockito.mockConstruction(QueryGRPCClient.class)) {
       final QueryNode node = factory.newNode(mock(QueryPipelineContext.class),
           mock(BaseTimeSeriesDataSourceConfig.class));
-    
+
       assertEquals(1, mockQueryGRPCClient.constructed().size());
       final QueryGRPCClient client = mockQueryGRPCClient.constructed().get(0);
       assertSame(client, node);
+    }
   }
-}
 }

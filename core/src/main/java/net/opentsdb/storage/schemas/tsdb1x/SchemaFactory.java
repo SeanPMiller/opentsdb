@@ -55,8 +55,8 @@ import com.stumbleupon.async.Deferred;
  * 
  * @since 3.0
  */
-public class SchemaFactory extends BaseTSDBPlugin 
-                           implements TimeSeriesDataSourceFactory<TimeSeriesDataSourceConfig, Tsdb1xQueryNode>,
+public class SchemaFactory extends BaseTSDBPlugin
+    implements TimeSeriesDataSourceFactory<TimeSeriesDataSourceConfig, Tsdb1xQueryNode>,
                                       TimeSeriesDataConsumerFactory {
   private static final Logger LOG = LoggerFactory.getLogger(SchemaFactory.class);
 

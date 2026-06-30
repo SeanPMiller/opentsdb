@@ -130,21 +130,21 @@ public class TestGroupBy {
     gb.onComplete(null, 42, 42);
     verify(upstream, times(2)).onComplete(gb, 42, 42);
   }
-  
+
   @Test
   public void onNext() throws Exception {
     try (MockedConstruction<GroupByResult> mockGroupByResult = Mockito.mockConstruction(GroupByResult.class)) {
-    final QueryResult results = mock(QueryResult.class);
-    
-    GroupBy gb = new GroupBy(factory, context, config);
-    gb.initialize(null);
+      final QueryResult results = mock(QueryResult.class);
+
+      GroupBy gb = new GroupBy(factory, context, config);
+      gb.initialize(null);
       gb.onNext(results);
-    
+
       final GroupByResult gb_results = mockGroupByResult.constructed().get(0);
-    verify(upstream, times(1)).onNext(gb_results);
-    
-    doThrow(new IllegalArgumentException("Boo!")).when(upstream)
-      .onNext(any(QueryResult.class));
+      verify(upstream, times(1)).onNext(gb_results);
+
+      doThrow(new IllegalArgumentException("Boo!")).when(upstream)
+          .onNext(any(QueryResult.class));
 //    try {
       gb.onNext(results);
 //      fail("Expected QueryUpstreamException");
@@ -152,108 +152,108 @@ public class TestGroupBy {
       verify(upstream, times(2)).onNext(any(QueryResult.class));
     }
   }
-  
+
   @Test
   public void onNextResolve() throws Exception {
     try (MockedConstruction<GroupByResult> mockGroupByResult = Mockito.mockConstruction(GroupByResult.class)) {
-    final QueryResult results = mock(QueryResult.class);
-    when(results.dataSource()).thenReturn(new DefaultQueryResultId("m1", "m1"));
-    when(results.idType()).thenAnswer(new Answer<TypeToken<?>>() {
-      @Override
-      public TypeToken<?> answer(InvocationOnMock invocation) throws Throwable {
-        return Const.TS_BYTE_ID;
-      }
-    });
-    TimeSeries ts = mock(TimeSeries.class);
-    TimeSeriesDataSourceFactory datastore = mock(TimeSeriesDataSourceFactory.class);
-    TimeSeriesByteId id =  BaseTimeSeriesByteId.newBuilder(datastore)
-        .setMetric(new byte[] { 0, 0, 1 })
-        .addTags(new byte[] { 0, 0, 1 }, new byte[] { 0, 0, 1 })
-        .build();
-    when(ts.iterator(any(TypeToken.class))).thenReturn(Optional.empty());
-    when(results.timeSeries()).thenReturn(Lists.newArrayList(ts));
-    when(ts.id()).thenReturn(id);
-    Deferred<List<byte[]>> deferred = new Deferred<List<byte[]>>();
+      final QueryResult results = mock(QueryResult.class);
+      when(results.dataSource()).thenReturn(new DefaultQueryResultId("m1", "m1"));
+      when(results.idType()).thenAnswer(new Answer<TypeToken<?>>() {
+        @Override
+        public TypeToken<?> answer(InvocationOnMock invocation) throws Throwable {
+          return Const.TS_BYTE_ID;
+        }
+      });
+      TimeSeries ts = mock(TimeSeries.class);
+      TimeSeriesDataSourceFactory datastore = mock(TimeSeriesDataSourceFactory.class);
+      TimeSeriesByteId id = BaseTimeSeriesByteId.newBuilder(datastore)
+          .setMetric(new byte[]{0, 0, 1})
+          .addTags(new byte[]{0, 0, 1}, new byte[]{0, 0, 1})
+          .build();
+      when(ts.iterator(any(TypeToken.class))).thenReturn(Optional.empty());
+      when(results.timeSeries()).thenReturn(Lists.newArrayList(ts));
+      when(ts.id()).thenReturn(id);
+      Deferred<List<byte[]>> deferred = new Deferred<List<byte[]>>();
       when(datastore.encodeJoinKeys(any(List.class), nullable(Span.class)))
-      .thenReturn(deferred);
-    
-    GroupBy gb = new GroupBy(factory, context, config);
-    gb.initialize(null);
-    assertNull(config.getEncodedTagKeys());
-    
-    gb.onNext(results);
-    verify(upstream, never()).onNext(any(QueryResult.class));
-    verify(upstream, never()).onError(any(Throwable.class));
+          .thenReturn(deferred);
+
+      GroupBy gb = new GroupBy(factory, context, config);
+      gb.initialize(null);
+      assertNull(config.getEncodedTagKeys());
+
+      gb.onNext(results);
+      verify(upstream, never()).onNext(any(QueryResult.class));
+      verify(upstream, never()).onError(any(Throwable.class));
       verify(datastore, times(1)).encodeJoinKeys(any(List.class), nullable(Span.class));
-    
-    deferred.callback(Lists.newArrayList(new byte[] { 0, 0, 1 }));
-    assertEquals(1, config.getEncodedTagKeys().size());
-    assertArrayEquals(new byte[] { 0, 0, 1 }, config.getEncodedTagKeys().get(0));
-    verify(upstream, times(1)).onNext(any(QueryResult.class));
-    verify(upstream, never()).onError(any(Throwable.class));
+
+      deferred.callback(Lists.newArrayList(new byte[]{0, 0, 1}));
+      assertEquals(1, config.getEncodedTagKeys().size());
+      assertArrayEquals(new byte[]{0, 0, 1}, config.getEncodedTagKeys().get(0));
+      verify(upstream, times(1)).onNext(any(QueryResult.class));
+      verify(upstream, never()).onError(any(Throwable.class));
+    }
   }
-  }
-  
+
   @Test
   public void onNextResolveError() throws Exception {
     try (MockedConstruction<GroupByResult> mockGroupByResult = Mockito.mockConstruction(GroupByResult.class)) {
-    final QueryResult results = mock(QueryResult.class);
-    when(results.idType()).thenAnswer(new Answer<TypeToken<?>>() {
-      @Override
-      public TypeToken<?> answer(InvocationOnMock invocation) throws Throwable {
-        return Const.TS_BYTE_ID;
-      }
-    });
-    TimeSeries ts = mock(TimeSeries.class);
-    TimeSeriesDataSourceFactory datastore = mock(TimeSeriesDataSourceFactory.class);
-    TimeSeriesByteId id =  BaseTimeSeriesByteId.newBuilder(datastore)
-        .setMetric(new byte[] { 0, 0, 1 })
-        .addTags(new byte[] { 0, 0, 1 }, new byte[] { 0, 0, 1 })
-        .build();
-    when(ts.iterator(any(TypeToken.class))).thenReturn(Optional.empty());
-    when(results.timeSeries()).thenReturn(Lists.newArrayList(ts));
-    when(ts.id()).thenReturn(id);
-    Deferred<List<byte[]>> deferred = new Deferred<List<byte[]>>();
+      final QueryResult results = mock(QueryResult.class);
+      when(results.idType()).thenAnswer(new Answer<TypeToken<?>>() {
+        @Override
+        public TypeToken<?> answer(InvocationOnMock invocation) throws Throwable {
+          return Const.TS_BYTE_ID;
+        }
+      });
+      TimeSeries ts = mock(TimeSeries.class);
+      TimeSeriesDataSourceFactory datastore = mock(TimeSeriesDataSourceFactory.class);
+      TimeSeriesByteId id = BaseTimeSeriesByteId.newBuilder(datastore)
+          .setMetric(new byte[]{0, 0, 1})
+          .addTags(new byte[]{0, 0, 1}, new byte[]{0, 0, 1})
+          .build();
+      when(ts.iterator(any(TypeToken.class))).thenReturn(Optional.empty());
+      when(results.timeSeries()).thenReturn(Lists.newArrayList(ts));
+      when(ts.id()).thenReturn(id);
+      Deferred<List<byte[]>> deferred = new Deferred<List<byte[]>>();
       when(datastore.encodeJoinKeys(any(List.class), nullable(Span.class)))
-      .thenReturn(deferred);
-    
-    GroupBy gb = new GroupBy(factory, context, config);
-    gb.initialize(null);
-    assertNull(config.getEncodedTagKeys());
-    
-    gb.onNext(results);
-    verify(upstream, never()).onNext(any(QueryResult.class));
-    verify(upstream, never()).onError(any(Throwable.class));
+          .thenReturn(deferred);
+
+      GroupBy gb = new GroupBy(factory, context, config);
+      gb.initialize(null);
+      assertNull(config.getEncodedTagKeys());
+
+      gb.onNext(results);
+      verify(upstream, never()).onNext(any(QueryResult.class));
+      verify(upstream, never()).onError(any(Throwable.class));
       verify(datastore, times(1)).encodeJoinKeys(any(List.class), nullable(Span.class));
-    
-    deferred.callback(new UnitTestException());
-    assertNull(config.getEncodedTagKeys());
-    verify(upstream, never()).onNext(any(QueryResult.class));
-    verify(upstream, times(1)).onError(any(Throwable.class));
+
+      deferred.callback(new UnitTestException());
+      assertNull(config.getEncodedTagKeys());
+      verify(upstream, never()).onNext(any(QueryResult.class));
+      verify(upstream, times(1)).onError(any(Throwable.class));
+    }
   }
-  }
-  
+
   @Test
   public void onNextResolveEmpty() throws Exception {
     try (MockedConstruction<GroupByResult> mockGroupByResult = Mockito.mockConstruction(GroupByResult.class)) {
-    final QueryResult results = mock(QueryResult.class);
-    when(results.idType()).thenAnswer(new Answer<TypeToken<?>>() {
-      @Override
-      public TypeToken<?> answer(InvocationOnMock invocation) throws Throwable {
-        return Const.TS_BYTE_ID;
-      }
-    });
-   
-    when(results.timeSeries()).thenReturn(Lists.newArrayList());
-    
-    GroupBy gb = new GroupBy(factory, context, config);
-    gb.initialize(null);
-    assertNull(config.getEncodedTagKeys());
-    
-    gb.onNext(results);
-    verify(upstream, times(1)).onNext(any(QueryResult.class));
-    verify(upstream, never()).onError(any(Throwable.class));
-  }
+      final QueryResult results = mock(QueryResult.class);
+      when(results.idType()).thenAnswer(new Answer<TypeToken<?>>() {
+        @Override
+        public TypeToken<?> answer(InvocationOnMock invocation) throws Throwable {
+          return Const.TS_BYTE_ID;
+        }
+      });
+
+      when(results.timeSeries()).thenReturn(Lists.newArrayList());
+
+      GroupBy gb = new GroupBy(factory, context, config);
+      gb.initialize(null);
+      assertNull(config.getEncodedTagKeys());
+
+      gb.onNext(results);
+      verify(upstream, times(1)).onNext(any(QueryResult.class));
+      verify(upstream, never()).onError(any(Throwable.class));
+    }
   }
   
   @Test

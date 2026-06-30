@@ -769,7 +769,7 @@ public class TestSchema extends SchemaBase {
         .setAlias("alias".getBytes(Const.UTF8_CHARSET))
         .addDisjointTag(UIDS.get("B"))
         .build();
-    
+
     TimeSeriesStringId newid = schema.resolveByteId(id, null).join();
     assertEquals("alias", newid.alias());
     assertEquals("Ns", newid.namespace());
@@ -777,7 +777,7 @@ public class TestSchema extends SchemaBase {
     assertEquals(TAGV_STRING, newid.tags().get(TAGK_STRING));
     assertEquals(TAGK_B_STRING, newid.aggregatedTags().get(0));
     assertEquals("B", newid.disjointTags().get(0));
-    
+
     // skip metric
     id = BaseTimeSeriesByteId.newBuilder(factory)
         .setNamespace("Ns".getBytes(Const.UTF8_CHARSET))
@@ -788,7 +788,7 @@ public class TestSchema extends SchemaBase {
         .addDisjointTag(UIDS.get("B"))
         .setSkipMetric(true)
         .build();
-    
+
     newid = schema.resolveByteId(id, null).join();
     assertEquals("alias", newid.alias());
     assertEquals("Ns", newid.namespace());
@@ -796,7 +796,7 @@ public class TestSchema extends SchemaBase {
     assertEquals(TAGV_STRING, newid.tags().get(TAGK_STRING));
     assertEquals(TAGK_B_STRING, newid.aggregatedTags().get(0));
     assertEquals("B", newid.disjointTags().get(0));
-    
+
     // exception
     id = BaseTimeSeriesByteId.newBuilder(factory)
         .setNamespace("Ns".getBytes(Const.UTF8_CHARSET))
@@ -806,7 +806,7 @@ public class TestSchema extends SchemaBase {
         .setAlias("alias".getBytes(Const.UTF8_CHARSET))
         .addDisjointTag(UIDS.get("B"))
         .build();
-    
+
     try {
       schema.resolveByteId(id, null).join();
       fail("Expected StorageException");

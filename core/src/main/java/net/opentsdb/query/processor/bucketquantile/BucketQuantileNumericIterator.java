@@ -30,8 +30,8 @@ import com.google.common.reflect.TypeToken;
  * 
  * @since 3.0
  */
-public class BucketQuantileNumericIterator extends BucketQuantileIterator  
-  implements TimeSeries, 
+public class BucketQuantileNumericIterator extends BucketQuantileIterator
+    implements TimeSeries, 
              TypedTimeSeriesIterator<NumericType> {
 
   private final BucketQuantileNumericProcessor processor;

@@ -157,14 +157,14 @@ public final class MockBigtable {
     default_table = DATA_TABLE;
     setupDefaultTables();
 
-      when(executor.readRowsAsync(any(ReadRowsRequest.class)))
-        .thenAnswer(new Answer<ListenableFuture<List<Row>>>() {
-          @Override
-          public ListenableFuture<List<Row>> answer(InvocationOnMock invocation)
-              throws Throwable {
-            return new MockGet((ReadRowsRequest) invocation.getArguments()[0]);
-          }
-        });
+    when(executor.readRowsAsync(any(ReadRowsRequest.class)))
+      .thenAnswer(new Answer<ListenableFuture<List<Row>>>() {
+        @Override
+        public ListenableFuture<List<Row>> answer(InvocationOnMock invocation)
+            throws Throwable {
+          return new MockGet((ReadRowsRequest) invocation.getArguments()[0]);
+        }
+      });
     
     // Default put answer will store the given values in the proper location.
     when(bulk_mutator.add(any(MutateRowRequest.class)))
@@ -189,26 +189,26 @@ public final class MockBigtable {
           }
       });
     
-      when(executor.readModifyWriteRowAsync(any(ReadModifyWriteRowRequest.class)))
-        .thenAnswer(new Answer<ListenableFuture<ReadModifyWriteRowResponse>>() {
-          @Override
-          public ListenableFuture<ReadModifyWriteRowResponse> answer(
-              InvocationOnMock invocation) throws Throwable {
-            return new MockAppendAndIncrement(
-                (ReadModifyWriteRowRequest) invocation.getArguments()[0]);
-          }
-        });
+    when(executor.readModifyWriteRowAsync(any(ReadModifyWriteRowRequest.class)))
+      .thenAnswer(new Answer<ListenableFuture<ReadModifyWriteRowResponse>>() {
+        @Override
+        public ListenableFuture<ReadModifyWriteRowResponse> answer(
+            InvocationOnMock invocation) throws Throwable {
+          return new MockAppendAndIncrement(
+              (ReadModifyWriteRowRequest) invocation.getArguments()[0]);
+        }
+      });
     
-      when(executor.checkAndMutateRowAsync(any(CheckAndMutateRowRequest.class)))
-        .thenAnswer(new Answer<ListenableFuture<CheckAndMutateRowResponse>>() {
-          @Override
-          public ListenableFuture<CheckAndMutateRowResponse> answer(
-              InvocationOnMock invocation) throws Throwable {
-            return new MockCAS((CheckAndMutateRowRequest) 
-                invocation.getArguments()[0]);
-          }
-        });
-    }
+    when(executor.checkAndMutateRowAsync(any(CheckAndMutateRowRequest.class)))
+      .thenAnswer(new Answer<ListenableFuture<CheckAndMutateRowResponse>>() {
+        @Override
+        public ListenableFuture<CheckAndMutateRowResponse> answer(
+            InvocationOnMock invocation) throws Throwable {
+          return new MockCAS((CheckAndMutateRowRequest)
+              invocation.getArguments()[0]);
+        }
+      });
+  }
 
   /**
    * Reflection helper replacing PowerMock's Whitebox.getInternalState. Reads a

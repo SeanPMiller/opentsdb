@@ -40,7 +40,7 @@ public class TestTsdb1xHBaseFactory {
   private TSDB tsdb;
   private Schema schema;
   private MockedConstruction<Tsdb1xHBaseDataStore> mockedDataStore;
-  
+
   @Before
   public void before() throws Exception {
     tsdb = mock(TSDB.class);
@@ -50,13 +50,13 @@ public class TestTsdb1xHBaseFactory {
       when(mock.id()).thenReturn(id);
       when(mock.shutdown()).thenReturn(Deferred.fromResult(null));
     });
-      }
+  }
 
   @After
   public void tearDown() {
     if (mockedDataStore != null) mockedDataStore.close();
   }
-  
+
   @Test
   public void ctor() throws Exception {
     Tsdb1xHBaseFactory factory = new Tsdb1xHBaseFactory();
@@ -64,64 +64,64 @@ public class TestTsdb1xHBaseFactory {
     assertNull(factory.default_client);
     assertTrue(factory.clients.isEmpty());
   }
-  
+
   @Test
   public void initialize() throws Exception {
     Tsdb1xHBaseFactory factory = new Tsdb1xHBaseFactory();
     assertNull(factory.tsdb());
     assertNull(factory.default_client);
     assertTrue(factory.clients.isEmpty());
-    
+
     factory.initialize(tsdb, null).join();
     assertSame(tsdb, factory.tsdb());
     assertNull(factory.default_client);
     assertTrue(factory.clients.isEmpty());
   }
-  
+
   @Test
   public void newInstanceDefault() throws Exception {
     Tsdb1xHBaseFactory factory = new Tsdb1xHBaseFactory();
     assertNull(factory.tsdb());
     assertNull(factory.default_client);
     assertTrue(factory.clients.isEmpty());
-    
+
     Tsdb1xDataStore store = factory.newInstance(tsdb, null, schema);
     assertSame(store, factory.default_client);
     assertTrue(factory.clients.isEmpty());
     assertEquals(1, mockedDataStore.constructed().size());
-    
+
     store = factory.newInstance(tsdb, null, schema);
     assertSame(store, factory.default_client);
     assertTrue(factory.clients.isEmpty());
     assertEquals(1, mockedDataStore.constructed().size());
-    
+
     store = factory.newInstance(tsdb, null, schema);
     assertSame(store, factory.default_client);
     assertTrue(factory.clients.isEmpty());
     assertEquals(1, mockedDataStore.constructed().size());
   }
-  
+
   @Test
   public void newInstanceWithId() throws Exception {
     Tsdb1xHBaseFactory factory = new Tsdb1xHBaseFactory();
     assertNull(factory.tsdb());
     assertNull(factory.default_client);
     assertTrue(factory.clients.isEmpty());
-    
+
     Tsdb1xDataStore store = factory.newInstance(tsdb, "id1", schema);
     assertNull(factory.default_client);
     assertEquals(1, factory.clients.size());
     assertSame(store, factory.clients.get("id1"));
     assertEquals("id1", store.id());
     assertEquals(1, mockedDataStore.constructed().size());
-    
+
     store = factory.newInstance(tsdb, "id1", schema);
     assertNull(factory.default_client);
     assertEquals(1, factory.clients.size());
     assertSame(store, factory.clients.get("id1"));
     assertEquals("id1", store.id());
     assertEquals(1, mockedDataStore.constructed().size());
-    
+
     store = factory.newInstance(tsdb, "id2", schema);
     assertNull(factory.default_client);
     assertEquals(2, factory.clients.size());
@@ -129,14 +129,14 @@ public class TestTsdb1xHBaseFactory {
     assertEquals("id2", store.id());
     assertEquals(2, mockedDataStore.constructed().size());
   }
-  
+
   @Test
   public void shutdown() throws Exception {
     Tsdb1xHBaseFactory factory = new Tsdb1xHBaseFactory();
-    
+
     // empty, no-op
     assertNull(factory.shutdown().join());
-    
+
     // full
     factory.newInstance(tsdb, null, schema);
     factory.newInstance(tsdb, "id1", schema);

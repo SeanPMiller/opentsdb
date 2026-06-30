@@ -55,26 +55,26 @@ public class TestYamlJsonFileProvider {
 
   @Rule
   public TemporaryFolder tempDir = new TemporaryFolder();
-  
+
   @Before
   public void before() throws Exception {
     factory = mock(ProviderFactory.class);
     config = mock(Configuration.class);
     timer = mock(HashedWheelTimer.class);
   }
-  
+
   @Test
   public void fileEmpty() throws Exception {
     final File jsonFile = tempDir.newFile("test.json");
-    
+
     final YamlJsonFileProvider provider = new YamlJsonFileProvider(
         factory, config, timer, "file://" + jsonFile);
-    
+
     assertTrue(provider.cache.isEmpty());
     assertEquals(jsonFile.toString(), provider.file_name);
     assertEquals(0, provider.last_hash);
   }
-  
+
   @Test
   public void fileEmptyJsonObject() throws Exception {
     final File jsonFile = tempDir.newFile("test.json");
@@ -128,7 +128,7 @@ public class TestYamlJsonFileProvider {
     final File jsonFile = tempDir.newFile("test.json");
     final FileWriter writer = new FileWriter(jsonFile, false);
     writer.write("{\"key.a\":\"a String\",\"key.b\":null,\"key.c\":"
-        + "42.5,\"key.d\":24,\"key.e\":true,\"key.f\":[\"s1\",\"s2\"],"
+         + "42.5,\"key.d\":24,\"key.e\":true,\"key.f\":[\"s1\",\"s2\"],"
          + "\"key.g\":{\"k1\":\"v1\",\"k2\":\"v2\"}}");
     writer.close();
 
@@ -137,24 +137,24 @@ public class TestYamlJsonFileProvider {
 
     assertEquals(jsonFile.toString(), provider.file_name);
     assertEquals(0xE31ED7ED74C4AA12L, provider.last_hash);
-    
+
     assertEquals(6, provider.cache.size());
-    
+
     assertTrue(provider.cache.get("key.a") instanceof String);
     assertEquals("a String", provider.getSetting("key.a").getValue());
-    
+
     assertFalse(provider.cache.containsKey("key.b"));
     assertNull(provider.getSetting("key.b"));
-    
+
     assertTrue(Double.class.isInstance(provider.cache.get("key.c")));
     assertEquals(42.5, (double) provider.getSetting("key.c").getValue(), 0.001);
-    
+
     assertTrue(Long.class.isInstance(provider.cache.get("key.d")));
     assertEquals(24, (long) provider.getSetting("key.d").getValue());
-    
+
     assertTrue(Boolean.class.isInstance(provider.cache.get("key.e")));
     assertTrue((boolean) provider.getSetting("key.e").getValue());
-    
+
     TypeReference<List<String>> ref = new TypeReference<List<String>>() { };
     assertTrue(provider.getSetting("key.f").getValue() instanceof JsonNode);
     List<String> list = Configuration.OBJECT_MAPPER.convertValue(
@@ -162,27 +162,27 @@ public class TestYamlJsonFileProvider {
     assertEquals(2, list.size());
     assertTrue(list.contains("s1"));
     assertTrue(list.contains("s2"));
-    
+
     assertTrue(provider.getSetting("key.g").getValue() instanceof JsonNode);
     PojoTest pojo = Configuration.OBJECT_MAPPER.convertValue(
         provider.getSetting("key.g").getValue(), PojoTest.class);
     assertEquals("v1", pojo.k1);
     assertEquals("v2", pojo.k2);
   }
-  
+
   @Test
   public void flatYamlObject() throws Exception {
     final String yaml = "--- \n" +
-        "key.a: \"a String\"\n" + 
-        "key.b: null\n" + 
-        "key.c: 42.5\n" + 
-        "key.d: 24\n" + 
-        "key.e: true\n" + 
-        "key.f: \n" + 
-        "  - s1\n" + 
-        "  - s2\n" + 
-        "key.g: \n" + 
-        "  k1: v1\n" + 
+        "key.a: \"a String\"\n" +
+        "key.b: null\n" +
+        "key.c: 42.5\n" +
+        "key.d: 24\n" +
+        "key.e: true\n" +
+        "key.f: \n" +
+        "  - s1\n" +
+        "  - s2\n" +
+        "key.g: \n" +
+        "  k1: v1\n" +
         "  k2: v2\n";
 
     final File yamlFile = tempDir.newFile("test.json");
@@ -195,24 +195,24 @@ public class TestYamlJsonFileProvider {
 
     assertEquals(yamlFile.toString(), provider.file_name);
     assertEquals(0x4DEEE69DB7B627D7L, provider.last_hash);
-    
+
     assertEquals(6, provider.cache.size());
-    
+
     assertTrue(provider.cache.get("key.a") instanceof String);
     assertEquals("a String", provider.getSetting("key.a").getValue());
-    
+
     assertFalse(provider.cache.containsKey("key.b"));
     assertNull(provider.getSetting("key.b"));
-    
+
     assertTrue(Double.class.isInstance(provider.cache.get("key.c")));
     assertEquals(42.5, (double) provider.getSetting("key.c").getValue(), 0.001);
-    
+
     assertTrue(Long.class.isInstance(provider.cache.get("key.d")));
     assertEquals(24, (long) provider.getSetting("key.d").getValue());
-    
+
     assertTrue(Boolean.class.isInstance(provider.cache.get("key.e")));
     assertTrue((boolean) provider.getSetting("key.e").getValue());
-    
+
     TypeReference<List<String>> ref = new TypeReference<List<String>>() { };
     assertTrue(provider.getSetting("key.f").getValue() instanceof JsonNode);
     List<String> list = Configuration.OBJECT_MAPPER.convertValue(
@@ -220,14 +220,14 @@ public class TestYamlJsonFileProvider {
     assertEquals(2, list.size());
     assertTrue(list.contains("s1"));
     assertTrue(list.contains("s2"));
-    
+
     assertTrue(provider.getSetting("key.g").getValue() instanceof JsonNode);
     PojoTest pojo = Configuration.OBJECT_MAPPER.convertValue(
         provider.getSetting("key.g").getValue(), PojoTest.class);
     assertEquals("v1", pojo.k1);
     assertEquals("v2", pojo.k2);
   }
-  
+
   @Test
   public void nestedJson() throws Exception {
     final String json = "{\"root\":{\"a\":{\"b\":\"Hello\",\"c\":\"World\"},"
@@ -243,35 +243,35 @@ public class TestYamlJsonFileProvider {
 
     assertEquals(jsonFile.toString(), provider.file_name);
     assertEquals(0x6CFBB3C2F4FA54D8L, provider.last_hash);
-    
+
     assertEquals(1, provider.cache.size());
     assertTrue(provider.getSetting("root").getValue() instanceof JsonNode);
-    
+
     JsonNode node = (JsonNode) provider.getSetting("root.a").getValue();
     assertEquals(JsonNodeType.OBJECT, node.getNodeType());
     assertNotNull(node.get("b"));
     assertEquals(2, provider.cache.size());
     assertSame(node, provider.cache.get("root.a"));
-    
+
     assertEquals("Hello", provider.getSetting("root.a.b").getValue());
     assertEquals(3, provider.cache.size());
     assertEquals("Hello", provider.cache.get("root.a.b"));
-    
+
     assertNull(provider.getSetting("root.a.d"));
     assertNull(provider.getSetting("root.array.k"));
     assertEquals(3, provider.cache.size());
   }
-  
+
   @Test
   public void nestedYaml() throws Exception {
     final String yaml = "--- \n" +
-        "root: \n" + 
-        "  a: \n" + 
-        "    b: Hello\n" + 
-        "    c: World\n" + 
-        "  array: \n" + 
-        "    - \n" + 
-        "      k: v\n" + 
+        "root: \n" +
+        "  a: \n" +
+        "    b: Hello\n" +
+        "    c: World\n" +
+        "  array: \n" +
+        "    - \n" +
+        "      k: v\n" +
         "";
 
     final File yamlFile = tempDir.newFile("test.json");
@@ -284,35 +284,35 @@ public class TestYamlJsonFileProvider {
 
     assertEquals(yamlFile.toString(), provider.file_name);
     assertEquals(0xFBFD981526D227B0L, provider.last_hash);
-    
+
     assertEquals(1, provider.cache.size());
     assertTrue(provider.getSetting("root").getValue() instanceof JsonNode);
-    
+
     JsonNode node = (JsonNode) provider.getSetting("root.a").getValue();
     assertEquals(JsonNodeType.OBJECT, node.getNodeType());
     assertNotNull(node.get("b"));
     assertEquals(2, provider.cache.size());
     assertSame(node, provider.cache.get("root.a"));
-    
+
     assertEquals("Hello", provider.getSetting("root.a.b").getValue());
     assertEquals(3, provider.cache.size());
     assertEquals("Hello", provider.cache.get("root.a.b"));
-    
+
     assertNull(provider.getSetting("root.a.d"));
     assertNull(provider.getSetting("root.array.k"));
     assertEquals(3, provider.cache.size());
   }
-  
+
   @Test
   public void nestedTypes() throws Exception {
     final String yaml = "--- \n" +
-        "root: \n" + 
-        "  a: \n" + 
-        "    b: Hello\n" + 
-        "    c: 24\n" + 
+        "root: \n" +
+        "  a: \n" +
+        "    b: Hello\n" +
+        "    c: 24\n" +
         "    d: 42.5\n" +
-        "    e: true\n" + 
-        "    f: ~\n" + 
+        "    e: true\n" +
+        "    f: ~\n" +
         "";
 
     final File yamlFile = tempDir.newFile("test.json");
@@ -325,25 +325,25 @@ public class TestYamlJsonFileProvider {
 
     assertEquals(yamlFile.toString(), provider.file_name);
     assertEquals(0x006197E3E9FD901BL, provider.last_hash);
-    
+
     assertEquals(1, provider.cache.size());
     assertTrue(provider.getSetting("root").getValue() instanceof JsonNode);
-    
+
     assertEquals("Hello", provider.getSetting("root.a.b").getValue());
     assertEquals(2, provider.cache.size());
-    
+
     assertEquals(24, (long) provider.getSetting("root.a.c").getValue());
     assertEquals(3, provider.cache.size());
-    
+
     assertEquals(42.5, (double) provider.getSetting("root.a.d").getValue(), 0.001);
     assertEquals(4, provider.cache.size());
-    
+
     assertTrue((boolean) provider.getSetting("root.a.e").getValue());
     assertEquals(5, provider.cache.size());
-    
+
     assertNull(provider.getSetting("root.a.f"));
   }
-  
+
   @Test
   public void badParse() throws Exception {
     final String json = "{\"key.a\":\"a String\",\"key.b\":null,\"key.c\":"
@@ -360,13 +360,13 @@ public class TestYamlJsonFileProvider {
 
     assertTrue(provider.cache.isEmpty());
   }
-  
+
   @Test
   public void reloadFlatSameHash() throws Exception {
     final String json = "{\"key.a\":\"a String\",\"key.b\":null,\"key.c\":"
         + "42.5,\"key.d\":24,\"key.e\":true,\"key.f\":[\"s1\",\"s2\"],"
         + "\"key.g\":{\"k1\":\"v1\",\"k2\":\"v2\"}}";
-    
+
     final File jsonFile = tempDir.newFile("test.json");
     final FileWriter writer = new FileWriter(jsonFile, false);
     writer.write(json);
@@ -379,14 +379,14 @@ public class TestYamlJsonFileProvider {
     assertEquals(jsonFile.toString(), provider.file_name);
     assertEquals(expectedHashCode, provider.last_hash);
     assertEquals(6, provider.cache.size());
-    
+
     provider.reload();
 
     assertEquals(jsonFile.toString(), provider.file_name);
     assertEquals(expectedHashCode, provider.last_hash);
     assertEquals(6, provider.cache.size());
   }
-  
+
   @Test
   public void reloadFlatChanges() throws Exception {
     String json = "{\"key.a\":\"a String\",\"key.b\":null,\"key.c\":"
@@ -400,24 +400,24 @@ public class TestYamlJsonFileProvider {
 
     final YamlJsonFileProvider provider = new YamlJsonFileProvider(
         factory, config, timer, "file://" + jsonFile);
-    
+
     assertEquals(6, provider.cache.size());
-    
+
     assertTrue(provider.cache.get("key.a") instanceof String);
     assertEquals("a String", provider.getSetting("key.a").getValue());
-    
+
     assertFalse(provider.cache.containsKey("key.b"));
     assertNull(provider.getSetting("key.b"));
-    
+
     assertTrue(Double.class.isInstance(provider.cache.get("key.c")));
     assertEquals(42.5, (double) provider.getSetting("key.c").getValue(), 0.001);
-    
+
     assertTrue(Long.class.isInstance(provider.cache.get("key.d")));
     assertEquals(24, (long) provider.getSetting("key.d").getValue());
-    
+
     assertTrue(Boolean.class.isInstance(provider.cache.get("key.e")));
     assertTrue((boolean) provider.getSetting("key.e").getValue());
-    
+
     TypeReference<List<String>> ref = new TypeReference<List<String>>() { };
     assertTrue(provider.getSetting("key.f").getValue() instanceof JsonNode);
     List<String> list = Configuration.OBJECT_MAPPER.convertValue(
@@ -425,13 +425,13 @@ public class TestYamlJsonFileProvider {
     assertEquals(2, list.size());
     assertTrue(list.contains("s1"));
     assertTrue(list.contains("s2"));
-    
+
     assertTrue(provider.getSetting("key.g").getValue() instanceof JsonNode);
     PojoTest pojo = Configuration.OBJECT_MAPPER.convertValue(
         provider.getSetting("key.g").getValue(), PojoTest.class);
     assertEquals("v1", pojo.k1);
     assertEquals("v2", pojo.k2);
-    
+
     // reload
     json = "{\"key.a\":\"Diff string\",\"key.b\":\"Set\",\"key.c\":"
         + "42.5,\"key.e\":false,\"key.f\":[\"s2\"],"
@@ -439,38 +439,38 @@ public class TestYamlJsonFileProvider {
     writer = new FileWriter(jsonFile, false);
     writer.write(json);
     writer.close();
-    
+
     provider.reload();
     assertEquals(6, provider.cache.size());
-    
+
     assertTrue(provider.cache.get("key.a") instanceof String);
     assertEquals("Diff string", provider.getSetting("key.a").getValue());
-    
+
     assertTrue(provider.cache.containsKey("key.b"));
     assertEquals("Set", provider.getSetting("key.b").getValue());
-    
+
     assertTrue(Double.class.isInstance(provider.cache.get("key.c")));
     assertEquals(42.5, (double) provider.getSetting("key.c").getValue(), 0.001);
-    
+
     assertFalse(provider.cache.containsKey("key.d"));
     assertNull(provider.getSetting("key.d"));
-    
+
     assertTrue(Boolean.class.isInstance(provider.cache.get("key.e")));
     assertFalse((boolean) provider.getSetting("key.e").getValue());
-    
+
     assertTrue(provider.getSetting("key.f").getValue() instanceof JsonNode);
     list = Configuration.OBJECT_MAPPER.convertValue(
         provider.getSetting("key.f").getValue(), ref);
     assertEquals(1, list.size());
     assertTrue(list.contains("s2"));
-    
+
     assertTrue(provider.getSetting("key.g").getValue() instanceof JsonNode);
     pojo = Configuration.OBJECT_MAPPER.convertValue(
         provider.getSetting("key.g").getValue(), PojoTest.class);
     assertEquals("va", pojo.k1);
     assertNull(pojo.k2);
   }
-  
+
   @Test
   public void reloadFlatToEmpty() throws Exception {
     String json = "{\"key.a\":\"a String\",\"key.b\":null,\"key.c\":"
@@ -484,24 +484,24 @@ public class TestYamlJsonFileProvider {
 
     final YamlJsonFileProvider provider = new YamlJsonFileProvider(
         factory, config, timer, "file://" + jsonFile);
-    
+
     assertEquals(6, provider.cache.size());
-    
+
     assertTrue(provider.cache.get("key.a") instanceof String);
     assertEquals("a String", provider.getSetting("key.a").getValue());
-    
+
     assertFalse(provider.cache.containsKey("key.b"));
     assertNull(provider.getSetting("key.b"));
-    
+
     assertTrue(Double.class.isInstance(provider.cache.get("key.c")));
     assertEquals(42.5, (double) provider.getSetting("key.c").getValue(), 0.001);
-    
+
     assertTrue(Long.class.isInstance(provider.cache.get("key.d")));
     assertEquals(24, (long) provider.getSetting("key.d").getValue());
-    
+
     assertTrue(Boolean.class.isInstance(provider.cache.get("key.e")));
     assertTrue((boolean) provider.getSetting("key.e").getValue());
-    
+
     TypeReference<List<String>> ref = new TypeReference<List<String>>() { };
     assertTrue(provider.getSetting("key.f").getValue() instanceof JsonNode);
     List<String> list = Configuration.OBJECT_MAPPER.convertValue(
@@ -509,23 +509,23 @@ public class TestYamlJsonFileProvider {
     assertEquals(2, list.size());
     assertTrue(list.contains("s1"));
     assertTrue(list.contains("s2"));
-    
+
     assertTrue(provider.getSetting("key.g").getValue() instanceof JsonNode);
     PojoTest pojo = Configuration.OBJECT_MAPPER.convertValue(
         provider.getSetting("key.g").getValue(), PojoTest.class);
     assertEquals("v1", pojo.k1);
     assertEquals("v2", pojo.k2);
-    
+
     // reload
     json = "{}";
     writer = new FileWriter(jsonFile, false);
     writer.write(json);
     writer.close();
-    
+
     provider.reload();
     assertEquals(0, provider.cache.size());
   }
-  
+
   @Test
   public void reloadNested() throws Exception {
     String json = "{\"root\":{\"a\":{\"b\":\"Hello\",\"c\":\"World\"},"
@@ -538,55 +538,55 @@ public class TestYamlJsonFileProvider {
 
     final YamlJsonFileProvider provider = new YamlJsonFileProvider(
         factory, config, timer, "file://" + jsonFile);
-    
+
     assertEquals(1, provider.cache.size());
     assertTrue(provider.getSetting("root").getValue() instanceof JsonNode);
-    
+
     JsonNode node = (JsonNode) provider.getSetting("root.a").getValue();
     assertEquals(JsonNodeType.OBJECT, node.getNodeType());
     assertNotNull(node.get("b"));
     assertEquals(2, provider.cache.size());
     assertSame(node, provider.cache.get("root.a"));
-    
+
     assertEquals("Hello", provider.getSetting("root.a.b").getValue());
     assertEquals(3, provider.cache.size());
     assertEquals("Hello", provider.cache.get("root.a.b"));
-    
+
     assertNull(provider.getSetting("root.a.d"));
     assertNull(provider.getSetting("root.array.k"));
     assertEquals(3, provider.cache.size());
-    
+
     json = "{\"root\":{\"a\":{\"b\":\"Diff\",\"c\":\"Value\"},"
         + "\"array\":[{\"k1\":\"v1\"}]}}";
     writer = new FileWriter(jsonFile, false);
     writer.write(json);
     writer.close();
-    
+
     provider.reload();
     assertEquals(3, provider.cache.size());
-    
+
     node = (JsonNode) provider.getSetting("root.a").getValue();
     assertEquals(JsonNodeType.OBJECT, node.getNodeType());
     assertNotNull(node.get("b"));
     assertEquals(3, provider.cache.size());
     assertSame(node, provider.cache.get("root.a"));
-    
-    TypeReference<Map<String, String>> ref = 
+
+    TypeReference<Map<String, String>> ref =
         new TypeReference<Map<String, String>>() { };
     Map<String, String> map = Configuration.OBJECT_MAPPER.convertValue(node, ref);
     assertEquals(2, map.size());
     assertEquals("Diff", map.get("b"));
     assertEquals("Value", map.get("c"));
-    
+
     assertEquals("Diff", provider.getSetting("root.a.b").getValue());
     assertEquals(3, provider.cache.size());
     assertEquals("Diff", provider.cache.get("root.a.b"));
-    
+
     assertNull(provider.getSetting("root.a.d"));
     assertNull(provider.getSetting("root.array.k"));
     assertNull(provider.getSetting("root.array.k1"));
   }
-  
+
   @Test
   public void reloadNestedEmpty() throws Exception {
     String json = "{\"root\":{\"a\":{\"b\":\"Hello\",\"c\":\"World\"},"
@@ -599,33 +599,33 @@ public class TestYamlJsonFileProvider {
 
     final YamlJsonFileProvider provider = new YamlJsonFileProvider(
         factory, config, timer, "file://" + jsonFile);
-    
+
     assertEquals(1, provider.cache.size());
     assertTrue(provider.getSetting("root").getValue() instanceof JsonNode);
-    
+
     JsonNode node = (JsonNode) provider.getSetting("root.a").getValue();
     assertEquals(JsonNodeType.OBJECT, node.getNodeType());
     assertNotNull(node.get("b"));
     assertEquals(2, provider.cache.size());
     assertSame(node, provider.cache.get("root.a"));
-    
+
     assertEquals("Hello", provider.getSetting("root.a.b").getValue());
     assertEquals(3, provider.cache.size());
     assertEquals("Hello", provider.cache.get("root.a.b"));
-    
+
     assertNull(provider.getSetting("root.a.d"));
     assertNull(provider.getSetting("root.array.k"));
     assertEquals(3, provider.cache.size());
-    
+
     json = "{}";
     writer = new FileWriter(jsonFile, false);
     writer.write(json);
     writer.close();
-    
+
     provider.reload();
     assertEquals(0, provider.cache.size());
   }
-  
+
   @JsonIgnoreProperties(ignoreUnknown = true)
   static class PojoTest {
     public String k1;

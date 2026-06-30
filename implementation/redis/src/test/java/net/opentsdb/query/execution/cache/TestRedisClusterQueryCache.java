@@ -62,7 +62,7 @@ public class TestRedisClusterQueryCache {
   private JedisCluster cluster;
   private Set<HostAndPort> nodes;
   private MockedConstruction<JedisCluster> mockedJedisCluster;
-  
+
   @Before
   public void before() throws Exception {
     tsdb = mock(TSDB.class);
@@ -71,23 +71,23 @@ public class TestRedisClusterQueryCache {
     ReadCacheSerdesFactory serdes_factory = mock(ReadCacheSerdesFactory.class);
     when(registry.getPlugin(eq(ReadCacheSerdesFactory.class), any()))
       .thenReturn(serdes_factory);
-    
+
     config_map = Maps.newHashMap();
-    config_map.put("redis.query.cache.hosts", 
+    config_map.put("redis.query.cache.hosts",
         "localhost:2424,localhost:4242");
     config = UnitTestConfiguration.getConfiguration(config_map);
-    
+
     when(tsdb.getConfig()).thenReturn(config);
     when(tsdb.getRegistry()).thenReturn(registry);
     when(tsdb.getStatsCollector()).thenReturn(new BlackholeStatsCollector());
-    
+
     mockedJedisCluster = Mockito.mockConstruction(JedisCluster.class, (mock, context) -> {
       cluster = mock;
       @SuppressWarnings("unchecked")
       Set<HostAndPort> arg = (Set<HostAndPort>) context.arguments().get(0);
       nodes = arg;
     });
-      }
+  }
 
   @After
   public void tearDown() {
@@ -158,7 +158,7 @@ public class TestRedisClusterQueryCache {
     final JedisCluster extant = mock(JedisCluster.class);
     when(registry.registerSharedObject(eq("RedisCache"), any(JedisCluster.class)))
       .thenReturn(extant);
-    
+
     final RedisClusterQueryCache cache = new RedisClusterQueryCache();
     assertNull(cache.initialize(tsdb, null).join(1));
     assertEquals(1, mockedJedisCluster.constructed().size());

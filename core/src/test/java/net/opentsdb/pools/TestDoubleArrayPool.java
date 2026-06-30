@@ -27,18 +27,18 @@ import org.junit.Test;
 
 public class TestDoubleArrayPool {
   private static MockTSDB TSDB;
-  
+
   @BeforeClass
   public static void beforeClass() throws Exception {
     TSDB = new MockTSDB();
   }
-  
+
   @Test
   public void initialize() throws Exception {
     ArrayObjectPool pool = mock(ArrayObjectPool.class);
     ArrayObjectPoolFactory factory = mock(ArrayObjectPoolFactory.class);
     when(factory.newPool(any(ObjectPoolConfig.class))).thenReturn(pool);
-    
+
     DoubleArrayPool allocator = new DoubleArrayPool();
     assertNull(allocator.initialize(TSDB, null).join());
     assertEquals(DoubleArrayPool.TYPE, allocator.id());
@@ -46,14 +46,14 @@ public class TestDoubleArrayPool {
         any(DummyArrayObjectPool.class));
     verify(TSDB.getRegistry(), never()).registerObjectPool(pool);
     assertEquals(4096, ((double[]) allocator.allocate()).length);
-    
+
     when(TSDB.getRegistry().getPlugin(ArrayObjectPoolFactory.class, null))
       .thenReturn(factory);
     assertNull(allocator.initialize(TSDB, null).join());
     verify(TSDB.getRegistry(), times(1)).registerObjectPool(pool);
     assertEquals(DoubleArrayPool.TYPE, allocator.id());
     assertEquals(4096, ((double[]) allocator.allocate()).length);
-    
+
     allocator.id = "foo";
     allocator.registerConfigs(TSDB.config, DoubleArrayPool.TYPE);
     TSDB.config.override("objectpool.foo.pool.id", "myfactory");
@@ -64,10 +64,10 @@ public class TestDoubleArrayPool {
     when(factory2.newPool(any(ObjectPoolConfig.class))).thenReturn(pool2);
     when(TSDB.getRegistry().getPlugin(ArrayObjectPoolFactory.class, "myfactory"))
       .thenReturn(factory);
-    
+
     assertNull(allocator.initialize(TSDB, "foo").join());
     verify(TSDB.getRegistry(), never()).registerObjectPool(pool2);
     assertEquals(16, ((double[]) allocator.allocate()).length);
   }
-  
+
 }

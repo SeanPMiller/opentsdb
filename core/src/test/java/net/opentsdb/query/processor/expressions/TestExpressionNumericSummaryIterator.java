@@ -39,7 +39,7 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-public class TestExpressionNumericSummaryIterator 
+public class TestExpressionNumericSummaryIterator
     extends BaseNumericSummaryTest {
   
   @Before
@@ -323,11 +323,11 @@ public class TestExpressionNumericSummaryIterator
     assertEquals(0, value.value().value(2).longValue());
     assertFalse(iterator.hasNext());
   }
-  
+
   @Test
   public void fillNaNInfectious() throws Exception {
-    setupData(new double[] { 1.1, -1, 2.66 }, new long[] { 1, -1, 2 }, 
-              new double[] { 4.5, 10.75, 8.9 }, new long[] { 1, 2, 2 }, false);
+    setupData(new double[]{1.1, -1, 2.66}, new long[]{1, -1, 2},
+        new double[]{4.5, 10.75, 8.9}, new long[]{1, 2, 2}, false);
     ExpressionConfig cfg = ExpressionConfig.newBuilder()
         .setExpression("a + b")
         .setJoinConfig(JOIN_CONFIG)
@@ -336,32 +336,32 @@ public class TestExpressionNumericSummaryIterator
         .setId("e1")
         .build();
     when(node.expressionConfig()).thenReturn(cfg);
-    
-    ExpressionNumericSummaryIterator iterator = 
-        new ExpressionNumericSummaryIterator(node, RESULT, 
+
+    ExpressionNumericSummaryIterator iterator =
+        new ExpressionNumericSummaryIterator(node, RESULT,
             (Map) ImmutableMap.builder()
-              .put(ExpressionTimeSeries.LEFT_KEY, left)
-              .put(ExpressionTimeSeries.RIGHT_KEY, right)
-              .build());
-    
+                .put(ExpressionTimeSeries.LEFT_KEY, left)
+                .put(ExpressionTimeSeries.RIGHT_KEY, right)
+                .build());
+
     assertTrue(iterator.hasNext());
-    TimeSeriesValue<NumericSummaryType> value = 
+    TimeSeriesValue<NumericSummaryType> value =
         (TimeSeriesValue<NumericSummaryType>) iterator.next();
     assertEquals(1000, value.timestamp().msEpoch());
     assertEquals(5.6, value.value().value(0).doubleValue(), 0.001);
     assertEquals(2, value.value().value(2).longValue());
-    
+
     value = (TimeSeriesValue<NumericSummaryType>) iterator.next();
     assertEquals(3000, value.timestamp().msEpoch());
     assertTrue(Double.isNaN(value.value().value(0).doubleValue()));
     assertTrue(Double.isNaN(value.value().value(2).doubleValue()));
-    
+
     value = (TimeSeriesValue<NumericSummaryType>) iterator.next();
     assertEquals(5000, value.timestamp().msEpoch());
     assertEquals(11.56, value.value().value(0).doubleValue(), 0.001);
     assertEquals(4, value.value().value(2).longValue());
     assertFalse(iterator.hasNext());
-    
+
     // subtract
     expression_config = (ExpressionParseNode) ExpressionParseNode.newBuilder()
         .setLeft("a")
@@ -373,12 +373,12 @@ public class TestExpressionNumericSummaryIterator
         .setId("expression")
         .build();
     when(node.config()).thenReturn(expression_config);
-    
-    iterator = new ExpressionNumericSummaryIterator(node, RESULT, 
-            (Map) ImmutableMap.builder()
-              .put(ExpressionTimeSeries.LEFT_KEY, left)
-              .put(ExpressionTimeSeries.RIGHT_KEY, right)
-              .build());
+
+    iterator = new ExpressionNumericSummaryIterator(node, RESULT,
+        (Map) ImmutableMap.builder()
+            .put(ExpressionTimeSeries.LEFT_KEY, left)
+            .put(ExpressionTimeSeries.RIGHT_KEY, right)
+            .build());
     final Field infectious_nanField = iterator.getClass().getSuperclass()
         .getDeclaredField("infectious_nan");
     infectious_nanField.setAccessible(true);
@@ -388,12 +388,12 @@ public class TestExpressionNumericSummaryIterator
     assertEquals(1000, value.timestamp().msEpoch());
     assertEquals(-3.4, value.value().value(0).doubleValue(), 0.001);
     assertEquals(0, value.value().value(2).longValue());
-    
+
     value = (TimeSeriesValue<NumericSummaryType>) iterator.next();
     assertEquals(3000, value.timestamp().msEpoch());
     assertTrue(Double.isNaN(value.value().value(0).doubleValue()));
     assertTrue(Double.isNaN(value.value().value(2).doubleValue()));
-    
+
     value = (TimeSeriesValue<NumericSummaryType>) iterator.next();
     assertEquals(5000, value.timestamp().msEpoch());
     assertEquals(-6.24, value.value().value(0).doubleValue(), 0.001);

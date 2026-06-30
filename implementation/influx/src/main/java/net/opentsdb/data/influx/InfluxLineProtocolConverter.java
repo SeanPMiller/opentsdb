@@ -52,7 +52,7 @@ import net.opentsdb.utils.XXHash;
  * TODO - The decode bits.
  */
 public class InfluxLineProtocolConverter extends BaseTSDBPlugin
-        implements TimeSeriesDataConverter,
+    implements TimeSeriesDataConverter,
                    TimeSeriesDataConverterFactory {
 
   public static final String TYPE = "InfluxLineProtocolConverter";

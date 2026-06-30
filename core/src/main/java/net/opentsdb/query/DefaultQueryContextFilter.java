@@ -61,7 +61,7 @@ import com.stumbleupon.async.Deferred;
  *  
  * @since 3.0
  */
-public class DefaultQueryContextFilter extends BaseTSDBPlugin 
+public class DefaultQueryContextFilter extends BaseTSDBPlugin
     implements QueryContextFilter {
   private static final Logger LOG = LoggerFactory.getLogger(
       DefaultQueryContextFilter.class);

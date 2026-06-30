@@ -53,7 +53,7 @@ import com.stumbleupon.async.Deferred;
  * @since 3.0
  */
 public abstract class BaseAuthenticationPlugin extends BaseTSDBPlugin
-        implements AuthFilter {
+    implements AuthFilter {
 
   private static final Logger LOG = LoggerFactory.getLogger(
           BaseAuthenticationPlugin.class);

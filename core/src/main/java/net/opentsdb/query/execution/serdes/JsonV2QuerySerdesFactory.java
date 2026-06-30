@@ -37,7 +37,7 @@ import com.stumbleupon.async.Deferred;
  * 
  * @since 3.0
  */
-public class JsonV2QuerySerdesFactory extends BaseTSDBPlugin 
+public class JsonV2QuerySerdesFactory extends BaseTSDBPlugin
     implements SerdesFactory {
 
   public static final String TYPE = "JsonV2QuerySerdes";

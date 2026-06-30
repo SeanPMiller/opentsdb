@@ -52,7 +52,7 @@ import com.google.common.collect.Sets;
 import com.stumbleupon.async.Callback;
 import com.stumbleupon.async.Deferred;
 
-public class ReadCacheQueryPipelineContext extends AbstractQueryPipelineContext 
+public class ReadCacheQueryPipelineContext extends AbstractQueryPipelineContext
     implements ReadCacheCallback {
   static final Logger LOG = LoggerFactory.getLogger(
       ReadCacheQueryPipelineContext.class);

@@ -86,7 +86,7 @@
         <groupId>com.stumbleupon</groupId>
         <artifactId>async</artifactId>
       </dependency>
-      
+
       <dependency>
         <groupId>org.glassfish.jersey.core</groupId>
         <artifactId>jersey-common</artifactId>

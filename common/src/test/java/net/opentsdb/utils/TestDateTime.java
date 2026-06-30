@@ -61,7 +61,7 @@ public final class TestDateTime {
   final static long NON_DST_TS = 1431699673432L;
   // Tue, 15 Dec 2015 04:02:25.123 UTC
   final static long DST_TS = 1450152145123L;
- 
+
   final static long NOW_TS = 1357300800000L;
  
   @Before

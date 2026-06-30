@@ -43,8 +43,8 @@ import com.google.common.reflect.TypeToken;
  */
 public abstract class BaseQueryNodeConfigWithInterpolators
     <B extends BaseQueryNodeConfigWithInterpolators.Builder<B, C>, 
-       C extends BaseQueryNodeConfigWithInterpolators> 
-          extends BaseQueryNodeConfig<B, C> {
+       C extends BaseQueryNodeConfigWithInterpolators>
+    extends BaseQueryNodeConfig<B, C> {
 
   /** A comparator for the interpolator map. */
   protected static MapComparator<TypeToken<?>, QueryInterpolatorConfig> INTERPOLATOR_CMP

@@ -39,8 +39,8 @@ import com.google.common.hash.Hashing;
  * 
  * @since 3.0
  */
-public abstract class BaseAnomalyConfig 
-    extends BaseQueryNodeConfigWithInterpolators 
+public abstract class BaseAnomalyConfig
+    extends BaseQueryNodeConfigWithInterpolators
     implements AnomalyConfig {
 
   protected String training_interval;

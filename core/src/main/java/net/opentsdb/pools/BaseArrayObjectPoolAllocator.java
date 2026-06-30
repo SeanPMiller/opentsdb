@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @since 3.0
  */
-public abstract class BaseArrayObjectPoolAllocator 
+public abstract class BaseArrayObjectPoolAllocator
     extends BaseObjectPoolAllocator implements ArrayObjectPoolAllocator {
   private static final Logger LOG = LoggerFactory.getLogger(
       BaseArrayObjectPoolAllocator.class);

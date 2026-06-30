@@ -351,7 +351,7 @@ public class Tsdb1xScanners implements HBaseExecutor, CloseablePooledObject, Tim
     if (has_failed || node.pipelineContext().queryContext().isClosed()) {
       return;
     }
-    
+
     if (scanners_done >= scanners.get(scanner_index).length) {
       if (!node.push() && current_result == null) {
         throw new IllegalStateException("Current result was null but "
@@ -359,7 +359,7 @@ public class Tsdb1xScanners implements HBaseExecutor, CloseablePooledObject, Tim
       }
       send_upstream = true;
     }
-    
+
     if (!send_upstream && node.push()) {
       // A scanner in a multi-scanner (salted) set finished but the set isn't
       // complete yet. In push mode results flow upstream via the partial time
@@ -371,7 +371,7 @@ public class Tsdb1xScanners implements HBaseExecutor, CloseablePooledObject, Tim
       try {
         if (node.push()) {
           if (node.sentData()) {
-            for (final Tsdb1xPartialTimeSeriesSet set : 
+            for (final Tsdb1xPartialTimeSeriesSet set :
                   sets.get(scanner_index).valueCollection()) {
               if (!set.complete()) {
                 throw new RuntimeException("Set " + set + " was not marked as "
@@ -380,10 +380,10 @@ public class Tsdb1xScanners implements HBaseExecutor, CloseablePooledObject, Tim
               }
             }
             current_result = null;
-          } else if (node.rollup_usage != RollupUsage.ROLLUP_NOFALLBACK && 
+          } else if (node.rollup_usage != RollupUsage.ROLLUP_NOFALLBACK &&
                      scanner_index + 1 < scanners.size()) {
             if (LOG.isDebugEnabled()) {
-              LOG.debug("Scanner index at [" + scanner_index 
+              LOG.debug("Scanner index at [" + scanner_index
                   + "] returned an empty set, falling back.");
             }
             // fall back!

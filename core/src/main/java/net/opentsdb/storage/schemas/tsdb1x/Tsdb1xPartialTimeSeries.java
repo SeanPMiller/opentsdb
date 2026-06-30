@@ -35,7 +35,7 @@ import com.google.common.reflect.TypeToken;
  * 
  * @since 3.0
  */
-public abstract class Tsdb1xPartialTimeSeries<T extends TimeSeriesDataType> 
+public abstract class Tsdb1xPartialTimeSeries<T extends TimeSeriesDataType>
     implements PartialTimeSeries<T>, CloseablePooledObject {
   /** Reference to the Object pool for this instance. */
   protected PooledObject pooled_object;

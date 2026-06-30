@@ -30,7 +30,7 @@ import com.stumbleupon.async.Deferred;
  * @since 3.0
  */
 public class AnyFieldRegexFactory extends BaseTSDBPlugin
-        implements QueryFilterFactory {
+    implements QueryFilterFactory {
 
   public static final String TYPE = "AnyFieldRegex";
 

@@ -47,7 +47,7 @@ import net.opentsdb.utils.JSON;
  * 
  * @since 3.0
  */
-public class QueryGRPCServer extends QueryRpcBetaGrpc.QueryRpcBetaImplBase 
+public class QueryGRPCServer extends QueryRpcBetaGrpc.QueryRpcBetaImplBase
     implements RPCServer {
   private static final Logger LOG = LoggerFactory.getLogger(QueryGRPCServer.class);
   

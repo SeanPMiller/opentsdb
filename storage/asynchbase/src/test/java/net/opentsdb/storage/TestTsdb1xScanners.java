@@ -146,8 +146,8 @@ public class TestTsdb1xScanners extends UTBase {
 
     mockedScanner = Mockito.mockConstruction(Tsdb1xScanner.class, (mock, ctx) -> {
       doAnswer(invocation -> {
-            caught.add((Scanner) invocation.getArguments()[1]);
-            return null;
+        caught.add((Scanner) invocation.getArguments()[1]);
+        return null;
       }).when(mock).reset(any(Tsdb1xScanners.class),
               any(Scanner.class), anyInt(), nullable(DefaultRollupInterval.class));
       when(mock.state()).thenReturn(State.CONTINUE);
@@ -186,7 +186,7 @@ public class TestTsdb1xScanners extends UTBase {
   public void tearDown() {
     if (mockedScanner != null) mockedScanner.close();
   }
-  
+
   @Test
   public void ctorDefaults() throws Exception {
     try {
@@ -447,7 +447,7 @@ public class TestTsdb1xScanners extends UTBase {
       .fetchNext(any(Tsdb1xQueryResult.class), any());
     verify(scanners.scanners.get(0)[0], times(1))
       .fetchNext(any(Tsdb1xQueryResult.class), any());
-    
+
     trace = new MockTrace(true);
     scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
@@ -486,11 +486,11 @@ public class TestTsdb1xScanners extends UTBase {
   public void setupScannersNoRollupRegexpFilterNoSalt() throws Exception {
     catchTsdb1xScanners(caught);
     setConfig(true, null, false);
-    
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     scanners.row_key_literals = new ByteMap<List<byte[]>>();
-    scanners.row_key_literals.put(TAGK_BYTES, 
+    scanners.row_key_literals.put(TAGK_BYTES,
         Lists.newArrayList(TAGV_BYTES, TAGV_B_BYTES));
     scanners.current_result = mock(Tsdb1xQueryResult.class);
     scanners.setupScanners(METRIC_BYTES, null);
@@ -514,11 +514,11 @@ public class TestTsdb1xScanners extends UTBase {
   @Test
   public void setupScannersNoRollupRegexpFilterWithSalt() throws Exception {
     setConfig(true, null, false);
-    
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(saltedNode(caught), source_config);
     scanners.row_key_literals = new ByteMap<List<byte[]>>();
-    scanners.row_key_literals.put(TAGK_BYTES, 
+    scanners.row_key_literals.put(TAGK_BYTES,
         Lists.newArrayList(TAGV_BYTES, TAGV_B_BYTES));
     scanners.current_result = mock(Tsdb1xQueryResult.class);
     scanners.setupScanners(METRIC_BYTES, null);
@@ -541,12 +541,12 @@ public class TestTsdb1xScanners extends UTBase {
         .fetchNext(any(Tsdb1xQueryResult.class), any());
     }
   }
-  
+
   @Test
   public void setupScannersNoRollupFuzzyEnabledFilterNoSalt() throws Exception {
     catchTsdb1xScanners(caught);
     setConfig(true, null, false);
-    
+
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
         .setStart(Integer.toString(START_TS))
@@ -556,22 +556,22 @@ public class TestTsdb1xScanners extends UTBase {
             .setId("f1")
             .setFilter(ExplicitTagsFilter.newBuilder()
                 .setFilter(ChainFilter.newBuilder()
-                  .addFilter(TagValueLiteralOrFilter.newBuilder()
-                    .setKey(TAGK_STRING)
-                    .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
+                    .addFilter(TagValueLiteralOrFilter.newBuilder()
+                        .setKey(TAGK_STRING)
+                        .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
+                        .build())
+                    .addFilter(TagValueWildcardFilter.newBuilder()
+                        .setKey(TAGK_B_STRING)
+                        .setFilter("*")
+                        .build())
                     .build())
-                  .addFilter(TagValueWildcardFilter.newBuilder()
-                      .setKey(TAGK_B_STRING)
-                      .setFilter("*")
-                     .build())
-                  .build())
                 .build())
             .build())
         .build();
     when(context.query()).thenReturn(query);
     source_config = (TimeSeriesDataSourceConfig) baseConfig(START_TS, END_TS, "f1")
         .build();
-    
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     Field enable_fuzzy_filterField = scanners.getClass().getDeclaredField("enable_fuzzy_filter");
@@ -585,7 +585,7 @@ public class TestTsdb1xScanners extends UTBase {
     filter_cbField.setAccessible(true);
     filter_cbField.set(scanners, filter_cb);
     scanners.row_key_literals = new ByteMap<List<byte[]>>();
-    scanners.row_key_literals.put(TAGK_BYTES, 
+    scanners.row_key_literals.put(TAGK_BYTES,
         Lists.newArrayList(TAGV_BYTES, TAGV_B_BYTES));
     scanners.current_result = mock(Tsdb1xQueryResult.class);
     scanners.setupScanners(METRIC_BYTES, null);
@@ -605,14 +605,14 @@ public class TestTsdb1xScanners extends UTBase {
     assertTrue(filter.filters().get(1) instanceof KeyRegexpFilter);
     assertTrue(scanners.initialized);
     verify(scanners.scanners.get(0)[0], times(1))
-      .fetchNext(any(Tsdb1xQueryResult.class), any());
+        .fetchNext(any(Tsdb1xQueryResult.class), any());
   }
-  
+
   @Test
   public void setupScannersRollupNoFilterNoSalt() throws Exception {
     catchTsdb1xScanners(caught);
     setConfig(false, "sum", false);
-    
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     scanners.current_result = mock(Tsdb1xQueryResult.class);
@@ -681,7 +681,7 @@ public class TestTsdb1xScanners extends UTBase {
     catchTsdb1xScanners(caught);
     setConfig(false, "sum", false);
     when(node.rollupUsage()).thenReturn(RollupUsage.ROLLUP_NOFALLBACK);
-    
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     scanners.current_result = mock(Tsdb1xQueryResult.class);
@@ -738,9 +738,9 @@ public class TestTsdb1xScanners extends UTBase {
     assertEquals(3, scanners.scanners.size());
     assertEquals(1, scanners.scanners.get(0).length);
     assertEquals(3, caught.size());
-    
+
     List<MockScanner> scnrs = storage.getScanners();
-    
+
     assertArrayEquals("tsdb-agg-1h".getBytes(Const.ASCII_CHARSET), scnrs.get(scnrs.size() - 3).table());
     assertArrayEquals("tsdb-agg-30m".getBytes(Const.ASCII_CHARSET), scnrs.get(scnrs.size() - 2).table());
     assertArrayEquals(DATA_TABLE, storage.getLastScanner().table());
@@ -814,12 +814,12 @@ public class TestTsdb1xScanners extends UTBase {
     assertEquals(2, scanners.scanners.size());
     assertEquals(1, scanners.scanners.get(0).length);
     assertEquals(2, caught.size());
-    
+
     List<MockScanner> scnrs = storage.getScanners();
-    
+
     assertArrayEquals("tsdb-1h".getBytes(Const.ASCII_CHARSET), scnrs.get(scnrs.size() - 2).table());
     assertArrayEquals(DATA_TABLE, storage.getLastScanner().table());
-    
+
     // 1h
     verify(caught.get(0), times(1)).setFamily(Tsdb1xHBaseDataStore.DATA_FAMILY);
     verify(caught.get(0), times(1)).setMaxNumRows(1024);
@@ -877,7 +877,7 @@ public class TestTsdb1xScanners extends UTBase {
     assertEquals(2, scanners.scanners.size());
     assertEquals(6, scanners.scanners.get(0).length);
     assertEquals(12, caught.size());
-    
+
     assertEquals(12, tables.size());
     for (int i = 0; i < 6; i++) {
       assertArrayEquals("tsdb-1h".getBytes(Const.ASCII_CHARSET), tables.get(i));
@@ -885,7 +885,7 @@ public class TestTsdb1xScanners extends UTBase {
     for (int i = 6; i < 12; i++) {
       assertArrayEquals(DATA_TABLE, tables.get(i));
     }
-    
+
     // 1h
     for (int i = 0; i < 6; i++) {
       verify(caught.get(i), times(1)).setFamily(Tsdb1xHBaseDataStore.DATA_FAMILY);
@@ -950,7 +950,7 @@ public class TestTsdb1xScanners extends UTBase {
     assertEquals(2, scanners.scanners.size());
     assertEquals(6, scanners.scanners.get(0).length);
     assertEquals(12, caught.size());
-    
+
     assertEquals(12, tables.size());
     for (int i = 0; i < 6; i++) {
       assertArrayEquals("tsdb-1h".getBytes(Const.ASCII_CHARSET), tables.get(i));
@@ -958,7 +958,7 @@ public class TestTsdb1xScanners extends UTBase {
     for (int i = 6; i < 12; i++) {
       assertArrayEquals(DATA_TABLE, tables.get(i));
     }
-    
+
     // 1h
     for (int i = 0; i < 6; i++) {
       verify(caught.get(i), times(1)).setFamily(Tsdb1xHBaseDataStore.DATA_FAMILY);
@@ -1002,11 +1002,11 @@ public class TestTsdb1xScanners extends UTBase {
   public void setupScannersRollupRegexpFilterNoSalt() throws Exception {
     catchTsdb1xScanners(caught);
     setConfig(true, "sum", false);
-    
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     scanners.row_key_literals = new ByteMap<List<byte[]>>();
-    scanners.row_key_literals.put(TAGK_BYTES, 
+    scanners.row_key_literals.put(TAGK_BYTES,
         Lists.newArrayList(TAGV_BYTES, TAGV_B_BYTES));
     scanners.current_result = mock(Tsdb1xQueryResult.class);
     scanners.setupScanners(METRIC_BYTES, null);
@@ -1087,19 +1087,19 @@ public class TestTsdb1xScanners extends UTBase {
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     scanners.row_key_literals = new ByteMap<List<byte[]>>();
-    scanners.row_key_literals.put(TAGK_BYTES, 
+    scanners.row_key_literals.put(TAGK_BYTES,
         Lists.newArrayList(TAGV_BYTES, TAGV_B_BYTES));
     scanners.current_result = mock(Tsdb1xQueryResult.class);
     scanners.setupScanners(METRIC_BYTES, null);
     assertEquals(2, scanners.scanners.size());
     assertEquals(1, scanners.scanners.get(0).length);
     assertEquals(2, caught.size());
-    
+
     List<MockScanner> scnrs = storage.getScanners();
-    
+
     assertArrayEquals("tsdb-1h".getBytes(Const.ASCII_CHARSET), scnrs.get(scnrs.size() - 2).table());
     assertArrayEquals(DATA_TABLE, storage.getLastScanner().table());
-    
+
     // 1h
     verify(caught.get(0), times(1)).setFamily(Tsdb1xHBaseDataStore.DATA_FAMILY);
     verify(caught.get(0), times(1)).setMaxNumRows(1024);
@@ -1133,12 +1133,12 @@ public class TestTsdb1xScanners extends UTBase {
     verify(scanners.scanners.get(1)[0], never())
       .fetchNext(any(Tsdb1xQueryResult.class), any());
   }
-  
+
   @Test
   public void setupScannersRollupFuzzyEnabledFilterNoSalt() throws Exception {
     catchTsdb1xScanners(caught);
     setConfig(true, "sum", false);
-    
+
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
         .setStart(Integer.toString(START_TS))
@@ -1148,15 +1148,15 @@ public class TestTsdb1xScanners extends UTBase {
             .setId("f1")
             .setFilter(ExplicitTagsFilter.newBuilder()
                 .setFilter(ChainFilter.newBuilder()
-                  .addFilter(TagValueLiteralOrFilter.newBuilder()
-                    .setKey(TAGK_STRING)
-                    .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
+                    .addFilter(TagValueLiteralOrFilter.newBuilder()
+                        .setKey(TAGK_STRING)
+                        .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
+                        .build())
+                    .addFilter(TagValueWildcardFilter.newBuilder()
+                        .setKey(TAGK_B_STRING)
+                        .setFilter("*")
+                        .build())
                     .build())
-                  .addFilter(TagValueWildcardFilter.newBuilder()
-                      .setKey(TAGK_B_STRING)
-                      .setFilter("*")
-                     .build())
-                  .build())
                 .build())
             .build())
         .build();
@@ -1167,15 +1167,15 @@ public class TestTsdb1xScanners extends UTBase {
         .setFilterId("f1")
         .setId("m1")
         .build();
-    
+
     when(node.rollupIntervals())
-      .thenReturn(Lists.<RollupInterval>newArrayList(DefaultRollupInterval.builder()
-          .setInterval("1h")
-          .setTable("tsdb-1h")
-          .setPreAggregationTable("tsdb-agg-1h")
-          .setRowSpan("1d")
-          .build()));
-    
+        .thenReturn(Lists.<RollupInterval>newArrayList(DefaultRollupInterval.builder()
+            .setInterval("1h")
+            .setTable("tsdb-1h")
+            .setPreAggregationTable("tsdb-agg-1h")
+            .setRowSpan("1d")
+            .build()));
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     Field enable_fuzzy_filterField = scanners.getClass().getDeclaredField("enable_fuzzy_filter");
@@ -1189,19 +1189,19 @@ public class TestTsdb1xScanners extends UTBase {
     filter_cbField.setAccessible(true);
     filter_cbField.set(scanners, filter_cb);
     scanners.row_key_literals = new ByteMap<List<byte[]>>();
-    scanners.row_key_literals.put(TAGK_BYTES, 
+    scanners.row_key_literals.put(TAGK_BYTES,
         Lists.newArrayList(TAGV_BYTES, TAGV_B_BYTES));
     scanners.current_result = mock(Tsdb1xQueryResult.class);
     scanners.setupScanners(METRIC_BYTES, null);
     assertEquals(2, scanners.scanners.size());
     assertEquals(1, scanners.scanners.get(0).length);
     assertEquals(2, caught.size());
-    
+
     List<MockScanner> scnrs = storage.getScanners();
-    
+
     assertArrayEquals("tsdb-1h".getBytes(Const.ASCII_CHARSET), scnrs.get(scnrs.size() - 2).table());
     assertArrayEquals(DATA_TABLE, storage.getLastScanner().table());
-    
+
     // 1h
     verify(caught.get(0), times(1)).setFamily(Tsdb1xHBaseDataStore.DATA_FAMILY);
     verify(caught.get(0), times(1)).setMaxNumRows(1024);
@@ -1218,10 +1218,10 @@ public class TestTsdb1xScanners extends UTBase {
     assertTrue(filter.filters().get(2) instanceof FilterList);
     filter = (FilterList) ((FilterList) filter.filters().get(2));
     assertArrayEquals("sum".getBytes(), ((BinaryPrefixComparator) ((QualifierFilter) filter.filters().get(0)).comparator()).value());
-    assertArrayEquals(new byte[] { 1 }, ((BinaryPrefixComparator) ((QualifierFilter) filter.filters().get(1)).comparator()).value());
+    assertArrayEquals(new byte[]{1}, ((BinaryPrefixComparator) ((QualifierFilter) filter.filters().get(1)).comparator()).value());
     assertArrayEquals("count".getBytes(), ((BinaryPrefixComparator) ((QualifierFilter) filter.filters().get(2)).comparator()).value());
-    assertArrayEquals(new byte[] { 2 }, ((BinaryPrefixComparator) ((QualifierFilter) filter.filters().get(3)).comparator()).value());
-    
+    assertArrayEquals(new byte[]{2}, ((BinaryPrefixComparator) ((QualifierFilter) filter.filters().get(3)).comparator()).value());
+
     // raw
     verify(caught.get(1), times(1)).setFamily(Tsdb1xHBaseDataStore.DATA_FAMILY);
     verify(caught.get(1), times(1)).setMaxNumRows(1024);
@@ -1239,12 +1239,12 @@ public class TestTsdb1xScanners extends UTBase {
     assertEquals(2, raw_filter.filters().size());
     assertTrue(raw_filter.filters().get(0) instanceof FuzzyRowFilter);
     assertTrue(raw_filter.filters().get(1) instanceof KeyRegexpFilter);
-    
+
     assertTrue(scanners.initialized);
     verify(scanners.scanners.get(0)[0], times(1))
-      .fetchNext(any(Tsdb1xQueryResult.class), any());
+        .fetchNext(any(Tsdb1xQueryResult.class), any());
     verify(scanners.scanners.get(1)[0], never())
-      .fetchNext(any(Tsdb1xQueryResult.class), any());
+        .fetchNext(any(Tsdb1xQueryResult.class), any());
   }
   
   @Test
@@ -1503,7 +1503,7 @@ public class TestTsdb1xScanners extends UTBase {
     
     assertEquals(Duration.ofSeconds(3600), scanners.currentDuration());
   }
-  
+
   @Test
   public void filterCBNoKeepers() throws Exception {
     QueryFilter filter = ChainFilter.newBuilder()
@@ -1511,12 +1511,12 @@ public class TestTsdb1xScanners extends UTBase {
             .setKey(TAGK_STRING)
             .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
             .build())
-          .addFilter(TagValueWildcardFilter.newBuilder()
-              .setKey(TAGK_B_STRING)
-              .setFilter("*")
-             .build())
-          .build();
-    
+        .addFilter(TagValueWildcardFilter.newBuilder()
+            .setKey(TAGK_B_STRING)
+            .setFilter("*")
+            .build())
+        .build();
+
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
         .setStart(Integer.toString(START_TS))
@@ -1529,8 +1529,8 @@ public class TestTsdb1xScanners extends UTBase {
         .build();
     when(context.query()).thenReturn(query);
     source_config = (TimeSeriesDataSourceConfig) baseConfig(START_TS, END_TS, "f1")
-            .build();
-    
+        .build();
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     Tsdb1xQueryResult results = mock(Tsdb1xQueryResult.class);
@@ -1540,7 +1540,7 @@ public class TestTsdb1xScanners extends UTBase {
     filter_cbField1.setAccessible(true);
     filter_cbField1.set(scanners, cb);
     cb.call(schema.resolveUids(filter, null).join());
-    
+
     assertEquals(2, scanners.row_key_literals.size());
     List<byte[]> uids = scanners.row_key_literals.get(TAGK_BYTES);
     assertEquals(2, uids.size());
@@ -1550,19 +1550,19 @@ public class TestTsdb1xScanners extends UTBase {
     assertFalse(scanners.filterDuringScan());
     assertFalse(scanners.couldMultiGet());
     assertEquals(1, scanners.scanners.size());
-    
+
     // regex tags now
     filter = ChainFilter.newBuilder()
         .addFilter(TagValueLiteralOrFilter.newBuilder()
             .setKey(TAGK_STRING)
             .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
             .build())
-          .addFilter(TagValueRegexFilter.newBuilder()
-              .setKey(TAGK_B_STRING)
-              .setFilter("^.*$")
-             .build())
-          .build();
-    
+        .addFilter(TagValueRegexFilter.newBuilder()
+            .setKey(TAGK_B_STRING)
+            .setFilter("^.*$")
+            .build())
+        .build();
+
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
         .setStart(Integer.toString(START_TS))
@@ -1575,8 +1575,8 @@ public class TestTsdb1xScanners extends UTBase {
         .build();
     when(context.query()).thenReturn(query);
     source_config = (TimeSeriesDataSourceConfig) baseConfig(START_TS, END_TS, "f1")
-            .build();
-    
+        .build();
+
     scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     scanners.current_result = results;
@@ -1585,7 +1585,7 @@ public class TestTsdb1xScanners extends UTBase {
     filter_cbField.setAccessible(true);
     filter_cbField.set(scanners, cb);
     cb.call(schema.resolveUids(filter, null).join());
-    
+
     assertEquals(2, scanners.row_key_literals.size());
     uids = scanners.row_key_literals.get(TAGK_BYTES);
     assertEquals(2, uids.size());
@@ -1596,7 +1596,7 @@ public class TestTsdb1xScanners extends UTBase {
     assertFalse(scanners.couldMultiGet());
     assertEquals(1, scanners.scanners.size());
   }
-  
+
   @Test
   public void filterCBKeepers() throws Exception {
     QueryFilter filter = ChainFilter.newBuilder()
@@ -1604,12 +1604,12 @@ public class TestTsdb1xScanners extends UTBase {
             .setKey(TAGK_STRING)
             .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
             .build())
-          .addFilter(TagValueWildcardFilter.newBuilder()
-              .setKey(TAGK_B_STRING)
-              .setFilter("*yahoo.com")
-             .build())
-          .build();
-    
+        .addFilter(TagValueWildcardFilter.newBuilder()
+            .setKey(TAGK_B_STRING)
+            .setFilter("*yahoo.com")
+            .build())
+        .build();
+
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
         .setStart(Integer.toString(START_TS))
@@ -1622,8 +1622,8 @@ public class TestTsdb1xScanners extends UTBase {
         .build();
     when(context.query()).thenReturn(query);
     source_config = (TimeSeriesDataSourceConfig) baseConfig(START_TS, END_TS, "f1")
-            .build();
-    
+        .build();
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     Tsdb1xQueryResult results = mock(Tsdb1xQueryResult.class);
@@ -1633,7 +1633,7 @@ public class TestTsdb1xScanners extends UTBase {
     filter_cbField1.setAccessible(true);
     filter_cbField1.set(scanners, cb);
     cb.call(schema.resolveUids(filter, null).join());
-    
+
     assertEquals(2, scanners.row_key_literals.size());
     List<byte[]> uids = scanners.row_key_literals.get(TAGK_BYTES);
     assertEquals(2, uids.size());
@@ -1643,19 +1643,19 @@ public class TestTsdb1xScanners extends UTBase {
     assertTrue(scanners.filterDuringScan());
     assertFalse(scanners.couldMultiGet());
     assertEquals(1, scanners.scanners.size());
-    
+
     // regexp
     filter = ChainFilter.newBuilder()
         .addFilter(TagValueLiteralOrFilter.newBuilder()
             .setKey(TAGK_STRING)
             .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
             .build())
-          .addFilter(TagValueRegexFilter.newBuilder()
-              .setKey(TAGK_B_STRING)
-              .setFilter("pre.*fix")
-             .build())
-          .build();
-    
+        .addFilter(TagValueRegexFilter.newBuilder()
+            .setKey(TAGK_B_STRING)
+            .setFilter("pre.*fix")
+            .build())
+        .build();
+
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
         .setStart(Integer.toString(START_TS))
@@ -1668,8 +1668,8 @@ public class TestTsdb1xScanners extends UTBase {
         .build();
     when(context.query()).thenReturn(query);
     source_config = (TimeSeriesDataSourceConfig) baseConfig(START_TS, END_TS, "f1")
-            .build();
-    
+        .build();
+
     scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     scanners.current_result = results;
@@ -1678,7 +1678,7 @@ public class TestTsdb1xScanners extends UTBase {
     filter_cbField.setAccessible(true);
     filter_cbField.set(scanners, cb);
     cb.call(schema.resolveUids(filter, null).join());
-    
+
     assertEquals(2, scanners.row_key_literals.size());
     uids = scanners.row_key_literals.get(TAGK_BYTES);
     assertEquals(2, uids.size());
@@ -1696,7 +1696,7 @@ public class TestTsdb1xScanners extends UTBase {
         .setKey(TAGK_STRING)
         .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
         .build();
-    
+
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
         .setStart(Integer.toString(START_TS))
@@ -1709,8 +1709,8 @@ public class TestTsdb1xScanners extends UTBase {
         .build();
     when(context.query()).thenReturn(query);
     source_config = (TimeSeriesDataSourceConfig) baseConfig(START_TS, END_TS, "f1")
-            .build();
-    
+        .build();
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     Tsdb1xQueryResult results = mock(Tsdb1xQueryResult.class);
@@ -1720,7 +1720,7 @@ public class TestTsdb1xScanners extends UTBase {
     filter_cbField1.setAccessible(true);
     filter_cbField1.set(scanners, cb);
     cb.call(schema.resolveUids(filter, null).join());
-    
+
     assertEquals(1, scanners.row_key_literals.size());
     List<byte[]> uids = scanners.row_key_literals.get(TAGK_BYTES);
     assertEquals(2, uids.size());
@@ -1729,7 +1729,7 @@ public class TestTsdb1xScanners extends UTBase {
     assertFalse(scanners.filterDuringScan());
     assertTrue(scanners.couldMultiGet());
     assertEquals(1, scanners.scanners.size());
-    
+
     // under the cardinality threshold.
     scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
@@ -1742,7 +1742,7 @@ public class TestTsdb1xScanners extends UTBase {
     filter_cbField.setAccessible(true);
     filter_cbField.set(scanners, cb);
     cb.call(schema.resolveUids(filter, null).join());
-    
+
     assertEquals(1, scanners.row_key_literals.size());
     uids = scanners.row_key_literals.get(TAGK_BYTES);
     assertEquals(2, uids.size());
@@ -1752,7 +1752,7 @@ public class TestTsdb1xScanners extends UTBase {
     assertFalse(scanners.couldMultiGet());
     assertEquals(1, scanners.scanners.size());
   }
-  
+
   @Test
   public void filterCBDupeTagKeys() throws Exception {
     QueryFilter filter = ChainFilter.newBuilder()
@@ -1760,12 +1760,12 @@ public class TestTsdb1xScanners extends UTBase {
             .setKey(TAGK_STRING)
             .setFilter(TAGV_STRING)
             .build())
-          .addFilter(TagValueLiteralOrFilter.newBuilder()
-              .setKey(TAGK_STRING)
-              .setFilter(TAGV_B_STRING)
-             .build())
-          .build();
-    
+        .addFilter(TagValueLiteralOrFilter.newBuilder()
+            .setKey(TAGK_STRING)
+            .setFilter(TAGV_B_STRING)
+            .build())
+        .build();
+
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
         .setStart(Integer.toString(START_TS))
@@ -1778,8 +1778,8 @@ public class TestTsdb1xScanners extends UTBase {
         .build();
     when(context.query()).thenReturn(query);
     source_config = (TimeSeriesDataSourceConfig) baseConfig(START_TS, END_TS, "f1")
-            .build();
-    
+        .build();
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     Tsdb1xQueryResult results = mock(Tsdb1xQueryResult.class);
@@ -1789,7 +1789,7 @@ public class TestTsdb1xScanners extends UTBase {
     filter_cbField.setAccessible(true);
     filter_cbField.set(scanners, cb);
     cb.call(schema.resolveUids(filter, null).join());
-    
+
     assertEquals(1, scanners.row_key_literals.size());
     List<byte[]> uids = scanners.row_key_literals.get(TAGK_BYTES);
     assertEquals(2, uids.size());
@@ -1799,21 +1799,21 @@ public class TestTsdb1xScanners extends UTBase {
     assertTrue(scanners.couldMultiGet());
     assertEquals(1, scanners.scanners.size());
   }
-  
+
   @Test
   public void filterCBAllNullLiteralOrValues() throws Exception {
     QueryFilter filter = ChainFilter.newBuilder()
-      .addFilter(TagValueLiteralOrFilter.newBuilder()
-        .setKey(NSUN_TAGK)
-        .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
-        .build())
-      .addFilter(TagValueWildcardFilter.newBuilder()
-          .setKey(TAGK_B_STRING)
-          .setFilter("*")
-         .build())
-      .build();
+        .addFilter(TagValueLiteralOrFilter.newBuilder()
+            .setKey(NSUN_TAGK)
+            .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
+            .build())
+        .addFilter(TagValueWildcardFilter.newBuilder()
+            .setKey(TAGK_B_STRING)
+            .setFilter("*")
+            .build())
+        .build();
     setConfig(filter, null, false);
-    
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     FilterCB cb = scanners.new FilterCB(METRIC_BYTES, null);
@@ -1826,7 +1826,7 @@ public class TestTsdb1xScanners extends UTBase {
     } catch (QueryExecutionException e) {
       assertTrue(e.getCause() instanceof NoSuchUniqueName);
     }
-    
+
     Field skip_nsun_tagvsField = scanners.getClass().getDeclaredField("skip_nsun_tagvs");
     skip_nsun_tagvsField.setAccessible(true);
     skip_nsun_tagvsField.set(scanners, true);
@@ -1840,20 +1840,20 @@ public class TestTsdb1xScanners extends UTBase {
     } catch (QueryExecutionException e) {
       assertTrue(e.getCause() instanceof NoSuchUniqueName);
     }
-    
+
     // and ditto if all uids were null.
     filter = ChainFilter.newBuilder()
         .addFilter(TagValueLiteralOrFilter.newBuilder()
-          .setKey(TAGK_STRING)
-          .setFilter(NSUN_TAGV + "|" + "none")
-          .build())
+            .setKey(TAGK_STRING)
+            .setFilter(NSUN_TAGV + "|" + "none")
+            .build())
         .addFilter(TagValueWildcardFilter.newBuilder()
             .setKey(TAGK_B_STRING)
             .setFilter("*")
-           .build())
+            .build())
         .build();
     setConfig(filter, null, false);
-      
+
     cb = scanners.new FilterCB(METRIC_BYTES, null);
     Field filter_cbField = scanners.getClass().getDeclaredField("filter_cb");
     filter_cbField.setAccessible(true);
@@ -1865,21 +1865,21 @@ public class TestTsdb1xScanners extends UTBase {
       assertTrue(e.getCause() instanceof NoSuchUniqueName);
     }
   }
-  
+
   @Test
   public void filterCBNullTagV() throws Exception {
     QueryFilter filter = ChainFilter.newBuilder()
         .addFilter(TagValueLiteralOrFilter.newBuilder()
-          .setKey(TAGK_STRING)
-          .setFilter(NSUN_TAGV + "|" + TAGV_B_STRING)
-          .build())
+            .setKey(TAGK_STRING)
+            .setFilter(NSUN_TAGV + "|" + TAGV_B_STRING)
+            .build())
         .addFilter(TagValueWildcardFilter.newBuilder()
             .setKey(TAGK_B_STRING)
             .setFilter("*")
-           .build())
+            .build())
         .build();
     setConfig(filter, null, false);
-    
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     Tsdb1xQueryResult results = mock(Tsdb1xQueryResult.class);
@@ -1894,7 +1894,7 @@ public class TestTsdb1xScanners extends UTBase {
     } catch (QueryExecutionException e) {
       assertTrue(e.getCause() instanceof NoSuchUniqueName);
     }
-    
+
     // skipping works
     scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
@@ -1907,7 +1907,7 @@ public class TestTsdb1xScanners extends UTBase {
     filter_cbField.setAccessible(true);
     filter_cbField.set(scanners, cb);
     cb.call(schema.resolveUids(filter, null).join());
-    
+
     assertEquals(2, scanners.row_key_literals.size());
     List<byte[]> uids = scanners.row_key_literals.get(TAGK_BYTES);
     assertEquals(1, uids.size());
@@ -1917,21 +1917,21 @@ public class TestTsdb1xScanners extends UTBase {
     assertFalse(scanners.couldMultiGet());
     assertEquals(1, scanners.scanners.size());
   }
-  
+
   @Test
   public void filterCBExpansionLimit() throws Exception {
     QueryFilter filter = ChainFilter.newBuilder()
         .addFilter(TagValueLiteralOrFilter.newBuilder()
-          .setKey(TAGK_STRING)
-          .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
-          .build())
+            .setKey(TAGK_STRING)
+            .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
+            .build())
         .addFilter(TagValueLiteralOrFilter.newBuilder()
             .setKey(TAGK_B_STRING)
             .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
-           .build())
+            .build())
         .build();
     setConfig(filter, null, false);
-    
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     Tsdb1xQueryResult results = mock(Tsdb1xQueryResult.class);
@@ -1944,7 +1944,7 @@ public class TestTsdb1xScanners extends UTBase {
     filter_cbField.setAccessible(true);
     filter_cbField.set(scanners, cb);
     cb.call(schema.resolveUids(filter, null).join());
-    
+
     assertEquals(2, scanners.row_key_literals.size());
     List<byte[]> uids = scanners.row_key_literals.get(TAGK_BYTES);
     assertEquals(2, uids.size());
@@ -2000,13 +2000,13 @@ public class TestTsdb1xScanners extends UTBase {
             .setKey(TAGK_STRING)
             .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
             .build())
-          .addFilter(NotFilter.newBuilder()
-              .setFilter(MetricLiteralFilter.newBuilder()
+        .addFilter(NotFilter.newBuilder()
+            .setFilter(MetricLiteralFilter.newBuilder()
                 .setMetric("sys.cpu.user")
                 .build())
-             .build())
-          .build();
-    
+            .build())
+        .build();
+
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
         .setStart(Integer.toString(START_TS))
@@ -2019,8 +2019,8 @@ public class TestTsdb1xScanners extends UTBase {
         .build();
     when(context.query()).thenReturn(query);
     source_config = (TimeSeriesDataSourceConfig) baseConfig(START_TS, END_TS, "f1")
-            .build();
-    
+        .build();
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     Tsdb1xQueryResult results = mock(Tsdb1xQueryResult.class);
@@ -2030,7 +2030,7 @@ public class TestTsdb1xScanners extends UTBase {
     filter_cbField.setAccessible(true);
     filter_cbField.set(scanners, cb);
     cb.call(schema.resolveUids(filter, null).join());
-    
+
     assertEquals(1, scanners.row_key_literals.size());
     List<byte[]> uids = scanners.row_key_literals.get(TAGK_BYTES);
     assertEquals(2, uids.size());
@@ -2041,7 +2041,7 @@ public class TestTsdb1xScanners extends UTBase {
     assertTrue(scanners.couldMultiGet());
     assertEquals(1, scanners.scanners.size());
   }
-  
+
   @Test
   public void filterNotWithTags() throws Exception {
     QueryFilter filter = ChainFilter.newBuilder()
@@ -2049,14 +2049,14 @@ public class TestTsdb1xScanners extends UTBase {
             .setKey(TAGK_STRING)
             .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
             .build())
-          .addFilter(NotFilter.newBuilder()
-              .setFilter(TagValueLiteralOrFilter.newBuilder()
-                  .setKey(TAGK_B_STRING)
-                  .setFilter(TAGV_STRING)
-                  .build())
-             .build())
-          .build();
-    
+        .addFilter(NotFilter.newBuilder()
+            .setFilter(TagValueLiteralOrFilter.newBuilder()
+                .setKey(TAGK_B_STRING)
+                .setFilter(TAGV_STRING)
+                .build())
+            .build())
+        .build();
+
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
         .setStart(Integer.toString(START_TS))
@@ -2069,8 +2069,8 @@ public class TestTsdb1xScanners extends UTBase {
         .build();
     when(context.query()).thenReturn(query);
     source_config = (TimeSeriesDataSourceConfig) baseConfig(START_TS, END_TS, "f1")
-            .build();
-    
+        .build();
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     Tsdb1xQueryResult results = mock(Tsdb1xQueryResult.class);
@@ -2080,7 +2080,7 @@ public class TestTsdb1xScanners extends UTBase {
     filter_cbField.setAccessible(true);
     filter_cbField.set(scanners, cb);
     cb.call(schema.resolveUids(filter, null).join());
-    
+
     assertEquals(1, scanners.row_key_literals.size());
     List<byte[]> uids = scanners.row_key_literals.get(TAGK_BYTES);
     assertEquals(2, uids.size());
@@ -2101,7 +2101,7 @@ public class TestTsdb1xScanners extends UTBase {
     scanners.reset(node, source_config);
     scanners.current_result = mock(Tsdb1xQueryResult.class);
     scanners.initialize(null);
-    
+
     assertNull(scanners.row_key_literals);
     assertFalse(scanners.filterDuringScan());
     assertFalse(scanners.couldMultiGet());
@@ -2112,7 +2112,7 @@ public class TestTsdb1xScanners extends UTBase {
     verify(node, never()).onComplete(any(QueryNode.class), anyLong(), anyLong());
     verify(scanners.scanners.get(0)[0], times(1))
       .fetchNext(any(Tsdb1xQueryResult.class), any());
-    
+
     trace = new MockTrace(true);
     scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
@@ -2135,7 +2135,7 @@ public class TestTsdb1xScanners extends UTBase {
     scanners.reset(node, source_config);
     scanners.current_result = mock(Tsdb1xQueryResult.class);
     scanners.initialize(null);
-    
+
     assertEquals(1, scanners.row_key_literals.size());
     List<byte[]> uids = scanners.row_key_literals.get(TAGK_BYTES);
     assertEquals(2, uids.size());
@@ -2185,22 +2185,22 @@ public class TestTsdb1xScanners extends UTBase {
     scanners.reset(node, source_config);
     scanners.initialize(trace.newSpan("UT").start());
   }
-  
+
   @Test
   public void initializeNSUNTagk() throws Exception {
     final List<Scanner> caught = Lists.newArrayList();
     catchTsdb1xScanners(caught);
     QueryFilter filter = ExplicitTagsFilter.newBuilder()
         .setFilter(ChainFilter.newBuilder()
-          .addFilter(TagValueLiteralOrFilter.newBuilder()
-            .setKey(TAGK_STRING)
-            .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
+            .addFilter(TagValueLiteralOrFilter.newBuilder()
+                .setKey(TAGK_STRING)
+                .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
+                .build())
+            .addFilter(TagValueWildcardFilter.newBuilder()
+                .setKey(NSUN_TAGK)
+                .setFilter("*")
+                .build())
             .build())
-          .addFilter(TagValueWildcardFilter.newBuilder()
-              .setKey(NSUN_TAGK)
-              .setFilter("*")
-             .build())
-          .build())
         .build();
     setConfig(filter, null, false);
     Tsdb1xScanners scanners = new Tsdb1xScanners();
@@ -2208,7 +2208,7 @@ public class TestTsdb1xScanners extends UTBase {
     Tsdb1xQueryResult result = mock(Tsdb1xQueryResult.class);
     scanners.current_result = result;
     scanners.initialize(null);
-    
+
     assertEquals(1, scanners.row_key_literals.size());
     assertFalse(scanners.filterDuringScan());
     assertTrue(scanners.couldMultiGet());
@@ -2217,7 +2217,7 @@ public class TestTsdb1xScanners extends UTBase {
     verify(node, never()).onError(any(NoSuchUniqueName.class));
     verify(node, times(1)).onNext(result);
     verify(node, never()).onComplete(any(QueryNode.class), anyLong(), anyLong());
-    
+
     // can't ignore with explicit tags
     scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
@@ -2226,7 +2226,7 @@ public class TestTsdb1xScanners extends UTBase {
     skip_nsun_tagksField1.setAccessible(true);
     skip_nsun_tagksField1.set(scanners, true);
     scanners.initialize(null);
-    
+
     assertEquals(1, scanners.row_key_literals.size());
     assertFalse(scanners.filterDuringScan());
     assertTrue(scanners.couldMultiGet());
@@ -2235,26 +2235,26 @@ public class TestTsdb1xScanners extends UTBase {
     verify(node, never()).onError(any(NoSuchUniqueName.class));
     verify(node, times(2)).onNext(result);
     verify(node, never()).onComplete(any(QueryNode.class), anyLong(), anyLong());
-    
+
     // tracing
     trace = new MockTrace(true);
     scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     scanners.initialize(trace.newSpan("UT").start());
-    verifySpan(Tsdb1xScanners.class.getName() + ".initialize", 
+    verifySpan(Tsdb1xScanners.class.getName() + ".initialize",
         QueryExecutionException.class, 10);
-    
+
     // now we can ignore it
     filter = ChainFilter.newBuilder()
-          .addFilter(TagValueLiteralOrFilter.newBuilder()
+        .addFilter(TagValueLiteralOrFilter.newBuilder()
             .setKey(TAGK_STRING)
             .setFilter(TAGV_STRING + "|" + TAGV_B_STRING)
             .build())
-          .addFilter(TagValueWildcardFilter.newBuilder()
-              .setKey(NSUN_TAGK)
-              .setFilter("*")
-             .build())
-          .build();
+        .addFilter(TagValueWildcardFilter.newBuilder()
+            .setKey(NSUN_TAGK)
+            .setFilter("*")
+            .build())
+        .build();
     setConfig(filter, null, false);
     scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
@@ -2263,7 +2263,7 @@ public class TestTsdb1xScanners extends UTBase {
     skip_nsun_tagksField.setAccessible(true);
     skip_nsun_tagksField.set(scanners, true);
     scanners.initialize(null);
-    
+
     assertEquals(1, scanners.row_key_literals.size());
     assertTrue(scanners.couldMultiGet());
     assertTrue(scanners.couldMultiGet());
@@ -2371,17 +2371,17 @@ public class TestTsdb1xScanners extends UTBase {
   public void scannerDoneNoSalt() throws Exception {
     final List<Scanner> caught = Lists.newArrayList();
     catchTsdb1xScanners(caught);
-    
+
     Tsdb1xScanners scanners = new Tsdb1xScanners();
     scanners.reset(node, source_config);
     scanners.current_result = mock(Tsdb1xQueryResult.class);
     scanners.initialize(null);
-    
+
     assertEquals(0, scanners.scanners_done);
     verify(node, never()).onError(any(Throwable.class));
     verify(node, never()).onNext(any(QueryResult.class));
     verify(node, never()).onComplete(any(QueryNode.class), anyLong(), anyLong());
-    
+
     scanners.scannerDone();
     assertEquals(1, scanners.scanners_done);
     verify(node, never()).onError(any(Throwable.class));
@@ -2973,7 +2973,7 @@ public class TestTsdb1xScanners extends UTBase {
             return null;
           }
           
-        }).when(mock_scanner).reset(any(Tsdb1xScanners.class), 
+        }).when(mock_scanner).reset(any(Tsdb1xScanners.class),
             any(Scanner.class), anyInt(), nullable(DefaultRollupInterval.class));
         when(mock_scanner.state()).thenReturn(State.CONTINUE);
         when(mock_scanner.object()).thenReturn(mock_scanner);
@@ -3053,7 +3053,7 @@ public class TestTsdb1xScanners extends UTBase {
             return null;
           }
           
-        }).when(mock_scanner).reset(any(Tsdb1xScanners.class), 
+        }).when(mock_scanner).reset(any(Tsdb1xScanners.class),
             any(Scanner.class), anyInt(), nullable(DefaultRollupInterval.class));
         when(mock_scanner.state()).thenReturn(State.CONTINUE);
         when(mock_scanner.object()).thenReturn(mock_scanner);
@@ -3183,5 +3183,5 @@ public class TestTsdb1xScanners extends UTBase {
     Field f = obj.getClass().getDeclaredField(fieldName);
     f.setAccessible(true);
     return (T) f.get(obj);
-}
+  }
 }

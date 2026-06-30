@@ -178,8 +178,8 @@ public class TestRollupConfig {
       config.getRollupInterval("");
       fail("Expected IllegalArgumentException");
     } catch (IllegalArgumentException e) { }
-    
-    
+
+
   }
   
   @Test

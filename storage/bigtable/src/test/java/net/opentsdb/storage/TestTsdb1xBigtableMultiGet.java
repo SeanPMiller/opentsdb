@@ -103,7 +103,7 @@ public class TestTsdb1xBigtableMultiGet extends UTBase {
   public void tearDown() {
     if (mockedScanner != null) mockedScanner.close();
   }
-  
+
   @Before
   public void before() throws Exception {
     node = mock(Tsdb1xBigtableQueryNode.class);
@@ -118,7 +118,7 @@ public class TestTsdb1xBigtableMultiGet extends UTBase {
       .thenReturn(Collections.emptyList());
     
     mockedScanner = Mockito.mockConstruction(Tsdb1xBigtableScanner.class);
-    
+
     query = SemanticQuery.newBuilder()
         .setMode(QueryMode.SINGLE)
         .setStart(Integer.toString(START_TS))
@@ -1330,7 +1330,7 @@ public class TestTsdb1xBigtableMultiGet extends UTBase {
     while (clazz != null) {
       try { Field f = clazz.getDeclaredField(fieldName); f.setAccessible(true); return f; }
       catch (NoSuchFieldException e) { clazz = clazz.getSuperclass(); }
-}
+    }
     throw new NoSuchFieldException(fieldName);
   }
 }

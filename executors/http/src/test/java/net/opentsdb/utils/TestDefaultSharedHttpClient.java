@@ -66,7 +66,7 @@ public class TestDefaultSharedHttpClient {
     when(builder.build()).thenReturn(client);
     
   }
-  
+
   @After
   public void tearDownStaticMocks() {
     mockedHttpAsyncClients.closeOnDemand();

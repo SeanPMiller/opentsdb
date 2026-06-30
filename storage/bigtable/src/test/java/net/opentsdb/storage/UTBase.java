@@ -169,7 +169,7 @@ public class UTBase {
     // this base setup. The session/client/static-factory interception that the
     // real data store needs lives in TestTsdb1xBigtableDataStore.
     when(session.getDataClient()).thenReturn(client);
-    
+
     when(session.createBulkMutation(any(BigtableTableName.class)))
       .thenReturn(bulk_mutator);
     

@@ -25,8 +25,8 @@ import sun.misc.Unsafe;
 /**
  * A linear probing Map for long keys and int values. Stores data off heap.
  *
-// * NOTE: There is now a hacky, ugly way to rehash the map without resizing when
-// * deletes start to result in too many scans for missed entries. If the average
+ // * NOTE: There is now a hacky, ugly way to rehash the map without resizing when
+ // * deletes start to result in too many scans for missed entries. If the average
  * number of scans per operation (any operation) exceeds the scan rehash threshold
  * then we'll pick the next prime number from the primes set to hash with. It will
  * roll over but by that time the key set should hopefully be fairly new.

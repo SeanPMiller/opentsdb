@@ -65,7 +65,7 @@ public class TestAWSSecretsProvider {
       .thenReturn(builder);
     Mockito.when(builder.build()).thenReturn(client);
   }
-    
+
   @After
   public void tearDownStaticMocks() {
     mockedAWSSecretsManagerClientBuilder.closeOnDemand();

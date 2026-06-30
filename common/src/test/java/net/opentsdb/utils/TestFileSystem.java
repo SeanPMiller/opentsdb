@@ -26,7 +26,7 @@ public final class TestFileSystem {
 
   @Rule
   public TemporaryFolder tempDir = new TemporaryFolder();
-  
+
   @Test (expected = IllegalArgumentException.class)
   public void checkDirectoryEmptyString() throws Exception {
     FileSystem.checkDirectory("", true /* need_write */, false /* create */);

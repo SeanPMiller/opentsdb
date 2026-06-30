@@ -29,7 +29,7 @@ import com.google.common.collect.Lists;
 import com.google.common.primitives.Bytes;
 
 public class MockLowLevelRollupMetricData extends MockLowLevelMetricData
-        implements LowLevelMetricData.LowLevelRollupMetricData {
+    implements LowLevelMetricData.LowLevelRollupMetricData {
 
   protected RollupConfig rollupConfig;
   protected Iterator<Integer> summaries;

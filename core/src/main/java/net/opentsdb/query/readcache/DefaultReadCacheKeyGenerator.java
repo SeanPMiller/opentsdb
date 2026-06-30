@@ -44,8 +44,8 @@ import com.stumbleupon.async.Deferred;
  * 
  * @since 3.0
  */
-public class DefaultReadCacheKeyGenerator 
-  extends ReadCacheKeyGenerator implements ConfigurationCallback<Object> {
+public class DefaultReadCacheKeyGenerator
+    extends ReadCacheKeyGenerator implements ConfigurationCallback<Object> {
   
   public static final String TYPE = 
       DefaultReadCacheKeyGenerator.class.getSimpleName().toString();

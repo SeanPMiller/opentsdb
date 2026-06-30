@@ -38,7 +38,7 @@ import com.stumbleupon.async.Deferred;
  * 
  * @since 3.0
  */
-public class ConvertedQueryResult extends BaseWrappedQueryResult 
+public class ConvertedQueryResult extends BaseWrappedQueryResult
     implements Runnable {
   
   /** The node to callback with the converted result. If this is null

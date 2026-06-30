@@ -46,7 +46,7 @@ import com.stumbleupon.async.Deferred;
  * 
  * @since 3.0
  */
-public class DefaultDatumIdValidator extends BaseTSDBPlugin 
+public class DefaultDatumIdValidator extends BaseTSDBPlugin
     implements DatumIdValidator {
   
   public static final String TYPE = 

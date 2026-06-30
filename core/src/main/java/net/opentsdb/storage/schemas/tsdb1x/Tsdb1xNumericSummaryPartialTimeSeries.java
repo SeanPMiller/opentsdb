@@ -49,7 +49,7 @@ import com.google.common.collect.Maps;
  */
 public class Tsdb1xNumericSummaryPartialTimeSeries extends 
     Tsdb1xPartialTimeSeries<NumericByteArraySummaryType>
-      implements NumericByteArraySummaryType {
+    implements NumericByteArraySummaryType {
   private static final Logger LOG = LoggerFactory.getLogger(
       Tsdb1xNumericSummaryPartialTimeSeries.class);
  

@@ -63,7 +63,7 @@ import net.opentsdb.uid.UniqueIdStore;
 public class TestTsdb1xBigtableDataStore extends UTBase {
 
   private static final String ID = "UT";
-  
+
   private Tsdb1xBigtableFactory factory;
   private MockedStatic<CredentialOptions> credentialOptions;
   private MockedConstruction<BigtableSession> mockedSession;
@@ -73,7 +73,7 @@ public class TestTsdb1xBigtableDataStore extends UTBase {
     if (mockedSession != null) mockedSession.close();
     if (credentialOptions != null) credentialOptions.close();
   }
-  
+
   @Before
   public void beforeLocal() throws Exception {
     factory = mock(Tsdb1xBigtableFactory.class);
@@ -107,7 +107,7 @@ public class TestTsdb1xBigtableDataStore extends UTBase {
           when(mock.getDataClient()).thenReturn(client);
           when(mock.createBulkMutation(any(BigtableTableName.class)))
             .thenReturn(bulk_mutator);
-      });
+        });
   }
   
   @Test
@@ -332,7 +332,7 @@ public class TestTsdb1xBigtableDataStore extends UTBase {
         return f;
       } catch (NoSuchFieldException e) {
         clazz = clazz.getSuperclass();
-}
+      }
     }
     throw new NoSuchFieldException(fieldName);
   }
