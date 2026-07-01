@@ -39,10 +39,15 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <!-- No longer marked "provided": now that implementation/protobuf,
+                     storage/asynchbase, storage/bigtable, and storage/googlepubsub all
+                     exclude protobuf-java from their own shaded jars (relying on one
+                     shared copy instead of each bundling/relocating their own), this
+                     needs to actually flow into the assembly's runtime classpath so
+                     lib/ gets a single real protobuf-java-${protobuf.version}.jar. -->
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java</artifactId>
                 <version>${protobuf.version}</version>
-                <scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

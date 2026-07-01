@@ -279,15 +279,15 @@
                      <exclude>ch.qos.logback:logback*</exclude>
                      <exclude>com.fasterxml*:*</exclude>
                      <exclude>javax*:*</exclude>
+                     <exclude>com.google.protobuf:protobuf-java</exclude>
                   </excludes>
                </artifactSet>
-               <relocations>
-                 <relocation>
-                   <!-- GRR since asynchbase still uses 2.5 we have to shade it. -->
-                   <pattern>com.google.protobuf</pattern>
-                   <shadedPattern>net.opentsdb.com.google.protobuf</shadedPattern>
-                 </relocation>
-               </relocations>
+               <!-- Relocation of com.google.protobuf -> net.opentsdb.com.google.protobuf
+                    removed: it existed to dodge a version clash with asynchbase's old
+                    bundled protobuf 2.5. Everything in the reactor (including the
+                    distribution-level pin) is now unified on ${protobuf.version}, so
+                    the relocation is no longer needed and was polluting the
+                    net.opentsdb namespace that PluginLoader scans at startup. -->
                <filters>
                   <filter>
                      <artifact>*:*</artifact>
